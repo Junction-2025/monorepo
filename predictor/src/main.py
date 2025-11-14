@@ -47,8 +47,8 @@ def parse_args() -> argparse.Namespace:
     )
     # Add GUI control argument
     parser.add_argument(
-        "--no-gui",
-        action="store_true",
+        "--gui",
+        action="store_false",
         help="Disable the live GUI visualization.",
     )
     return parser.parse_args()
@@ -81,7 +81,7 @@ def main():
     print("--- Configuration ---")
     print(f"Input file: {args.input}")
     print(f"Playback speed: {args.speed}x")
-    print(f"GUI Enabled: {not args.no_gui}")
+    print(f"GUI Enabled: {not args.gui}")
     print("---------------------")
 
     try:
@@ -97,7 +97,7 @@ def main():
         start_time = time.perf_counter()
 
         # --- GUI Setup ---
-        if not args.no_gui:
+        if not args.gui:
             plt.ion()
             fig, ax = plt.subplots()
             
@@ -121,7 +121,7 @@ def main():
         # --- End GUI Setup ---
 
         for batch in paced_batches:
-            if not args.no_gui:
+            if not args.gui:
                 x, y, pol = decode_batch(source, batch)
                 
                 # Separate points by polarity
@@ -150,7 +150,7 @@ def main():
 
         print("\n\n--- Playback Finished ---")
         
-        if not args.no_gui:
+        if not args.gui:
             print("Closing GUI window.")
             plt.ioff()
             plt.close(fig)
