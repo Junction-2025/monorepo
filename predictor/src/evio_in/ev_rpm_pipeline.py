@@ -19,16 +19,14 @@ from typing import List, Tuple, Optional, Dict, Literal
 import numpy as np
 
 # Optional imports; you may need to install these.
+from src.evio_in.dat_file import DatFileSource
+from src.evio_in.recording import open_dat
+
+
 try:
     import h5py
 except ImportError:
     h5py = None
-
-try:
-    from evio.source.dat_file import DatFileSource
-except ImportError:
-    DatFileSource = None
-
 
 # ----------------------------------------------------------------------
 # 1. Data sources
@@ -64,31 +62,38 @@ class EventSourceBase:
 
 
 class EvioDatSource(EventSourceBase):
-    """Read .dat files via EVIO."""
+    """Read .dat files via EVIO (open_dat), returning a single time-sorted packet."""
 
-    def __init__(self, path: str):
-        if DatFileSource is None:
+    def __init__(self, path: str, sensor_width: int, sensor_height: int):
+        if open_dat is None:
             raise RuntimeError("evio not installed or not importable.")
         self.path = path
+        self.sensor_width = sensor_width
+        self.sensor_height = sensor_height
 
     def iter_packets(self):
-        import asyncio
+        # Load recording; timestamps are already sorted by time
+        rec = open_dat(self.path, width=self.sensor_width, height=self.sensor_height)
 
-        async def _collect_packets(path):
-            src = DatFileSource(path)
-            packets = []
-            # adjust this line if play_dat.py uses a different attribute
-            async for packet in src:
-                x = packet.x_coords.astype(np.int16, copy=False)
-                y = packet.y_coords.astype(np.int16, copy=False)
-                t = packet.timestamps.astype(np.int64, copy=False)
-                p = packet.polarities.astype(np.int8, copy=False)
-                packets.append((x, y, t, p))
-            return packets
+        # t: int64 [N], already in time order
+        t = np.asarray(rec.timestamps, dtype=np.int64)
 
-        packets = asyncio.run(_collect_packets(self.path))
-        for pkt in packets:
-            yield pkt
+        # event_words: uint32 [N_raw]; rec.order permutes into time order
+        words_time_ordered = rec.event_words[rec.order].astype(np.uint32, copy=False)
+
+        # Decode packed words into x, y, polarity (same logic as play_dat.get_window)
+        x = (words_time_ordered & 0x3FFF).astype(np.int16, copy=False)
+        y = ((words_time_ordered >> 14) & 0x3FFF).astype(np.int16, copy=False)
+        p_bool = ((words_time_ordered >> 28) & 0xF) > 0
+        p = p_bool.astype(np.int8, copy=False)
+
+        # Sanity: enforce equal length
+        n = min(len(x), len(y), len(t), len(p))
+        x, y, t, p = x[:n], y[:n], t[:n], p[:n]
+
+        # Yield one big packet; EventSourceBase.iter_all() will just pass it through
+        yield x, y, t, p
+
 
 
 
@@ -486,11 +491,16 @@ class RpmPipeline:
 
     def _make_source(self, path: str) -> EventSourceBase:
         if self.cfg.source_type == "evio":
-            return EvioDatSource(path)
+            return EvioDatSource(
+                path,
+                self.cfg.sensor_width,
+                self.cfg.sensor_height,
+            )
         elif self.cfg.source_type == "hdf5":
             return Hdf5EventSource(path)
         else:
             raise ValueError(f"Unknown source_type: {self.cfg.source_type}")
+
 
     def run_on_file(self, path: str) -> List[Dict]:
         """
