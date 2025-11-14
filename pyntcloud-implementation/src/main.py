@@ -2,7 +2,7 @@ import argparse
 import numpy as np
 from pathlib import Path
 import pandas as pd
-from recording import open_dat
+from recording import open_dat, Recording
 from pyntcloud import PyntCloud
 
 
@@ -75,18 +75,17 @@ def main():
     # LOAD EVENTS FROM .dat
     # =============================
     reader = open_dat(input_file, width=width, height=height)
-    print(reader)
     xs = []
     ys = []
     ts = []
     pols = []
 
     print("Reading events...")
-    for e in reader:
-        xs.append(e.x)
-        ys.append(e.y)
-        ts.append(e.ts)
-        pols.append(e.p)
+    for x,y,t,p in zip(reader.event_words, reader.event_words, reader.timestamps, reader.event_words):
+        xs.append(x)
+        ys.append(y)
+        ts.append(t)
+        pols.append(p)
 
     xs = np.array(xs)
     ys = np.array(ys)
