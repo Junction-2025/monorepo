@@ -61,6 +61,7 @@ class EventSourceBase:
         return x[order], y[order], t[order], p[order]
 
 
+
 class EvioDatSource(EventSourceBase):
     """Read .dat files via EVIO (open_dat), returning a single time-sorted packet."""
 
@@ -471,6 +472,119 @@ class PipelineConfig:
     rpm_step_us: int = 10_000       # step between RPM windows (~10ms)
     ee3p_config: EE3PConfig = dataclasses.field(default_factory=EE3PConfig)
     evtach_config: Optional[EvTachAOIConfig] = None
+
+
+
+class StreamingRpmPipeline:
+    def __init__(self, cfg: PipelineConfig):
+        self.cfg = cfg
+        # set up AOI, EE3P and aggregator as before
+        if cfg.evtach_config is None:
+            self.evtach_cfg = EvTachAOIConfig(
+                sensor_width=cfg.sensor_width,
+                sensor_height=cfg.sensor_height,
+                num_clusters=cfg.num_clusters,
+            )
+        else:
+            self.evtach_cfg = cfg.evtach_config
+
+        self.aoi_detector = EvTachAOIDetector(self.evtach_cfg)
+        self.ee3p = EE3PRPMEstimator(cfg.ee3p_config)
+        self.aggregator = EventAggregator(
+            cfg.sensor_width, cfg.sensor_height, cfg.ee3p_config
+        )
+
+        # streaming state
+        self._x_buf = np.empty(0, dtype=np.int16)
+        self._y_buf = np.empty(0, dtype=np.int16)
+        self._t_buf = np.empty(0, dtype=np.int64)
+
+        self._have_aois = False
+        self._aois: list[AOI] = []
+        self._last_aoi_update_us: int | None = None
+
+        self.latest_rpms: dict[int, float] = {}  # aoi_idx -> rpm
+
+    def _append_batch(self, x: np.ndarray, y: np.ndarray, t: np.ndarray):
+        # append new events
+        self._x_buf = np.concatenate([self._x_buf, x.astype(np.int16, copy=False)])
+        self._y_buf = np.concatenate([self._y_buf, y.astype(np.int16, copy=False)])
+        self._t_buf = np.concatenate([self._t_buf, t.astype(np.int64, copy=False)])
+
+        # drop events older than max(aoi_window_us, rpm_window_us)
+        if self._t_buf.size == 0:
+            return
+        t_now = self._t_buf.max()
+        max_window = max(self.cfg.aoi_window_us, self.cfg.rpm_window_us)
+        keep_mask = self._t_buf >= (t_now - max_window)
+        self._x_buf = self._x_buf[keep_mask]
+        self._y_buf = self._y_buf[keep_mask]
+        self._t_buf = self._t_buf[keep_mask]
+
+    def _update_aois_if_needed(self):
+        """Run EV-Tach AOI detection on the last aoi_window_us if needed."""
+        if self._t_buf.size == 0:
+            return
+
+        t_now = self._t_buf.max()
+        if self._last_aoi_update_us is not None:
+            # e.g. re-run AOI every 50 ms
+            if t_now - self._last_aoi_update_us < 50_000:
+                return
+
+        # select events from last aoi_window_us
+        win_start = t_now - self.cfg.aoi_window_us
+        mask = self._t_buf >= win_start
+        xs = self._x_buf[mask]
+        ys = self._y_buf[mask]
+        if xs.size == 0:
+            return
+
+        self._aois = self.aoi_detector.detect_aois(xs, ys)
+        self._have_aois = len(self._aois) > 0
+        self._last_aoi_update_us = t_now
+
+    def _update_rpm(self):
+        """Estimate RPM for each AOI from the last rpm_window_us."""
+        self.latest_rpms.clear()
+        if not self._have_aois or self._t_buf.size == 0:
+            return
+
+        t_now = self._t_buf.max()
+        win_start = t_now - self.cfg.rpm_window_us
+        mask_win = self._t_buf >= win_start
+        xw = self._x_buf[mask_win]
+        yw = self._y_buf[mask_win]
+        tw = self._t_buf[mask_win]
+
+        for a_idx, aoi in enumerate(self._aois):
+            x1, y1, x2, y2 = aoi.bbox
+            m_roi = (xw >= x1) & (xw < x2) & (yw >= y1) & (yw < y2)
+            if not np.any(m_roi):
+                continue
+
+            xr, yr, tr = xw[m_roi], yw[m_roi], tw[m_roi]
+            frames, times = self.aggregator.aggregate_roi(xr, yr, tr, aoi.bbox)
+            if frames.shape[0] == 0:
+                continue
+
+            rpm = self.ee3p.estimate_rpm(frames, times)
+            if rpm is not None:
+                self.latest_rpms[a_idx] = float(rpm)
+
+    def consume_batch(self, x: np.ndarray, y: np.ndarray, t: np.ndarray):
+        """
+        Main entry point for streaming use.
+        - x,y,t are a 10 ms batch of events (sorted by t).
+        - Updates AOIs & RPMs using sliding windows.
+        Returns: (aois, latest_rpms_dict)
+        """
+        self._append_batch(x, y, t)
+        self._update_aois_if_needed()
+        self._update_rpm()
+        return self._aois, self.latest_rpms
+
+
 
 
 class RpmPipeline:

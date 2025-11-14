@@ -54,6 +54,9 @@ class DatFileSource:
         # time-sorted timestamps to match index space of build_windows
         t_sorted = t_raw[self._order].astype(np.int64, copy=False)
 
+        self._timestamps_raw = t_raw              # unsorted, aligned with event_words
+        self._timestamps_sorted = t_sorted 
+
         # windows are [start, stop) in time-ordered index space
         win_idx = build_windows(rec, window_length_us)
 
@@ -90,3 +93,13 @@ class DatFileSource:
     def __len__(self) -> int:
         """Number of precomputed ranges."""
         return len(self._ranges)
+
+    @property
+    def timestamps_raw(self) -> np.ndarray:
+        """Per-event timestamps (microseconds), aligned with event_words."""
+        return self._timestamps_raw
+
+    @property
+    def timestamps_sorted(self) -> np.ndarray:
+        """Per-event timestamps in time order, aligned with 'order' index space."""
+        return self._timestamps_sorted
