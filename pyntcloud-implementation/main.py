@@ -1,6 +1,83 @@
-def main():
-    print("Hello from pyntcloud!")
+import numpy as np
+from pathlib import Path
+import pandas as pd
+from recording import open_dat
+from pyntcloud import PyntCloud
 
+# =============================
+# CONFIG
+# =============================
+PROJECT_ROOT = Path(__file__).parent.parent
+INPUT_FILE = PROJECT_ROOT / "data/drone_idle.dat"
+OUTPUT_FILE = Path(__file__).parent / "events.ply"
+USE_TIMESTAMP_AS_Z = True    # If False → z = 0 (2-D sheet)
+NORMALISE_TIME = True        # Scale timestamps to 0–1 range for visibility
 
-if __name__ == "__main__":
-    main()
+WIDTH = 1280
+HEIGHT = 720
+
+# =============================
+# LOAD EVENTS FROM .dat
+# =============================
+reader = open_dat(INPUT_FILE, width=WIDTH, height=HEIGHT)
+print(reader)
+xs = []
+ys = []
+ts = []
+pols = []
+
+print("Reading events...")
+for e in reader:
+    xs.append(e.x)
+    ys.append(e.y)
+    ts.append(e.ts)
+    pols.append(e.p)
+
+xs = np.array(xs)
+ys = np.array(ys)
+ts = np.array(ts)
+pols = np.array(pols)
+
+print(f"Loaded {len(xs)} events")
+
+# =============================
+# MAP TO POINT CLOUD Z-DIMENSION
+# =============================
+if USE_TIMESTAMP_AS_Z:
+    z = ts.astype(np.float64)
+    if NORMALISE_TIME:
+        z = (z - z.min()) / (z.max() - z.min() + 1e-12)
+else:
+    z = np.zeros_like(xs, dtype=np.float64)
+
+# =============================
+# COLOUR BY POLARITY
+# =============================
+# Positive polarity = white (255,255,255)
+# Negative polarity = red  (255,0,0)
+red   = np.where(pols == 1, 255, 255)
+green = np.where(pols == 1, 255,   0)
+blue  = np.where(pols == 1, 255,   0)
+
+# =============================
+# BUILD DATAFRAME FOR PYNTCLOUD
+# =============================
+df = pd.DataFrame({
+    "x": xs,
+    "y": ys,
+    "z": z,
+    "red": red.astype(np.uint8),
+    "green": green.astype(np.uint8),
+    "blue": blue.astype(np.uint8)
+})
+
+print("Creating PyntCloud object...")
+cloud = PyntCloud(df)
+
+# =============================
+# SAVE AS .ply
+# =============================
+print(f"Writing to {OUTPUT_FILE} ...")
+cloud.to_file(OUTPUT_FILE)
+
+print("Done.")
