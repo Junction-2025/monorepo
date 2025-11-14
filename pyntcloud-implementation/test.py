@@ -7,8 +7,9 @@ from pyntcloud import PyntCloud
 # =============================
 # CONFIG
 # =============================
-INPUT_FILE = Path(__file__).parent.parent / "evio/fan_const_rpm.dat"
-OUTPUT_FILE = "events.ply"
+PROJECT_ROOT = Path(__file__).parent.parent
+INPUT_FILE = PROJECT_ROOT / "evio/fan_const_rpm.dat"
+OUTPUT_FILE = Path(__file__).parent / "events.ply"
 USE_TIMESTAMP_AS_Z = True    # If False → z = 0 (2-D sheet)
 NORMALISE_TIME = True        # Scale timestamps to 0–1 range for visibility
 
