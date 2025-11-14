@@ -10,4 +10,8 @@ dependencies = [
     "opencv-python>=4.11.0.86",
     "ultralytics>=8.3.228",
     "scikit-learn>=1.7.2",
+    "clip",
 ]
+
+[tool.uv.sources]
+clip = { git = "https://github.com/ultralytics/CLIP.git" }

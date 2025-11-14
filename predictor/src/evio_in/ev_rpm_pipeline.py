@@ -63,7 +63,6 @@ class EventSourceBase:
         return x[order], y[order], t[order], p[order]
 
 
-
 class EvioDatSource(EventSourceBase):
     """Read .dat files via EVIO (open_dat), returning a single time-sorted packet."""
 
@@ -500,7 +499,6 @@ class PipelineConfig:
     evtach_config: Optional[EvTachAOIConfig] = None
 
 
-
 class StreamingRpmPipeline:
     def __init__(self, cfg: PipelineConfig):
         self.cfg = cfg
@@ -609,8 +607,6 @@ class StreamingRpmPipeline:
         self._update_aois_if_needed()
         self._update_rpm()
         return self._aois, self.latest_rpms
-
-
 
 
 class RpmPipeline:

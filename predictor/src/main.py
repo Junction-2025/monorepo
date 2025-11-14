@@ -9,15 +9,9 @@ import numpy as np
 from src.evio_in.pacer import Pacer
 from src.evio_in.dat_file import DatFileSource, BatchRange
 from src.evio_in.play_dat import get_frame, get_window
-<<<<<<< Updated upstream
-from src.knn.knn import find_centroids
 from src.yolo.yolo import detect_drone_crop
-
-from .utils import draw_png, display_frame
-=======
-
 from src.roo.rotating_object_extraction import find_clusters
->>>>>>> Stashed changes
+
 
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
@@ -95,11 +89,17 @@ def main():
     src = DatFileSource(
         args.input, width=1280, height=720, window_length_us=args.window
     )
-    pacer = Pacer(speed=args.speed, force_speed=args.force_speed, drop_tolerance_s=args.drop_tolerance)
+    pacer = Pacer(
+        speed=args.speed,
+        force_speed=args.force_speed,
+        drop_tolerance_s=args.drop_tolerance,
+    )
 
     if len(src) == 0:
         print("\nError: No batches were generated from the source file.")
-        print("This might be due to a very large --window size for a short recording, or an empty input file.")
+        print(
+            "This might be due to a very large --window size for a short recording, or an empty input file."
+        )
         sys.exit(1)
 
     print(f"\n--- Starting Paced Playback ({len(src)} batches) ---")
@@ -117,14 +117,8 @@ def main():
 
         frame = get_frame(window)
 
-        drone = detect_drone_crop(frame)
-        if drone is not None:
-            display_frame(drone)
-        knn_frame = find_centroids(drone)
-        if do:
-            frame = get_frame(window)
-            find_clusters(window[0], window[1])
-            do = False
+        drone_crop_coords = detect_drone_crop(frame)
+        find_clusters(window[0], window[1])
 
         wall_time = time.perf_counter() - start_time
         print(

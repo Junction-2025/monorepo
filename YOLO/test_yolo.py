@@ -6,10 +6,12 @@ import numpy as np
 from ultralytics import YOLO
 
 
-def predict_image(model: YOLO, source: str | Path | np.ndarray, save_path: str | None = None):
+def predict_image(
+    model: YOLO, source: str | Path | np.ndarray, save_path: str | None = None
+):
     """
     Run prediction on an image or numpy array.
-    
+
     Args:
         model: YOLO model instance
         source: Image path, URL, or numpy array (BGR format)
@@ -17,15 +19,15 @@ def predict_image(model: YOLO, source: str | Path | np.ndarray, save_path: str |
     """
     print(f"\nRunning prediction on: {source}")
     results = model.predict(source)
-    
+
     # Process results
     for result in results:
         # Print detection info
         print(f"\nDetections: {len(result.boxes)} objects found")
-        
+
         # Show results (displays image with bounding boxes)
         result.show()
-        
+
         # Save results with annotations
         if save_path:
             result.save(save_path)
@@ -33,7 +35,7 @@ def predict_image(model: YOLO, source: str | Path | np.ndarray, save_path: str |
         else:
             result.save("output.jpg")
             print("Results saved to output.jpg")
-        
+
         # Print class names and confidence scores
         if len(result.boxes) > 0:
             print("\nDetected objects:")
@@ -42,7 +44,7 @@ def predict_image(model: YOLO, source: str | Path | np.ndarray, save_path: str |
                 conf = float(box.conf[0])
                 class_name = model.names[cls]
                 print(f"  - {class_name}: {conf:.2%} confidence")
-    
+
     return results
 
 
@@ -68,17 +70,17 @@ def main():
         help="Output path for annotated image (default: output.jpg)",
     )
     args = parser.parse_args()
-    
+
     print("Importing YOLOv8...")
-    
+
     # Load a pretrained YOLOv8 model
-    # Options: 'yolov8n.pt' (nano), 'yolov8s.pt' (small), 
+    # Options: 'yolov8n.pt' (nano), 'yolov8s.pt' (small),
     #          'yolov8m.pt' (medium), 'yolov8l.pt' (large), 'yolov8x.pt' (xlarge)
     model = YOLO(args.model)
-    
+
     print(f"Model loaded: {model.model_name}")
     print("YOLOv8 import successful!")
-    
+
     # Run prediction
     if args.image:
         predict_image(model, args.image, args.output)
@@ -86,10 +88,9 @@ def main():
         # Example: predict on a test image or numpy array
         print("\nNo image provided. Use --image <path> to specify an image.")
         print("Example: python test_yolo.py --image path/to/image.jpg")
-    
+
     return model
 
 
 if __name__ == "__main__":
     main()
-

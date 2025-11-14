@@ -11,9 +11,9 @@ from src.evio_in.dat_file import BatchRange, DatFileSource
 from src.evio_in.ev_rpm_pipeline import (
     EvTachAOIConfig,
     EvTachAOIDetector,
-    PipelineConfig,         
-    EE3PConfig,             
-    StreamingRpmPipeline,   
+    PipelineConfig,
+    EE3PConfig,
+    StreamingRpmPipeline,
 )
 
 
@@ -111,6 +111,7 @@ def draw_hud(
 # Utility: decode one time window of events into x,y,polarity
 # ----------------------------------------------------------------------
 
+
 # Live AOI tracker – uses EvTachAOIDetector once we have enough data
 # ----------------------------------------------------------------------
 class LiveAOITracker:
@@ -169,8 +170,16 @@ class LiveAOITracker:
 
             # check whether we've covered the AOI detection window
             if batch_range.end_ts_us - self._t_start_us >= self.aoi_window_us:
-                xs = np.concatenate(self._acc_x) if self._acc_x else np.zeros(0, dtype=np.int16)
-                ys = np.concatenate(self._acc_y) if self._acc_y else np.zeros(0, dtype=np.int16)
+                xs = (
+                    np.concatenate(self._acc_x)
+                    if self._acc_x
+                    else np.zeros(0, dtype=np.int16)
+                )
+                ys = (
+                    np.concatenate(self._acc_y)
+                    if self._acc_y
+                    else np.zeros(0, dtype=np.int16)
+                )
 
                 if xs.size > 0:
                     print(
@@ -188,7 +197,9 @@ class LiveAOITracker:
         return self.aois
 
 
-def draw_aois(frame: np.ndarray, aois, rpms: dict[int, float] | None = None, color=(0, 0, 255)) -> None:
+def draw_aois(
+    frame: np.ndarray, aois, rpms: dict[int, float] | None = None, color=(0, 0, 255)
+) -> None:
     if rpms is None:
         rpms = {}
     for idx, aoi in enumerate(aois):
@@ -284,7 +295,9 @@ def main() -> None:
         # Feed batch into streaming pipeline
         aois, rpm_dict = rpm_pipeline.consume_batch(x_coords, y_coords, t_coords)
 
-        frame = get_frame((x_coords, y_coords, polarities_on), width=args.width, height=args.height)
+        frame = get_frame(
+            (x_coords, y_coords, polarities_on), width=args.width, height=args.height
+        )
 
         # Draw AOIs and RPMs
         if aois:
