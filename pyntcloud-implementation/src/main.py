@@ -2,8 +2,8 @@ import argparse
 import numpy as np
 from pathlib import Path
 import pandas as pd
-from src.recording import open_dat, Recording
-from src.config import DATA_DIR
+from src.recording import open_dat
+from src.config import BASE_HEIGHT, BASE_WIDTH, DATA_DIR
 from pyntcloud import PyntCloud
 
 
@@ -24,13 +24,13 @@ def parse_args():
     parser.add_argument(
         "--width",
         type=int,
-        default=1280,
+        default=BASE_WIDTH,
         help="Sensor width in pixels (default: 1280)"
     )
     parser.add_argument(
         "--height",
         type=int,
-        default=720,
+        default=BASE_HEIGHT,
         help="Sensor height in pixels (default: 720)"
     )
     parser.add_argument(
