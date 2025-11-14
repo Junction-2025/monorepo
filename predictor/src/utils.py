@@ -26,12 +26,22 @@ def display_frame(frame: np.ndarray):
 
 def draw_heatmap(arr: np.ndarray, name="heatmap"):
     heatmap = np.asarray(arr)
-    # zeros -> white (255), everything else -> black (0)
-    mask = heatmap == 0
-    out = np.where(mask, 255, 0).astype(np.uint8)
+    # work with a single-channel view (use first channel if given a 3-channel array)
+    if heatmap.ndim == 2:
+        scalar = heatmap
+    else:
+        scalar = heatmap[..., 0]
 
-    if out.ndim == 2:
-        out = np.stack([out] * 3, axis=-1)
+    h, w = scalar.shape
+    out = np.zeros((h, w, 3), dtype=np.uint8)
+
+    # zeros -> white (255,255,255)
+    mask_zero = scalar == 0
+    out[mask_zero] = [255, 255, 255]
+
+    # -1 -> pure red (255,0,0)
+    mask_neg1 = scalar == -1
+    out[mask_neg1] = [255, 0, 0]
 
     Image.fromarray(out).save(LOG_DIR / f"{name}.png", format="PNG")
     print(f"--- Drew {LOG_DIR / f'{name}.png'} ---")

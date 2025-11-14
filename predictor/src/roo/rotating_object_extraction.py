@@ -1,12 +1,10 @@
 import numpy as np
-from typing import Tuple
 
 from src.config import DEFAULT_HEIGHT, DEFAULT_WIDTH, LOG_DIR
 from src.roo.config import HEATMAP_PIXEL_SIZE
 from src.roo.kmeans import locate_centroids
 from src.yolo.yolo import CropCoords
 from src.utils import draw_heatmap
-import numpy as _np
 from numpy.typing import NDArray
 
 
@@ -50,8 +48,8 @@ def find_clusters(
     y: np.ndarray,
     height=DEFAULT_HEIGHT,
     width=DEFAULT_WIDTH,
-    drone_crop_coords: CropCoords | None = CropCoords(x1=200, x2=800, y1=200, y2=800),
-) -> Tuple[np.ndarray, np.ndarray]:
+    drone_crop_coords: CropCoords | None = None,
+) -> np.ndarray:
     """
     Find centroids in event data using heatmap-based initialization and k-means.
 
@@ -66,8 +64,17 @@ def find_clusters(
 
     heatmap = find_heatmap(x, y, width=width, height=height, crop=drone_crop_coords)
     np.savetxt(str(LOG_DIR / "heatmap.txt"), heatmap, fmt="%d")
-    draw_heatmap(heatmap, name="heatmap")
 
     cx, cy = locate_centroids(heatmap)
-    print("centroids:", cx, cy)
-    points = _np.stack([x.astype(_np.float32), y.astype(_np.float32)], axis=1)
+
+    # mark centroid locations in the reduced heatmap as -1
+    if cx is not None and cy is not None and len(cx) and len(cy):
+        h_new, w_new = heatmap.shape
+        ix = np.rint(cx).astype(np.intp)
+        iy = np.rint(cy).astype(np.intp)
+        valid = (ix >= 0) & (ix < w_new) & (iy >= 0) & (iy < h_new)
+        if np.any(valid):
+            heatmap[iy[valid], ix[valid]] = -1
+    draw_heatmap(heatmap, name="heatmap")
+
+    return heatmap

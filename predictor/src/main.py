@@ -87,7 +87,7 @@ def main():
 
     # The issue was here: args.window is already in µs, so multiplying by 1000 was incorrect.
     src = DatFileSource(
-        args.input, width=1280, height=720, window_length_us=args.window
+        args.input, width=1280, height=720, window_length_us=args.window * 100
     )
     pacer = Pacer(
         speed=args.speed,
@@ -106,7 +106,6 @@ def main():
     start_time = time.perf_counter()
 
     print("\n--- Data Import Complete ---")
-    do = True
     for batch_range in pacer.pace(src.ranges()):
         window = get_window(
             src.event_words,
@@ -118,7 +117,8 @@ def main():
         frame = get_frame(window)
 
         drone_crop_coords = detect_drone_crop(frame)
-        find_clusters(window[0], window[1])
+        if drone_crop_coords:
+            find_clusters(window[0], window[1], drone_crop_coords=drone_crop_coords)
 
         wall_time = time.perf_counter() - start_time
         print(
