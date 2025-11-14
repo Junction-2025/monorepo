@@ -11,8 +11,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--input",
         type=Path,
-        default=DATA_DIR / "drone_idle.dat",
-        help="Input .dat file path (default: ../data/drone_idle.dat)",
+        default=DATA_DIR / "events.ply",
+        help="Input .ply file path (default: ../data/drone_idle.ply)",
     )
 
     return parser.parse_args()
