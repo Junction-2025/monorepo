@@ -87,46 +87,10 @@ def main():
     print("--- Configuration ---")
     print(f"Input file: {args.input}")
     print(f"Playback speed: {args.speed}x")
-    print(f"GUI Enabled: {not args.gui}")
     print("---------------------")
-
-    source = DatFileSource(path=str(args.input), window_length_us=args.window_us)
-    print(f"Source loaded with {len(source)} batches.")
-
-    pacer = Pacer(
-        speed=args.speed,
-        force_speed=args.force_speed,
-        drop_tolerance_s=args.drop_tolerance,
-    )
-
-    raw_batches = source.ranges()
-    paced_batches = pacer.pace(raw_batches)
 
     print("\n--- Starting Paced Playback ---")
     start_time = time.perf_counter()
-
-    # --- GUI Setup ---
-    if not args.gui:
-        plt.ion()
-        fig, ax = plt.subplots()
-
-        # Create two scatter plots for different polarities
-        scatter_on = ax.scatter([], [], c="blue", s=2, label="ON")
-        scatter_off = ax.scatter([], [], c="red", s=2, label="OFF")
-
-        ax.set_xlim(0, source.width)
-        ax.set_ylim(source.height, 0)  # Invert Y axis to match sensor origin
-        ax.set_aspect("equal", adjustable="box")
-        ax.set_title("Live Event Stream")
-        ax.set_xlabel("X coordinate")
-        ax.set_ylabel("Y coordinate")
-
-        # Create a legend
-        on_patch = mpatches.Patch(color="blue", label="ON polarity")
-        off_patch = mpatches.Patch(color="red", label="OFF polarity")
-        ax.legend(handles=[on_patch, off_patch])
-
-        fig.show()
 
     src = DatFileSource(
         args.dat, width=1280, height=720, window_length_us=args.window * 1000
