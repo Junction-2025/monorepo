@@ -14,19 +14,16 @@ def parse_args() -> argparse.Namespace:
         default=DATA_DIR / "events.ply",
         help="Input .ply file path (default: ../data/drone_idle.ply)",
     )
+    parser.add_argument(
+        "--visualize",
+        action="store_true",
+        default=False,
+        help="Whether to output png to logs or not (default: False)",
+    )
 
     return parser.parse_args()
 
-
-def main():
-    args = parse_args()
-    input_file = args.input
-
-    ply = PlyData.read(input_file)
-    v = ply["vertex"].data
-    x, y = v["x"], v["y"]
-
-    z = v["z"]
+def visualize(x, y, z, input_file: Path) -> None:
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
     ax.scatter(x, y, z, s=1)
@@ -38,6 +35,19 @@ def main():
     output_file = LOG_DIR / f"{input_file.stem}.png"
     fig.savefig(output_file, dpi=300, bbox_inches="tight")
     plt.close(fig)
+
+def main():
+    args = parse_args()
+    input_file = args.input
+
+    ply = PlyData.read(input_file)
+    v = ply["vertex"].data
+    x, y = v["x"], v["y"]
+    z = v["z"]
+
+    if args.visualize:
+        visualize(x,y,z,input_file)
+
 
 
 if __name__ == "__main__":
