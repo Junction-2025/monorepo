@@ -45,11 +45,10 @@ def parse_args() -> argparse.Namespace:
         default=10000,
         help="Batch window size in microseconds (default: 10000 µs = 10ms).",
     )
-    # Add GUI control argument
     parser.add_argument(
         "--gui",
         action="store_false",
-        help="Disable the live GUI visualization.",
+        help="Enable the live GUI visualization.",
     )
     return parser.parse_args()
 
