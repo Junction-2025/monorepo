@@ -1,7 +1,7 @@
 import time
 from collections.abc import Iterable, Iterator
 
-from src.dat_file import BatchRange
+from src.evio_in.dat_file import BatchRange
 
 
 class Pacer:

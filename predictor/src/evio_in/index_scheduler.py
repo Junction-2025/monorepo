@@ -1,7 +1,7 @@
 # evio/core/index_scheduler.py
 import numpy as np
 
-from src.recording import Recording
+from src.evio_in.recording import Recording
 
 
 def build_windows(recording: Recording, window_duration_us: int) -> np.ndarray:

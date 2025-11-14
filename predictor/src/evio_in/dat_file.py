@@ -3,8 +3,8 @@ from typing import NamedTuple
 
 import numpy as np
 
-from src.index_scheduler import build_windows
-from src.recording import open_dat
+from src.evio_in.index_scheduler import build_windows
+from src.evio_in.recording import open_dat
 
 
 class BatchRange(NamedTuple):
