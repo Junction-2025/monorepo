@@ -2,7 +2,7 @@ import argparse
 import numpy as np
 from pathlib import Path
 import pandas as pd
-from recording import open_dat, Recording
+from src.recording import open_dat, Recording
 from pyntcloud import PyntCloud
 
 
@@ -11,7 +11,7 @@ def parse_args():
     parser.add_argument(
         "--input",
         type=Path,
-        default=Path(__file__).parent.parent / "data/drone_idle.dat",
+        default=Path(__file__).parent.parent.parent / "data/drone_idle.dat",
         help="Input .dat file path (default: ../data/drone_idle.dat)"
     )
     parser.add_argument(
@@ -81,7 +81,22 @@ def main():
     pols = []
 
     print("Reading events...")
-    for x,y,t,p in zip(reader.event_words, reader.event_words, reader.timestamps, reader.event_words):
+
+    # reader.event_words contains the bullshit we need (x,y, uuhhhh polarity)
+    #- `w32` (lower 32 bits) packs polarity and coordinates as:
+    #| Bits  | Meaning                                   |
+    #|-------|-------------------------------------------|
+    #| 31–28 | polarity (4 bits; > 0 → ON, 0 → OFF)      |
+    #| 27–14 | y coordinate (14 bits)                    |
+    #| 13–0  | x coordinate (14 bits)                    |
+
+    w32 = reader.event_words.astype(np.uint32)
+    pol_array = ((w32 >> 28) & 0xF).astype(np.uint8)
+    pol_array = (pol_array > 0).astype(np.uint8)
+    y_array = ((w32 >> 14) & 0x3FFF).astype(np.int64)
+    x_array = (w32 & 0x3FFF).astype(np.int64)
+
+    for x,y,t,p in zip(x_array, y_array, reader.timestamps, pol_array):
         xs.append(x)
         ys.append(y)
         ts.append(t)
