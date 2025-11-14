@@ -34,7 +34,7 @@ def main():
     ax.set_ylabel("y")
     ax.set_zlabel("z")
     ax.invert_yaxis()
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
+
     output_file = LOG_DIR / f"{input_file.stem}.png"
     fig.savefig(output_file, dpi=300, bbox_inches="tight")
     plt.close(fig)
