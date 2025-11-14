@@ -19,7 +19,6 @@ from typing import List, Tuple, Optional, Dict, Literal
 import numpy as np
 
 # Optional imports; you may need to install these.
-from src.evio_in.dat_file import DatFileSource
 from src.evio_in.recording import open_dat
 
 
@@ -31,6 +30,7 @@ except ImportError:
 # ----------------------------------------------------------------------
 # 1. Data sources
 # ----------------------------------------------------------------------
+
 
 class EventSourceBase:
     """Abstract base class for event sources."""
@@ -48,10 +48,12 @@ class EventSourceBase:
             ts.append(t)
             ps.append(p)
         if not xs:
-            return (np.array([], dtype=np.int16),
-                    np.array([], dtype=np.int16),
-                    np.array([], dtype=np.int64),
-                    np.array([], dtype=np.int8))
+            return (
+                np.array([], dtype=np.int16),
+                np.array([], dtype=np.int16),
+                np.array([], dtype=np.int64),
+                np.array([], dtype=np.int8),
+            )
         x = np.concatenate(xs)
         y = np.concatenate(ys)
         t = np.concatenate(ts)
@@ -96,19 +98,20 @@ class EvioDatSource(EventSourceBase):
         yield x, y, t, p
 
 
-
-
 class Hdf5EventSource(EventSourceBase):
     """
     Generic HDF5 event source for FRED/NeRDD-style files.
     You must adjust the dataset keys to match your specific file structure.
     """
 
-    def __init__(self, path: str,
-                 x_key: str = "events/x",
-                 y_key: str = "events/y",
-                 t_key: str = "events/t",
-                 p_key: str = "events/p"):
+    def __init__(
+        self,
+        path: str,
+        x_key: str = "events/x",
+        y_key: str = "events/y",
+        t_key: str = "events/t",
+        p_key: str = "events/p",
+    ):
         if h5py is None:
             raise RuntimeError("h5py not installed.")
         self.path = path
@@ -124,12 +127,18 @@ class Hdf5EventSource(EventSourceBase):
             t = f[self.t_key][:]  # usually microseconds
             p = f[self.p_key][:]
         # Single big packet
-        yield x.astype(np.int16), y.astype(np.int16), t.astype(np.int64), p.astype(np.int8)
+        yield (
+            x.astype(np.int16),
+            y.astype(np.int16),
+            t.astype(np.int64),
+            p.astype(np.int8),
+        )
 
 
 # ----------------------------------------------------------------------
 # 2. EV-Tach-style AOI detection (heatmap + k-means + outlier removal)
 # ----------------------------------------------------------------------
+
 
 @dataclass
 class AOI:
@@ -163,7 +172,9 @@ class EvTachAOIDetector:
     def __init__(self, config: EvTachAOIConfig):
         self.cfg = config
 
-    def _build_heatmap(self, x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _build_heatmap(
+        self, x: np.ndarray, y: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         bs = self.cfg.heatmap_bin_size
         gw = self.cfg.sensor_width // bs + 1
         gh = self.cfg.sensor_height // bs + 1
@@ -177,7 +188,9 @@ class EvTachAOIDetector:
         ys, xs = np.meshgrid(np.arange(gh), np.arange(gw), indexing="ij")
         return heat, xs, ys
 
-    def _init_centroids_from_heatmap(self, heat: np.ndarray, xs: np.ndarray, ys: np.ndarray) -> np.ndarray:
+    def _init_centroids_from_heatmap(
+        self, heat: np.ndarray, xs: np.ndarray, ys: np.ndarray
+    ) -> np.ndarray:
         """
         Simple variant of EV-Tach heatmap-based centroid init:
         - pick the hottest bin
@@ -201,7 +214,12 @@ class EvTachAOIDetector:
         # For subsequent centroids, choose farthest high-valued bins
         for _ in range(1, k):
             # compute distance to nearest chosen centroid
-            dists = np.min(np.linalg.norm(coords[:, None, :] - np.array(chosen)[None, :, :], axis=-1), axis=1)
+            dists = np.min(
+                np.linalg.norm(
+                    coords[:, None, :] - np.array(chosen)[None, :, :], axis=-1
+                ),
+                axis=1,
+            )
             # prefer high-value & far bins
             scores = dists * (vals / (vals.max() + 1e-9))
             idx = np.argmax(scores)
@@ -213,7 +231,9 @@ class EvTachAOIDetector:
         centroids_pix = (centroids_pix + 0.5) * bs
         return centroids_pix  # shape (k,2) as (x,y)
 
-    def _kmeans_xy(self, points: np.ndarray, init_centroids: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _kmeans_xy(
+        self, points: np.ndarray, init_centroids: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Basic k-means on 2D points.
 
@@ -229,7 +249,9 @@ class EvTachAOIDetector:
 
         for _ in range(self.cfg.max_kmeans_iters):
             # assign
-            dists = np.linalg.norm(points[:, None, :] - centroids[None, :, :], axis=-1)  # [N,K]
+            dists = np.linalg.norm(
+                points[:, None, :] - centroids[None, :, :], axis=-1
+            )  # [N,K]
             new_labels = np.argmin(dists, axis=1)
             if np.all(new_labels == labels):
                 break
@@ -288,7 +310,7 @@ class EvTachAOIDetector:
             aoi = AOI(
                 centroid=(float(c[0]), float(c[1])),
                 bbox=(x1, y1, x2, y2),
-                mask=global_mask
+                mask=global_mask,
             )
             aoi_list.append(aoi)
 
@@ -299,11 +321,12 @@ class EvTachAOIDetector:
 # 3. EE3P-style RPM estimator
 # ----------------------------------------------------------------------
 
+
 @dataclass
 class EE3PConfig:
-    slice_us: int = 500        # time length of each aggregation slice (microseconds)
-    min_slices: int = 10       # minimum slices needed to do correlation
-    symmetry_order: int = 3    # number of identical repeats per revolution (e.g. blades)
+    slice_us: int = 500  # time length of each aggregation slice (microseconds)
+    min_slices: int = 10  # minimum slices needed to do correlation
+    symmetry_order: int = 3  # number of identical repeats per revolution (e.g. blades)
     peak_prominence: float = 0.1
     max_peaks: int = 10
 
@@ -320,11 +343,13 @@ class EventAggregator:
         self.sh = sensor_height
         self.cfg = cfg
 
-    def aggregate_roi(self,
-                      x: np.ndarray,
-                      y: np.ndarray,
-                      t: np.ndarray,
-                      bbox: Tuple[int, int, int, int]) -> Tuple[np.ndarray, np.ndarray]:
+    def aggregate_roi(
+        self,
+        x: np.ndarray,
+        y: np.ndarray,
+        t: np.ndarray,
+        bbox: Tuple[int, int, int, int],
+    ) -> Tuple[np.ndarray, np.ndarray]:
         """
         x,y,t: ROI-filtered events (global coords)
         bbox: (x1,y1,x2,y2)
@@ -396,7 +421,7 @@ class EE3PRPMEstimator:
         a_std = a.std() + 1e-6
         b_std = b.std() + 1e-6
         num = (a * b).sum()
-        den = (a_std * b_std * a.size)
+        den = a_std * b_std * a.size
         return float(num / den)
 
     def _find_local_peaks(self, corr: np.ndarray) -> np.ndarray:
@@ -437,7 +462,7 @@ class EE3PRPMEstimator:
 
         # Limit number of peaks for robust estimation
         if peaks.size > cfg.max_peaks:
-            peaks = peaks[:cfg.max_peaks]
+            peaks = peaks[: cfg.max_peaks]
 
         peak_times = times[peaks]
         # intervals between successive peaks
@@ -451,7 +476,7 @@ class EE3PRPMEstimator:
         if median_period <= 0:
             return None
 
-        f_corr = 1.0 / median_period       # Hz of pattern repetition
+        f_corr = 1.0 / median_period  # Hz of pattern repetition
         f_rot = f_corr / cfg.symmetry_order  # correct for symmetry (e.g. blades)
         rpm = 60.0 * f_rot
         return float(rpm)
@@ -461,15 +486,16 @@ class EE3PRPMEstimator:
 # 4. Pipeline orchestration
 # ----------------------------------------------------------------------
 
+
 @dataclass
 class PipelineConfig:
     source_type: Literal["evio", "hdf5"]
     sensor_width: int
     sensor_height: int
     num_clusters: int
-    aoi_window_us: int = 150_000    # time range used to detect AOI (~150ms)
-    rpm_window_us: int = 30_000     # each RPM estimation window (~30ms)
-    rpm_step_us: int = 10_000       # step between RPM windows (~10ms)
+    aoi_window_us: int = 150_000  # time range used to detect AOI (~150ms)
+    rpm_window_us: int = 30_000  # each RPM estimation window (~30ms)
+    rpm_step_us: int = 10_000  # step between RPM windows (~10ms)
     ee3p_config: EE3PConfig = dataclasses.field(default_factory=EE3PConfig)
     evtach_config: Optional[EvTachAOIConfig] = None
 
@@ -601,7 +627,9 @@ class RpmPipeline:
 
         self.aoi_detector = EvTachAOIDetector(self.evtach_cfg)
         self.ee3p = EE3PRPMEstimator(cfg.ee3p_config)
-        self.aggregator = EventAggregator(cfg.sensor_width, cfg.sensor_height, cfg.ee3p_config)
+        self.aggregator = EventAggregator(
+            cfg.sensor_width, cfg.sensor_height, cfg.ee3p_config
+        )
 
     def _make_source(self, path: str) -> EventSourceBase:
         if self.cfg.source_type == "evio":
@@ -614,7 +642,6 @@ class RpmPipeline:
             return Hdf5EventSource(path)
         else:
             raise ValueError(f"Unknown source_type: {self.cfg.source_type}")
-
 
     def run_on_file(self, path: str) -> List[Dict]:
         """
@@ -643,7 +670,9 @@ class RpmPipeline:
             print("No events in AOI window.")
             return []
 
-        print(f"[INFO] AOI detection window: {t_min} to {aoi_end} us ({mask_aoi.sum()} events)")
+        print(
+            f"[INFO] AOI detection window: {t_min} to {aoi_end} us ({mask_aoi.sum()} events)"
+        )
 
         aoi_list = self.aoi_detector.detect_aois(x[mask_aoi], y[mask_aoi])
         print(f"[INFO] Detected {len(aoi_list)} AOIs")
@@ -680,11 +709,13 @@ class RpmPipeline:
                 if rpm is None:
                     continue
 
-                results.append({
-                    "t_center": float(t_center * 1e-6),  # seconds
-                    "aoi_idx": a_idx,
-                    "rpm": float(rpm),
-                })
+                results.append(
+                    {
+                        "t_center": float(t_center * 1e-6),  # seconds
+                        "aoi_idx": a_idx,
+                        "rpm": float(rpm),
+                    }
+                )
 
             t_center += step
 
@@ -695,16 +726,37 @@ class RpmPipeline:
 # 5. CLI
 # ----------------------------------------------------------------------
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Event-based RPM estimation (EVIO + EV-Tach AOI + EE3P).")
+    parser = argparse.ArgumentParser(
+        description="Event-based RPM estimation (EVIO + EV-Tach AOI + EE3P)."
+    )
     parser.add_argument("path", type=str, help="Path to .dat or .h5 event file")
-    parser.add_argument("--source-type", type=str, choices=["evio", "hdf5"], default="evio",
-                        help="Type of source: 'evio' for .dat, 'hdf5' for FRED/NeRDD")
-    parser.add_argument("--width", type=int, default=1280, help="Sensor width in pixels")
-    parser.add_argument("--height", type=int, default=720, help="Sensor height in pixels")
-    parser.add_argument("--clusters", type=int, default=1, help="Number of rotating objects (AOIs) to find")
-    parser.add_argument("--symmetry", type=int, default=3,
-                        help="Symmetry order (e.g. number of blades; 3 for many props, 2 for typical drone blades)")
+    parser.add_argument(
+        "--source-type",
+        type=str,
+        choices=["evio", "hdf5"],
+        default="evio",
+        help="Type of source: 'evio' for .dat, 'hdf5' for FRED/NeRDD",
+    )
+    parser.add_argument(
+        "--width", type=int, default=1280, help="Sensor width in pixels"
+    )
+    parser.add_argument(
+        "--height", type=int, default=720, help="Sensor height in pixels"
+    )
+    parser.add_argument(
+        "--clusters",
+        type=int,
+        default=1,
+        help="Number of rotating objects (AOIs) to find",
+    )
+    parser.add_argument(
+        "--symmetry",
+        type=int,
+        default=3,
+        help="Symmetry order (e.g. number of blades; 3 for many props, 2 for typical drone blades)",
+    )
     args = parser.parse_args()
 
     ee3p_cfg = EE3PConfig(symmetry_order=args.symmetry)

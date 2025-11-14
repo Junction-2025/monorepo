@@ -7,6 +7,7 @@ from pathlib import Path
 model = YOLOWorld("yolov8s-worldv2.pt")
 model.set_classes(["drone", "uav", "quadrotor", "airplane"])
 
+
 def detect_drone_crop(frame: np.ndarray):
     """
     Input:  frame (H,W,3) BGR ndarray
@@ -24,4 +25,3 @@ def detect_drone_crop(frame: np.ndarray):
     # crop
     crop = frame[y1:y2, x1:x2]
     return crop
-

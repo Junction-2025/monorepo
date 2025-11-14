@@ -23,6 +23,7 @@ def parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
+
 def visualize(x, y, z, input_file: Path) -> None:
     fig = plt.figure()
     # downsample by factor of 10
@@ -68,6 +69,7 @@ def visualize(x, y, z, input_file: Path) -> None:
     fig3.savefig(output_file_3d, dpi=300, bbox_inches="tight")
     plt.close(fig3)
 
+
 def main():
     args = parse_args()
     input_file = args.input
@@ -78,9 +80,8 @@ def main():
     z = v["z"]
 
     if args.visualize:
-        visualize(x,y,z,input_file)
+        visualize(x, y, z, input_file)
 
-    
 
 if __name__ == "__main__":
     main()

@@ -9,10 +9,15 @@ import numpy as np
 from src.evio_in.pacer import Pacer
 from src.evio_in.dat_file import DatFileSource, BatchRange
 from src.evio_in.play_dat import get_frame, get_window
+<<<<<<< Updated upstream
 from src.knn.knn import find_centroids
 from src.yolo.yolo import detect_drone_crop
 
 from .utils import draw_png, display_frame
+=======
+
+from src.roo.rotating_object_extraction import find_clusters
+>>>>>>> Stashed changes
 
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
@@ -100,6 +105,8 @@ def main():
     print(f"\n--- Starting Paced Playback ({len(src)} batches) ---")
     start_time = time.perf_counter()
 
+    print("\n--- Data Import Complete ---")
+    do = True
     for batch_range in pacer.pace(src.ranges()):
         window = get_window(
             src.event_words,
@@ -113,8 +120,11 @@ def main():
         drone = detect_drone_crop(frame)
         if drone is not None:
             display_frame(drone)
-
-        knn_frame = find_centroids(frame)
+        knn_frame = find_centroids(drone)
+        if do:
+            frame = get_frame(window)
+            find_clusters(window[0], window[1])
+            do = False
 
         wall_time = time.perf_counter() - start_time
         print(
