@@ -60,36 +60,13 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
-    # =============================
-    # COMMAND LINE ARGUMENTS
-    # =============================
-    args = parse_args()
-    input_file = args.input
-    output_file = args.output
-    use_timestamp_as_z = args.use_timestamp_as_z
-    normalize_time = args.normalize_time
-    width = args.width
-    height = args.height
-
-    # =============================
-    # LOAD EVENTS FROM .dat
-    # =============================
-    reader = open_dat(input_file, width=width, height=height)
-    xs = []
-    ys = []
-    ts = []
-    pols = []
-
+def load_events_from_dat(input_file: Path, width: int, height: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Event word bit format: [31-28: polarity] [27-14: y] [13-0: x]
+    Returns: (x, y, timestamps, polarity) arrays
+    """
     print("Reading events...")
-
-    # reader.event_words contains the bullshit we need (x,y, uuhhhh polarity)
-    #- `w32` (lower 32 bits) packs polarity and coordinates as:
-    #| Bits  | Meaning                                   |
-    #|-------|-------------------------------------------|
-    #| 31–28 | polarity (4 bits; > 0 → ON, 0 → OFF)      |
-    #| 27–14 | y coordinate (14 bits)                    |
-    #| 13–0  | x coordinate (14 bits)                    |
+    reader = open_dat(input_file, width=width, height=height)
 
     w32 = reader.event_words.astype(np.uint32)
     pol_array = ((w32 >> 28) & 0xF).astype(np.uint8)
@@ -97,7 +74,12 @@ def main():
     y_array = ((w32 >> 14) & 0x3FFF).astype(np.int64)
     x_array = (w32 & 0x3FFF).astype(np.int64)
 
-    for x,y,t,p in zip(x_array, y_array, reader.timestamps, pol_array):
+    xs = []
+    ys = []
+    ts = []
+    pols = []
+
+    for x, y, t, p in zip(x_array, y_array, reader.timestamps, pol_array):
         xs.append(x)
         ys.append(y)
         ts.append(t)
@@ -109,48 +91,71 @@ def main():
     pols = np.array(pols)
 
     print(f"Loaded {len(xs)} events")
+    return xs, ys, ts, pols
 
-    # =============================
-    # MAP TO POINT CLOUD Z-DIMENSION
-    # =============================
+
+def calculate_z_coordinates(timestamps: np.ndarray, use_timestamp_as_z: bool, normalize_time: bool) -> np.ndarray:
     if use_timestamp_as_z:
-        z = ts.astype(np.float64)
+        z = timestamps.astype(np.float64)
         if normalize_time:
             z = (z - z.min()) / (z.max() - z.min() + 1e-12)
     else:
-        z = np.zeros_like(xs, dtype=np.float64)
+        z = np.zeros_like(timestamps, dtype=np.float64)
 
-    # =============================
-    # COLOUR BY POLARITY
-    # =============================
-    # Positive polarity = white (255,255,255)
-    # Negative polarity = red  (255,0,0)
-    red   = np.where(pols == 1, 255, 255)
-    green = np.where(pols == 1, 255,   0)
-    blue  = np.where(pols == 1, 255,   0)
+    return z
 
-    # =============================
-    # BUILD DATAFRAME FOR PYNTCLOUD
-    # =============================
-    df = pd.DataFrame({
+
+def create_polarity_colors(polarities: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Positive (1) = white, Negative (0) = red"""
+    red = np.where(polarities == 1, 255, 255)
+    green = np.where(polarities == 1, 255, 0)
+    blue = np.where(polarities == 1, 255, 0)
+
+    return red.astype(np.uint8), green.astype(np.uint8), blue.astype(np.uint8)
+
+
+def build_point_cloud_dataframe(xs: np.ndarray, ys: np.ndarray, zs: np.ndarray,
+                                 red: np.ndarray, green: np.ndarray, blue: np.ndarray) -> pd.DataFrame:
+    return pd.DataFrame({
         "x": xs,
         "y": ys,
-        "z": z,
-        "red": red.astype(np.uint8),
-        "green": green.astype(np.uint8),
-        "blue": blue.astype(np.uint8)
+        "z": zs,
+        "red": red,
+        "green": green,
+        "blue": blue
     })
 
+
+def save_point_cloud(df: pd.DataFrame, output_file: Path) -> None:
     print("Creating PyntCloud object...")
     cloud = PyntCloud(df)
 
-    # =============================
-    # SAVE AS .ply
-    # =============================
-    print(f"Writing to {output_file} ...")
+    print(f"Writing to {output_file}...")
     cloud.to_file(str(output_file))
 
     print("Done.")
+
+
+def main():
+    args = parse_args()
+
+    xs, ys, ts, pols = load_events_from_dat(
+        args.input,
+        args.width,
+        args.height
+    )
+
+    zs = calculate_z_coordinates(
+        ts,
+        args.use_timestamp_as_z,
+        args.normalize_time
+    )
+
+    red, green, blue = create_polarity_colors(pols)
+
+    df = build_point_cloud_dataframe(xs, ys, zs, red, green, blue)
+
+    save_point_cloud(df, args.output)
 
 
 if __name__ == "__main__":
