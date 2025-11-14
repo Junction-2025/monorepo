@@ -10,6 +10,8 @@ import matplotlib.patches as mpatches
 # Imports are now relative within the 'evio' package
 from src.evio_in.pacer import Pacer
 from src.evio_in.dat_file import DatFileSource, BatchRange
+from src.evio_in.play_dat import get_frame, get_window
+
 
 
 def parse_args() -> argparse.Namespace:
@@ -117,50 +119,31 @@ def main():
             ax.legend(handles=[on_patch, off_patch])
 
             fig.show()
-        # --- End GUI Setup ---
 
-        for batch in paced_batches:
-            if not args.gui:
-                x, y, pol = decode_batch(source, batch)
-                
-                # Separate points by polarity
-                on_mask = pol == 1
-                off_mask = pol == 0
-                
-                # Update scatter plot data
-                scatter_on.set_offsets(np.c_[x[on_mask], y[on_mask]])
-                scatter_off.set_offsets(np.c_[x[off_mask], y[off_mask]])
-                
-                ax.set_title(f"Live Event Stream | Event Time: {batch.end_ts_us / 1e6:.2f}s")
-                
-                # Redraw canvas
-                fig.canvas.draw()
-                fig.canvas.flush_events()
-            else:
-                # Original text-based output
-                wall_time = time.perf_counter() - start_time
-                print(
-                    f"\rWall Time: {wall_time: >6.2f}s | "
-                    f"Event Time: {batch.end_ts_us / 1e6: >6.2f}s | "
-                    f"Emitted: {pacer.emitted_batches: >5} | "
-                    f"Dropped: {pacer.dropped_batches: >5}   ",
-                    end=""
-                )
+        src = DatFileSource(
+            args.dat, width=1280, height=720, window_length_us=args.window * 1000
+        )
+        pacer = Pacer(speed=args.speed, force_speed=args.force_speed)
+
+
+        for batch_range in pacer.pace(src.ranges()):
+            window = get_window(
+                src.event_words,
+                src.order,
+                batch_range.start,
+                batch_range.stop,
+            )
+            frame = get_frame(window)
+            wall_time = time.perf_counter() - start_time
+            print(
+                f"\rWall Time: {wall_time: >6.2f}s | "
+                # f"Event Time: {batch.end_ts_us / 1e6: >6.2f}s | "
+                f"Emitted: {pacer.emitted_batches: >5} | "
+                f"Dropped: {pacer.dropped_batches: >5}   ",
+                end=""
+            )
 
         print("\n\n--- Playback Finished ---")
-        
-        if not args.gui:
-            print("Closing GUI window.")
-            plt.ioff()
-            plt.close(fig)
-
-    except Exception as e:
-        print(f"\nAn error occurred: {e}")
-        # Make sure plot is closed on error
-        if 'fig' in locals() and plt.fignum_exists(fig.number):
-            plt.close(fig)
-        sys.exit(1)
-
 
 if __name__ == "__main__":
     main()
