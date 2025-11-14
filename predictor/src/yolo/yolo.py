@@ -4,8 +4,8 @@ import cv2
 from pathlib import Path
 
 # Load model once globally
-model = YOLOE("yoloe-11l-seg.pt")
-model.set_classes(["drone"], model.get_text_pe(["drone"]))
+model = YOLOE("yolo12l.pt")
+# model.set_classes(["drone"], model.get_text_pe(["drone"]))
 
 def detect_drone_crop(frame: np.ndarray):
     """

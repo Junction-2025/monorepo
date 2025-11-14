@@ -10,7 +10,9 @@ from src.evio_in.pacer import Pacer
 from src.evio_in.dat_file import DatFileSource, BatchRange
 from src.evio_in.play_dat import get_frame, get_window
 from src.knn.knn import find_centroids
+from src.yolo.yolo import detect_drone_crop
 
+from .utils import draw_png, display_frame
 
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
@@ -91,6 +93,7 @@ def main():
     print("\n--- Starting Paced Playback ---")
     start_time = time.perf_counter()
 
+
     src = DatFileSource(
         args.input, width=1280, height=720, window_length_us=args.window * 1000
     )
@@ -103,7 +106,13 @@ def main():
             batch_range.start,
             batch_range.stop,
         )
+
         frame = get_frame(window)
+
+        drone = detect_drone_crop(frame)
+        if drone:
+            display_frame(drone)
+
         knn_frame = find_centroids(frame)
 
         wall_time = time.perf_counter() - start_time
