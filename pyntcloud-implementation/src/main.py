@@ -3,6 +3,7 @@ import numpy as np
 from pathlib import Path
 import pandas as pd
 from src.recording import open_dat, Recording
+from src.config import DATA_DIR
 from pyntcloud import PyntCloud
 
 
@@ -11,13 +12,13 @@ def parse_args():
     parser.add_argument(
         "--input",
         type=Path,
-        default=Path(__file__).parent.parent.parent / "data/drone_idle.dat",
+        default=DATA_DIR/ "drone_idle.dat",
         help="Input .dat file path (default: ../data/drone_idle.dat)"
     )
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path(__file__).parent.parent.parent / "data/events.ply",
+        default= DATA_DIR/ "events.ply",
         help="Output .ply file path (default: ./events.ply)"
     )
     parser.add_argument(
