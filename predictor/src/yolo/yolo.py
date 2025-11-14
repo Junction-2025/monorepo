@@ -1,5 +1,7 @@
 from ultralytics import YOLOE, YOLOWorld
 import numpy as np
+import cv2
+from pathlib import Path
 
 # Load model once globally
 model = YOLOWorld("yolov8s-worldv2.pt")
