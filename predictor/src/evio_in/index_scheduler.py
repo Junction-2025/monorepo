@@ -31,12 +31,8 @@ def build_windows(recording: Recording, window_duration_us: int) -> np.ndarray:
 
     # Boundaries cover the entire range, including the last partial window
     boundaries = np.arange(t_start, t_end + dt, dt, dtype=np.int64)
-    starts = np.searchsorted(timestamps, boundaries[:-1], side="left").astype(
-        np.int32
-    )
-    stops = np.searchsorted(timestamps, boundaries[1:], side="left").astype(
-        np.int32
-    )
+    starts = np.searchsorted(timestamps, boundaries[:-1], side="left").astype(np.int32)
+    stops = np.searchsorted(timestamps, boundaries[1:], side="left").astype(np.int32)
 
     # Drop empty windows but keep at least one if there are events
     non_empty = stops > starts

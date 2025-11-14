@@ -65,10 +65,7 @@ def _parse_header_and_data_offset(dat_path: Path) -> tuple[dict, int]:
         )  # must be 8 for CD
 
         if metadata["event_size"] != 8:
-            msg = (
-                f"Unsupported DAT event size:"
-                f" {metadata['event_size']} (expected 8)."
-            )
+            msg = f"Unsupported DAT event size: {metadata['event_size']} (expected 8)."
             raise ValueError(msg)
 
         return metadata, dat_file.tell()
@@ -134,8 +131,7 @@ class DatMemmap:
         payload_bytes = file_size - binary_offset
         if payload_bytes < 0 or (payload_bytes % 8) != 0:
             msg = (
-                f"Invalid DAT payload size {payload_bytes}"
-                " (not a multiple of 8 bytes)."
+                f"Invalid DAT payload size {payload_bytes} (not a multiple of 8 bytes)."
             )
             raise ValueError(msg)
 
@@ -159,14 +155,10 @@ class DatMemmap:
 
         # Geometry: use header values if present, otherwise infer from data
         width = int(
-            metadata.get(
-                "width", int(decoded_x.max()) + 1 if num_events > 0 else 0
-            )
+            metadata.get("width", int(decoded_x.max()) + 1 if num_events > 0 else 0)
         )
         height = int(
-            metadata.get(
-                "height", int(decoded_y.max()) + 1 if num_events > 0 else 0
-            )
+            metadata.get("height", int(decoded_y.max()) + 1 if num_events > 0 else 0)
         )
 
         return DatMemmap(

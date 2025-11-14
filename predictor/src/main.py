@@ -13,10 +13,11 @@ from src.evio_in.dat_file import DatFileSource, BatchRange
 from src.evio_in.play_dat import get_frame, get_window
 
 
-
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
-    parser = argparse.ArgumentParser(description="Stream a .dat file with real-time pacing and optional GUI.")
+    parser = argparse.ArgumentParser(
+        description="Stream a .dat file with real-time pacing and optional GUI."
+    )
     parser.add_argument(
         "--input",
         type=Path,
@@ -54,11 +55,14 @@ def parse_args() -> argparse.Namespace:
     )
     return parser.parse_args()
 
-def decode_batch(source: DatFileSource, batch: BatchRange) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+
+def decode_batch(
+    source: DatFileSource, batch: BatchRange
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Decode the event data for a given batch range."""
     # Get the time-ordered indices for the current batch
-    ordered_indices = source.order[batch.start:batch.stop]
-    
+    ordered_indices = source.order[batch.start : batch.stop]
+
     # Get the corresponding packed event words
     w32 = source.event_words[ordered_indices].astype(np.uint32)
 
@@ -68,8 +72,9 @@ def decode_batch(source: DatFileSource, batch: BatchRange) -> tuple[np.ndarray, 
     pol = (pol > 0).astype(np.uint8)
     y = ((w32 >> 14) & 0x3FFF).astype(np.int64)
     x = (w32 & 0x3FFF).astype(np.int64)
-    
+
     return x, y, pol
+
 
 def main():
     """Main streaming loop."""
@@ -85,65 +90,68 @@ def main():
     print(f"GUI Enabled: {not args.gui}")
     print("---------------------")
 
-    try:
-        source = DatFileSource(path=str(args.input), window_length_us=args.window_us)
-        print(f"Source loaded with {len(source)} batches.")
+    source = DatFileSource(path=str(args.input), window_length_us=args.window_us)
+    print(f"Source loaded with {len(source)} batches.")
 
-        pacer = Pacer(speed=args.speed, force_speed=args.force_speed, drop_tolerance_s=args.drop_tolerance)
-        
-        raw_batches = source.ranges()
-        paced_batches = pacer.pace(raw_batches)
+    pacer = Pacer(
+        speed=args.speed,
+        force_speed=args.force_speed,
+        drop_tolerance_s=args.drop_tolerance,
+    )
 
-        print("\n--- Starting Paced Playback ---")
-        start_time = time.perf_counter()
+    raw_batches = source.ranges()
+    paced_batches = pacer.pace(raw_batches)
 
-        # --- GUI Setup ---
-        if not args.gui:
-            plt.ion()
-            fig, ax = plt.subplots()
-            
-            # Create two scatter plots for different polarities
-            scatter_on = ax.scatter([], [], c='blue', s=2, label='ON')
-            scatter_off = ax.scatter([], [], c='red', s=2, label='OFF')
-            
-            ax.set_xlim(0, source.width)
-            ax.set_ylim(source.height, 0) # Invert Y axis to match sensor origin
-            ax.set_aspect('equal', adjustable='box')
-            ax.set_title("Live Event Stream")
-            ax.set_xlabel("X coordinate")
-            ax.set_ylabel("Y coordinate")
-            
-            # Create a legend
-            on_patch = mpatches.Patch(color='blue', label='ON polarity')
-            off_patch = mpatches.Patch(color='red', label='OFF polarity')
-            ax.legend(handles=[on_patch, off_patch])
+    print("\n--- Starting Paced Playback ---")
+    start_time = time.perf_counter()
 
-            fig.show()
+    # --- GUI Setup ---
+    if not args.gui:
+        plt.ion()
+        fig, ax = plt.subplots()
 
-        src = DatFileSource(
-            args.dat, width=1280, height=720, window_length_us=args.window * 1000
+        # Create two scatter plots for different polarities
+        scatter_on = ax.scatter([], [], c="blue", s=2, label="ON")
+        scatter_off = ax.scatter([], [], c="red", s=2, label="OFF")
+
+        ax.set_xlim(0, source.width)
+        ax.set_ylim(source.height, 0)  # Invert Y axis to match sensor origin
+        ax.set_aspect("equal", adjustable="box")
+        ax.set_title("Live Event Stream")
+        ax.set_xlabel("X coordinate")
+        ax.set_ylabel("Y coordinate")
+
+        # Create a legend
+        on_patch = mpatches.Patch(color="blue", label="ON polarity")
+        off_patch = mpatches.Patch(color="red", label="OFF polarity")
+        ax.legend(handles=[on_patch, off_patch])
+
+        fig.show()
+
+    src = DatFileSource(
+        args.dat, width=1280, height=720, window_length_us=args.window * 1000
+    )
+    pacer = Pacer(speed=args.speed, force_speed=args.force_speed)
+
+    for batch_range in pacer.pace(src.ranges()):
+        window = get_window(
+            src.event_words,
+            src.order,
+            batch_range.start,
+            batch_range.stop,
         )
-        pacer = Pacer(speed=args.speed, force_speed=args.force_speed)
+        frame = get_frame(window)
+        wall_time = time.perf_counter() - start_time
+        print(
+            f"\rWall Time: {wall_time: >6.2f}s | "
+            # f"Event Time: {batch.end_ts_us / 1e6: >6.2f}s | "
+            f"Emitted: {pacer.emitted_batches: >5} | "
+            f"Dropped: {pacer.dropped_batches: >5}   ",
+            end="",
+        )
 
+    print("\n\n--- Playback Finished ---")
 
-        for batch_range in pacer.pace(src.ranges()):
-            window = get_window(
-                src.event_words,
-                src.order,
-                batch_range.start,
-                batch_range.stop,
-            )
-            frame = get_frame(window)
-            wall_time = time.perf_counter() - start_time
-            print(
-                f"\rWall Time: {wall_time: >6.2f}s | "
-                # f"Event Time: {batch.end_ts_us / 1e6: >6.2f}s | "
-                f"Emitted: {pacer.emitted_batches: >5} | "
-                f"Dropped: {pacer.dropped_batches: >5}   ",
-                end=""
-            )
-
-        print("\n\n--- Playback Finished ---")
 
 if __name__ == "__main__":
     main()

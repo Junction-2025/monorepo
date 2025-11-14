@@ -84,17 +84,13 @@ class Pacer:
                 break
             time.sleep(min(0.05, dt))
 
-    def _snapshot_and_yield(
-        self, batch_range: BatchRange
-    ) -> Iterator[BatchRange]:
+    def _snapshot_and_yield(self, batch_range: BatchRange) -> Iterator[BatchRange]:
         """Emit batch and compute instantaneous + average drop rates."""
         self._emitted_batches += 1
 
         # Compute drop rate (drops per second of event time)
         if self._last_emit_ts_us is not None:
-            dt_ms = max(
-                (batch_range.end_ts_us - self._last_emit_ts_us) / 1e3, 1e-9
-            )
+            dt_ms = max((batch_range.end_ts_us - self._last_emit_ts_us) / 1e3, 1e-9)
             self._inst_drop_rate = self._dropped_pending / dt_ms
         else:
             self._inst_drop_rate = 0.0
