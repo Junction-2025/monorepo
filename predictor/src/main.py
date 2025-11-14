@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
 # Imports are now relative within the 'evio' package
-from .core.pacer import Pacer
-from .source.dat_file import DatFileSource, BatchRange
+from src.evio_in.pacer import Pacer
+from src.evio_in.dat_file import DatFileSource, BatchRange
 
 
 def parse_args() -> argparse.Namespace:
