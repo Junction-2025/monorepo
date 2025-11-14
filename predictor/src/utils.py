@@ -23,4 +23,5 @@ def display_frame(frame: np.ndarray):
     Press any key to close the window.
     """
     cv2.imshow("Frame", frame)
+    cv2.waitKey(1)
     

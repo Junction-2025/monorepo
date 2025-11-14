@@ -17,7 +17,7 @@ from .utils import draw_png, display_frame
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Stream a .dat file with real-time pacing and optional GUI."
+        description="Stream a .dat file with real-time pacing."
     )
     parser.add_argument(
         "--input",
@@ -49,11 +49,7 @@ def parse_args() -> argparse.Namespace:
         default=10000,
         help="Batch window size in microseconds (default: 10000 µs = 10ms).",
     )
-    parser.add_argument(
-        "--gui",
-        action="store_false",
-        help="Enable the live GUI visualization.",
-    )
+    # The --gui argument is no longer needed without a GUI
     return parser.parse_args()
 
 
@@ -90,14 +86,19 @@ def main():
     print(f"Playback speed: {args.speed}x")
     print("---------------------")
 
-    print("\n--- Starting Paced Playback ---")
-    start_time = time.perf_counter()
-
-
+    # The issue was here: args.window is already in µs, so multiplying by 1000 was incorrect.
     src = DatFileSource(
-        args.input, width=1280, height=720, window_length_us=args.window * 1000
+        args.input, width=1280, height=720, window_length_us=args.window
     )
-    pacer = Pacer(speed=args.speed, force_speed=args.force_speed)
+    pacer = Pacer(speed=args.speed, force_speed=args.force_speed, drop_tolerance_s=args.drop_tolerance)
+
+    if len(src) == 0:
+        print("\nError: No batches were generated from the source file.")
+        print("This might be due to a very large --window size for a short recording, or an empty input file.")
+        sys.exit(1)
+
+    print(f"\n--- Starting Paced Playback ({len(src)} batches) ---")
+    start_time = time.perf_counter()
 
     for batch_range in pacer.pace(src.ranges()):
         window = get_window(
@@ -110,7 +111,7 @@ def main():
         frame = get_frame(window)
 
         drone = detect_drone_crop(frame)
-        if drone:
+        if drone is not None:
             display_frame(drone)
 
         knn_frame = find_centroids(frame)
@@ -118,7 +119,7 @@ def main():
         wall_time = time.perf_counter() - start_time
         print(
             f"\rWall Time: {wall_time: >6.2f}s | "
-            # f"Event Time: {batch.end_ts_us / 1e6: >6.2f}s | "
+            f"Event Time: {batch_range.end_ts_us / 1e6: >6.2f}s | "
             f"Emitted: {pacer.emitted_batches: >5} | "
             f"Dropped: {pacer.dropped_batches: >5}   ",
             end="",

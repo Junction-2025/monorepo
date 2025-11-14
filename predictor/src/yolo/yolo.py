@@ -1,9 +1,9 @@
-from ultralytics import YOLOE
+from ultralytics import YOLOE, YOLOWorld
 import numpy as np
 
 # Load model once globally
-model = YOLOE("yolo12l.pt")
-# model.set_classes(["drone"], model.get_text_pe(["drone"]))
+model = YOLOWorld("yolov8s-worldv2.pt")
+model.set_classes(["drone", "uav", "quadrotor", "airplane"])
 
 def detect_drone_crop(frame: np.ndarray):
     """
