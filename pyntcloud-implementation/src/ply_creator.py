@@ -72,6 +72,14 @@ def load_events_from_dat(
     print("Reading events...")
     reader = open_dat(input_file, width=width, height=height)
 
+    #- `t32` (upper 32 bits) is a little-endian `uint32` timestamp in microseconds.
+    #- `w32` (lower 32 bits) packs polarity and coordinates as:
+
+    #| Bits  | Meaning                                   |
+    #|-------|-------------------------------------------|
+    #| 31–28 | polarity (4 bits; > 0 → ON, 0 → OFF)      |
+    #| 27–14 | y coordinate (14 bits)                    |
+    #| 13–0  | x coordinate (14 bits)                    |
     w32 = reader.event_words.astype(np.uint32)
     pol_array = ((w32 >> 28) & 0xF).astype(np.uint8)
     pol_array = (pol_array > 0).astype(np.uint8)
