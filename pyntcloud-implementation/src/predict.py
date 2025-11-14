@@ -1,4 +1,4 @@
-from config import DATA_DIR
+from src.config import DATA_DIR
 from pathlib import Path
 import argparse
 
