@@ -17,7 +17,7 @@ def parse_args():
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path(__file__).parent / "events.ply",
+        default=Path(__file__).parent.parent.parent / "data/events.ply",
         help="Output .ply file path (default: ./events.ply)"
     )
     parser.add_argument(
