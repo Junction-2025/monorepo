@@ -52,7 +52,7 @@ def parse_args():
     )
     parser.add_argument(
         "--no-normalise-time",
-        dest="normalise_time",
+        dest="normalize_time",
         action="store_false",
         help="Do not normalise timestamps"
     )
@@ -64,18 +64,17 @@ def main():
     # COMMAND LINE ARGUMENTS
     # =============================
     args = parse_args()
-
-    INPUT_FILE = args.input
-    OUTPUT_FILE = args.output
-    USE_TIMESTAMP_AS_Z = args.use_timestamp_as_z
-    NORMALISE_TIME = args.normalise_time
-    WIDTH = args.width
-    HEIGHT = args.height
+    input_file = args.input
+    output_file = args.output
+    use_timestamp_as_z = args.use_timestamp_as_z
+    normalize_time = args.normalize_time
+    width = args.width
+    height = args.height
 
     # =============================
     # LOAD EVENTS FROM .dat
     # =============================
-    reader = open_dat(INPUT_FILE, width=WIDTH, height=HEIGHT)
+    reader = open_dat(input_file, width=width, height=height)
     print(reader)
     xs = []
     ys = []
@@ -99,9 +98,9 @@ def main():
     # =============================
     # MAP TO POINT CLOUD Z-DIMENSION
     # =============================
-    if USE_TIMESTAMP_AS_Z:
+    if use_timestamp_as_z:
         z = ts.astype(np.float64)
-        if NORMALISE_TIME:
+        if normalize_time:
             z = (z - z.min()) / (z.max() - z.min() + 1e-12)
     else:
         z = np.zeros_like(xs, dtype=np.float64)
@@ -133,8 +132,8 @@ def main():
     # =============================
     # SAVE AS .ply
     # =============================
-    print(f"Writing to {OUTPUT_FILE} ...")
-    cloud.to_file(str(OUTPUT_FILE))
+    print(f"Writing to {output_file} ...")
+    cloud.to_file(str(output_file))
 
     print("Done.")
 
