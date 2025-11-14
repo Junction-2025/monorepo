@@ -4,13 +4,12 @@ import time
 from pathlib import Path
 
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 
 # Imports are now relative within the 'evio' package
 from src.evio_in.pacer import Pacer
 from src.evio_in.dat_file import DatFileSource, BatchRange
 from src.evio_in.play_dat import get_frame, get_window
+from src.knn.knn import find_centroids
 
 
 def parse_args() -> argparse.Namespace:
@@ -43,7 +42,7 @@ def parse_args() -> argparse.Namespace:
         help="Lag tolerance in seconds before dropping batches (default: 0.1s).",
     )
     parser.add_argument(
-        "--window-us",
+        "--window",
         type=int,
         default=10000,
         help="Batch window size in microseconds (default: 10000 µs = 10ms).",
@@ -93,7 +92,7 @@ def main():
     start_time = time.perf_counter()
 
     src = DatFileSource(
-        args.dat, width=1280, height=720, window_length_us=args.window * 1000
+        args.input, width=1280, height=720, window_length_us=args.window * 1000
     )
     pacer = Pacer(speed=args.speed, force_speed=args.force_speed)
 
@@ -105,6 +104,8 @@ def main():
             batch_range.stop,
         )
         frame = get_frame(window)
+        knn_frame = find_centroids(frame)
+
         wall_time = time.perf_counter() - start_time
         print(
             f"\rWall Time: {wall_time: >6.2f}s | "

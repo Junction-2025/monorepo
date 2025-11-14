@@ -1,4 +1,7 @@
+import numpy as np
 
+def find_centroids(frame: np.ndarray) -> np.ndarray:
+    print(frame)
 
-def find_centroids():
+    return frame
     
