@@ -1,4 +1,4 @@
-from src.config import DATA_DIR
+from src.config import DATA_DIR, LOG_DIR
 from pathlib import Path
 import argparse
 
@@ -26,9 +26,18 @@ def main():
     v = ply["vertex"].data
     x, y = v["x"], v["y"]
 
-    plt.scatter(x, y, s=1)
-    plt.gca().invert_yaxis()
-    plt.show()
+    z = v["z"]
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
+    ax.scatter(x, y, z, s=1)
+    ax.set_xlabel("x")
+    ax.set_ylabel("y")
+    ax.set_zlabel("z")
+    ax.invert_yaxis()
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    output_file = LOG_DIR / f"{input_file.stem}.png"
+    fig.savefig(output_file, dpi=300, bbox_inches="tight")
+    plt.close(fig)
 
 
 if __name__ == "__main__":
