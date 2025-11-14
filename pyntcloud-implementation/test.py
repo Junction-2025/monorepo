@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from evio import EventReader
+from evio.src.evio.source.dat_file import open_dat
 from pyntcloud import PyntCloud
 
 # =============================
@@ -11,10 +11,13 @@ OUTPUT_FILE = "events.ply"
 USE_TIMESTAMP_AS_Z = True    # If False → z = 0 (2-D sheet)
 NORMALISE_TIME = True        # Scale timestamps to 0–1 range for visibility
 
+WIDTH = 1280
+HEIGHT = 720
+
 # =============================
 # LOAD EVENTS FROM .dat
 # =============================
-reader = EventReader(INPUT_FILE)
+reader = open_dat(INPUT_FILE, width=WIDTH, height=HEIGHT)
 
 xs = []
 ys = []
