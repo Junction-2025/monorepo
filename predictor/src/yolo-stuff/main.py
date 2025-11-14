@@ -1,5 +1,7 @@
 from ultralytics import YOLOE
 import numpy as np
+import cv2
+from pathlib import Path
 
 # Load model once globally
 model = YOLOE("yoloe-11l-seg.pt")
