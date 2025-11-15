@@ -34,32 +34,34 @@ export default function Dashboard() {
 
 
     return (
-        <div className="flex flex-col items-center justify-center h-screen w-screen gap-12">
-            <h1 className="text-4xl font-semibold">Drone Destroyer 5000</h1>
-            {droneData &&
-                <Card className="max-w-80">
-                    <CardHeader>
-                        <CardTitle className="flex flex-row gap-2 items-center text-xl">
-                            <Drone className="w-6 h-6 shrink-0" />
-                            Detection
-                        </CardTitle>
-                        <CardDescription>
-                            {droneData.timestamp}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="text-sm border px-4 py-4 rounded-xl mx-4">
-                        <ul className="flex flex-col list-disc list-inside gap-2">
-                            <li>Model: {droneData.model}</li>
-                            <li>Rotors: {droneData.rotors}</li>
-                            <li>RPM: {droneData.rpm}</li>
-                        </ul>
-                    </CardContent>
-                    <CardFooter className="flex text-sm text-muted-foreground items-start gap-2">
-                        <ShieldAlert className="w-4 h-4 mt-1 shrink-0" />
-                        <p className="flex-1">{droneData.description}</p>
-                    </CardFooter>
-                </Card>
-            }
+        <div className="flex flex-col items-center justify-center h-screen w-screen p-4">
+            <h1 className="text-4xl font-semibold m-6 mb-10">Drone Destroyer 5000</h1>
+            <div className="flex h-full w-full items-center justify-center">
+                {droneData &&
+                    <Card className="max-w-80">
+                        <CardHeader>
+                            <CardTitle className="flex flex-row gap-2 items-center text-xl">
+                                <Drone className="w-6 h-6 shrink-0" />
+                                Detection
+                            </CardTitle>
+                            <CardDescription>
+                                {droneData.timestamp}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="text-sm border px-4 py-4 rounded-xl mx-4">
+                            <ul className="flex flex-col list-disc list-inside gap-2">
+                                <li>Model: {droneData.model}</li>
+                                <li>Rotors: {droneData.rotors}</li>
+                                <li>RPM: {droneData.rpm}</li>
+                            </ul>
+                        </CardContent>
+                        <CardFooter className="flex text-sm text-muted-foreground items-start gap-2">
+                            <ShieldAlert className="w-4 h-4 mt-1 shrink-0" />
+                            <p className="flex-1">{droneData.description}</p>
+                        </CardFooter>
+                    </Card>
+                }
+            </div>
         </div>
     );
 }
