@@ -57,7 +57,7 @@ app.get('/events', async (req, res) => {
         type: "drone-detected",
         model: "DJI M600",
         rpm: "5000",
-        rotors: 4,
+        rotors: 6,
         description: "Target detected via event camera system. Classification: Commercial hexacopter. Status: Active monitoring. Last detected: 0.5 seconds ago. Confidence: 94.7%",
         timestamp: new Date().toLocaleString()
     });

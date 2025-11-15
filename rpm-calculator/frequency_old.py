@@ -28,7 +28,7 @@ crop_y_max = 400
 crop_x_min = 550
 crop_x_max = 700
 crop_y_min = 250
-crop_y_max = 250
+crop_y_max = 400
 
 crop_height = crop_y_max - crop_y_min
 crop_width = crop_x_max - crop_x_min
