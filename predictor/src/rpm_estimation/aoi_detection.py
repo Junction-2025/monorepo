@@ -42,8 +42,9 @@ def build_heatmap(
     bin_x = np.clip(x // bin_size, 0, gw - 1)
     bin_y = np.clip(y // bin_size, 0, gh - 1)
 
-    for bx, by in zip(bin_x, bin_y):
-        heat[by, bx] += 1
+    # Vectorized accumulation using np.add.at
+    flat_indices = bin_y * gw + bin_x
+    np.add.at(heat.ravel(), flat_indices, 1)
 
     ys, xs = np.meshgrid(np.arange(gh), np.arange(gw), indexing="ij")
     return heat, xs, ys

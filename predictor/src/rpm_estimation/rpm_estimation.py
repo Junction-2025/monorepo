@@ -55,16 +55,20 @@ def aggregate_events_to_frames(
     xr = x - x1
     yr = y - y1
 
-    # Accumulate events into frames
-    for xi, yi, si in zip(xr, yr, slice_idx):
-        if 0 <= xi < w and 0 <= yi < h:
-            frames[si, yi, xi] += 1
+    # Filter events within bounds (vectorized)
+    valid_mask = (xr >= 0) & (xr < w) & (yr >= 0) & (yr < h)
+    xr_valid = xr[valid_mask]
+    yr_valid = yr[valid_mask]
+    slice_idx_valid = slice_idx[valid_mask]
 
-    # Compute slice center times
-    for s in range(num_slices):
-        t_start = t_min + s * slice_us
-        t_end = t_start + slice_us
-        times[s] = 0.5 * (t_start + t_end) * 1e-6  # Convert to seconds
+    # Accumulate events into frames (vectorized using np.add.at)
+    # Flatten 3D indices (slice, y, x) into 1D for np.add.at
+    flat_indices = slice_idx_valid * (h * w) + yr_valid * w + xr_valid
+    np.add.at(frames.ravel(), flat_indices, 1)
+
+    # Compute slice center times (vectorized)
+    slice_starts = t_min + np.arange(num_slices) * slice_us
+    times = (slice_starts + 0.5 * slice_us) * 1e-6  # Convert to seconds
 
     return frames, times
 
