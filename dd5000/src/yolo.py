@@ -1,3 +1,4 @@
+from torch import device
 from ultralytics import YOLO
 
 from src.models import CropCoords
@@ -20,7 +21,7 @@ def detect_drone_crop(frame: np.ndarray) -> CropCoords | None:
         frame: Input frame to detect drone in
     """
     # Inference
-    results = model.predict(frame, conf=YOLO_CONFIDENCE_THRESHOLD, verbose=MODEL_LOGGING_VERBOSE)
+    results = model.predict(frame, conf=YOLO_CONFIDENCE_THRESHOLD, verbose=MODEL_LOGGING_VERBOSE, device='mps')
     if (
         not results
         or not hasattr(results[0], "boxes")

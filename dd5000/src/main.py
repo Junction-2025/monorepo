@@ -94,7 +94,7 @@ def main():
             cropped_overlay = overlay_mask(cropped_frame, mask)
             frame[yolo_bounding_box.y1:yolo_bounding_box.y2, yolo_bounding_box.x1:yolo_bounding_box.x2] = cropped_overlay
 
-            blade_count = get_blade_count()
+            blade_count = get_blade_count(cropped_frame, mask)
             text_pos = (tl[0], max(0, tl[1] - 8))
             cv2.putText(
                 frame,
@@ -109,7 +109,6 @@ def main():
         cv2.waitKey(1)
     cv2.destroyAllWindows()
   
-
 
 if __name__ == "__main__":
     main()
