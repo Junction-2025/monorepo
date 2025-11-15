@@ -1,10 +1,11 @@
-# Utility functions module
-# This file is intentionally minimal - utility functions have been removed as they were unused
 import numpy as np
 from PIL import Image
 from src.config import LOG_DIR
 import cv2
 import colorsys
+import numpy as np
+import cv2
+from src.config import K_CANDIDATES
 
 
 def draw_png(arr: np.ndarray, name="frame"):
@@ -49,3 +50,18 @@ def display_frame(frame: np.ndarray):
     """
     cv2.imshow("Frame", frame)
     cv2.waitKey(1)
+
+def overlay_mask(frame: np.ndarray, mask: np.ndarray, alpha: float = 0.5) -> np.ndarray:
+    """Overlay colored mask on frame with max(K_CANDIDATES) colors."""
+    colors = [
+        (255, 0, 0),    # Blue
+        (0, 255, 0),    # Green
+        (0, 0, 255),    # Red
+        (255, 255, 0),  # Cyan
+    ][:max(K_CANDIDATES)]
+
+    overlay = frame.copy()
+    for label in range(max(K_CANDIDATES)):
+        overlay[mask == label] = colors[label]
+
+    return cv2.addWeighted(frame, 1 - alpha, overlay, alpha, 0)

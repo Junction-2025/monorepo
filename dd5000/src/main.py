@@ -10,6 +10,7 @@ from src.evio_lib.play_dat import get_frame, get_window
 from src.yolo import detect_drone_crop
 from src.logger import get_logger
 from src.kmeans import get_blade_count, get_propeller_masks
+from src.utils import overlay_mask
 import cv2
 
 
@@ -90,7 +91,9 @@ def main():
 
             cropped_frame = frame[yolo_bounding_box.y1:yolo_bounding_box.y2, yolo_bounding_box.x1:yolo_bounding_box.x2]
             mask = get_propeller_masks(cropped_frame)
-            logger.info("Mask:", mask)
+            cropped_overlay = overlay_mask(cropped_frame, mask)
+            frame[yolo_bounding_box.y1:yolo_bounding_box.y2, yolo_bounding_box.x1:yolo_bounding_box.x2] = cropped_overlay
+
             blade_count = get_blade_count()
             text_pos = (tl[0], max(0, tl[1] - 8))
             cv2.putText(
