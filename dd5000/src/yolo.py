@@ -20,8 +20,7 @@ def detect_drone_crop(frame: np.ndarray) -> CropCoords | None:
     Args:
         frame: Input frame to detect drone in
     """
-    # Inference
-    results = model.predict(frame, conf=YOLO_CONFIDENCE_THRESHOLD, verbose=MODEL_LOGGING_VERBOSE, device='mps')
+    results = model.predict(frame, conf=YOLO_CONFIDENCE_THRESHOLD, verbose=MODEL_LOGGING_VERBOSE, device='mps', iou=0.5)
     if (
         not results
         or not hasattr(results[0], "boxes")
