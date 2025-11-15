@@ -1,6 +1,5 @@
 import argparse
 from pathlib import Path
-import numpy as np
 
 from src.config import BATCH_WINDOW_US, BASE_WIDTH, BASE_HEIGHT
 
@@ -52,7 +51,6 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-
 def main():
     args = parse_args()
 
@@ -83,13 +81,14 @@ def main():
         yolo_bounding_box = detect_drone_crop(frame)
         if not yolo_bounding_box:
             continue
-    
-        cropped_frame = frame[yolo_bounding_box.y1:yolo_bounding_box.y2, yolo_bounding_box.x1:yolo_bounding_box.x2]
+
+        cropped_frame = frame[
+            yolo_bounding_box.y1 : yolo_bounding_box.y2,
+            yolo_bounding_box.x1 : yolo_bounding_box.x2,
+        ]
         propeller_masks = get_propeller_masks(frame=cropped_frame)
         blade_count = get_blade_count()
         rpm = estimate_rpm()
-
-
 
 
 if __name__ == "__main__":

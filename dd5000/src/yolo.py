@@ -1,6 +1,6 @@
 from ultralytics import YOLOWorld
 
-from dataclasses import dataclass
+from src.models import CropCoords
 import numpy as np
 
 from src.config import YOLO_CONFIDENCE_THRESHOLD
@@ -11,15 +11,6 @@ model = YOLOWorld("yolov8s-worldv2.pt")
 model.set_classes(["drone", "uav", "quadrotor", "airplane"])
 
 logger = get_logger()
-
-@dataclass
-class CropCoords:
-    x1: int
-    x2: int
-    y1: int
-    y2: int
-
-
 
 def detect_drone_crop(
     frame: np.ndarray
