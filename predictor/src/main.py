@@ -44,7 +44,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--window",
         type=int,
-        default=10000 * 15,  # 150ms as per paper
+        default=10000 * 150,  # 150ms as per paper
         help="Batch window size in microseconds (default: 10000 µs = 10ms).",
     )
     return parser.parse_args()

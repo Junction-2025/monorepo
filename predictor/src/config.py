@@ -5,3 +5,5 @@ LOG_DIR.mkdir(exist_ok=True)
 
 DEFAULT_HEIGHT = 720
 DEFAULT_WIDTH = 1280
+
+YOLO_MARGIN = 30

@@ -1,5 +1,6 @@
 from ultralytics import YOLOWorld
 import numpy as np
+from src.config import YOLO_MARGIN
 from dataclasses import dataclass
 
 # Load model once globally
@@ -38,12 +39,12 @@ def detect_drone_crop(
     b = result.boxes[0]
     confidence = float(b.conf[0])
     x1, y1, x2, y2 = map(int, b.xyxy[0])
-    margin = 30
+    
     h, w = frame.shape[:2]
-    x1 = max(0, x1 - margin)
-    y1 = max(0, y1 - margin)
-    x2 = min(w - 1, x2 + margin)
-    y2 = min(h - 1, y2 + margin)
+    x1 = max(0, x1 - YOLO_MARGIN)
+    y1 = max(0, y1 - YOLO_MARGIN)
+    x2 = min(w - 1, x2 + YOLO_MARGIN)
+    y2 = min(h - 1, y2 + YOLO_MARGIN)
 
     if verbose:
         print(f"YOLO: Detected drone at ({x1},{y1})-({x2},{y2}) conf={confidence:.3f}")
