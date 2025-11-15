@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 # Load video
-cap = cv2.VideoCapture("drone_idle_output.mp4")
+cap = cv2.VideoCapture("fan_output.mp4")
 fps = cap.get(cv2.CAP_PROP_FPS)
 
 print(fps)
@@ -13,10 +13,10 @@ print(fps)
 ## This could be acquired from the object detection model
 """
 ### drone_idle
-crop_x_min = 625
-crop_x_max = 650
-crop_y_min = 335
-crop_y_max = 355
+crop_x_min = 500
+crop_x_max = 700
+crop_y_min = 300
+crop_y_max = 450
 
 ### fan 
 crop_x_min = 550
@@ -24,10 +24,11 @@ crop_x_max = 700
 crop_y_min = 250
 crop_y_max = 400
 """
-crop_x_min = 625
-crop_x_max = 650
-crop_y_min = 335
-crop_y_max = 355
+
+crop_x_min = 550
+crop_x_max = 700
+crop_y_min = 250
+crop_y_max = 250
 
 crop_height = crop_y_max - crop_y_min
 crop_width = crop_x_max - crop_x_min
@@ -51,7 +52,7 @@ while True:
     cropped = gray[crop_y_min:crop_y_max, crop_x_min:crop_x_max]
     
     # Define rectangular ROI 5
-    roi_x_min = crop_x_min + (crop_width // 2)  # right half
+    roi_x_min = crop_x_min #+ (crop_width // 2)  # right half
     roi_x_max = crop_x_max
     roi_y_min = crop_y_min                      # full height
     roi_y_max = crop_y_max                     # bottom
@@ -98,20 +99,20 @@ if len(intensity) > 20:
     fft_vals = np.abs(np.fft.rfft(signal))
     freqs = np.fft.rfftfreq(len(signal), 1 / fps)
 
-    """
+    
     plt.plot(freqs, fft_vals)
     plt.xlabel('Frequency (Hz)')
     plt.ylabel('Amplitude')
     plt.title('FFT of Signal')
     plt.show()
-    """
+    
     
     # Find strongest non-zero frequency
     peak_idx = np.argmax(fft_vals[1:]) + 1
     rot_freq_hz = freqs[peak_idx]
 
     # RPM calculation
-    blade_count = 2   # set your blade count
+    blade_count = 3   # set your blade count
     rpm = (rot_freq_hz * 60) / blade_count
 
     print(f"Estimated RPM: {rpm:.2f}")
