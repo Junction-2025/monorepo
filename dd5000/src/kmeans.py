@@ -64,11 +64,24 @@ def get_heatmap_centroids(heatmap: np.ndarray) -> Centroids:
     )
 
 
+def scale_centroids(centroids: Centroids, scaler: int):
+    return Centroids(
+        x_coords=centroids.x_coords * scaler, y_coords=centroids.x_coords * scaler
+    )
+
+
+def get_propeller_masks(heatmap: np.ndarray, propeller_masks: Centroids):
+    return
+
+
 def get_propeller_masks(frame: np.ndarray) -> np.ndarray:
     heatmap = construct_heatmap(frame, factor=HEATMAP_PIXEL_SIZE)
     logger.info(f"Constructed heatmap: {heatmap} of dim {heatmap.shape}")
     centroids = get_heatmap_centroids(heatmap)
+    centroids = scale_centroids(centroids, HEATMAP_PIXEL_SIZE)
 
+    logger.info(f"Found centroids: {centroids}")
+    propeller_masks = get_propeller_masks(heatmap, centroids)
     return np.array([])
 
 
