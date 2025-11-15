@@ -3,6 +3,7 @@ import time
 from ultralytics import YOLO
 from pathlib import Path
 import natsort
+import argparse
 
 # CONFIG
 MODEL_PATH = "best.pt"
@@ -10,23 +11,33 @@ TEST_DIR = Path("val")
 OUTPUT_VIDEO = "drone_tracking.mp4"
 IMG_SIZE = 640
 USE_TRACKER = True
-SHOW_WINDOW = False   # <<< IMPORTANT: NO GUI
 
 def main():
-    print(f"Loading model: {MODEL_PATH}")
-    model = YOLO(MODEL_PATH)
+    parser = argparse.ArgumentParser(description="YOLO Inference with Tracking Pipeline")
+    parser.add_argument('--model', type=str, default=MODEL_PATH, help='Path to YOLO model or engine')
+    parser.add_argument('--data', type=str, default=str(TEST_DIR), help='Directory with input images')
+    parser.add_argument('--output', type=str, default=OUTPUT_VIDEO, help='Output video filename')
+    parser.add_argument('--imgsz', type=int, default=IMG_SIZE, help='Inference image size')
+    parser.add_argument('--device', type=str, default='mps', help='Device for inference (cpu, cuda, mps, 0, 1, etc)')
+    parser.add_argument('--tracker', type=str, default='botsort.yaml', help='Tracker config file')
+    parser.add_argument('--conf', type=float, default=0.3, help='Confidence threshold')
+    parser.add_argument('--show', action='store_true', help='Show window (GUI)')
+    args = parser.parse_args()
+
+    print(f"Loading model: {args.model}")
+    model = YOLO(args.model)
 
     if USE_TRACKER:
-        model.tracker = "botsort.yaml"
+        model.tracker = args.tracker
 
     image_paths = natsort.natsorted(
-        [p for p in TEST_DIR.glob("*.png")] +
-        [p for p in TEST_DIR.glob("*.jpg")] +
-        [p for p in TEST_DIR.glob("*.jpeg")]
+        [p for p in Path(args.data).glob("*.png")] +
+        [p for p in Path(args.data).glob("*.jpg")] +
+        [p for p in Path(args.data).glob("*.jpeg")]
     )
 
     if len(image_paths) == 0:
-        raise RuntimeError(f"No images in {TEST_DIR}")
+        raise RuntimeError(f"No images in {args.data}")
 
     print(f"Found {len(image_paths)} frames.")
 
@@ -34,7 +45,7 @@ def main():
     h, w = first.shape[:2]
 
     writer = cv2.VideoWriter(
-        OUTPUT_VIDEO,
+        args.output,
         cv2.VideoWriter_fourcc(*"mp4v"),
         30.0,
         (w, h)
@@ -43,10 +54,14 @@ def main():
     prev_time = time.time()
     frame_count = 0
     fps = 0
+    inference_times = []
 
     for img_path in image_paths:
         frame = cv2.imread(str(img_path))
-        results = model.predict(frame, imgsz=IMG_SIZE, conf=0.3, device='mps', verbose=True)
+        t0 = time.time()
+        results = model.predict(frame, imgsz=args.imgsz, conf=args.conf, device=args.device, verbose=True)
+        infer_time = time.time() - t0
+        inference_times.append(infer_time)
         annotated = results[0].plot()
 
         frame_count += 1
@@ -60,17 +75,22 @@ def main():
 
         writer.write(annotated)
 
-        # Only show window if GUI mode is enabled
-        if SHOW_WINDOW:
+        if args.show:
             cv2.imshow("Drone Tracking", annotated)
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
     writer.release()
-    if SHOW_WINDOW:
+    if args.show:
         cv2.destroyAllWindows()
 
-    print(f"\nSaved video: {OUTPUT_VIDEO}\n")
+    avg_inf = sum(inference_times) / len(inference_times)
+    print(f"\nSaved video: {args.output}\n")
+    print(f"Average inference time: {avg_inf:.4f} seconds/frame")
+    with open(args.output + "_metrics.txt", "w") as f:
+        f.write(f"Average inference time: {avg_inf:.4f} seconds/frame\n")
+        f.write(f"Total frames: {len(image_paths)}\n")
+        f.write(f"FPS (approx): {1/avg_inf:.2f}\n")
 
 if __name__ == "__main__":
     main()

@@ -69,6 +69,18 @@ def main():
         default=None,
         help="Output path for annotated image (default: output.jpg)",
     )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="cpu",
+        help="Device for inference (cpu, cuda, mps, 0, 1, etc)",
+    )
+    parser.add_argument(
+        "--conf",
+        type=float,
+        default=0.3,
+        help="Confidence threshold",
+    )
     args = parser.parse_args()
 
     print("Importing model...")

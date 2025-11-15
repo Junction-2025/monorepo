@@ -1,7 +1,9 @@
-from src.kmeans import construct_heatmap
 import numpy as np
-from src.kmeans import find_furthest_centroid
-from src.kmeans import get_heatmap_centroids
+from src.kmeans import (
+    get_heatmap_centroids,
+    find_furthest_centroid,
+    construct_heatmap,
+)
 from src.models import Centroids
 
 
@@ -181,3 +183,29 @@ def test_get_heatmap_centroids_four_clusters():
     centroids = get_heatmap_centroids(heatmap)
 
     assert centroids == centers
+
+
+def test_get_heatmap_centroids_no_duplicates():
+    """Test that get_heatmap_centroids doesn't return duplicate centroids.
+
+    This test ensures that when find_furthest_centroid is called, it uses the
+    already-selected centroids (not the original sorted list) to avoid duplicates.
+    """
+    # Small 2x2 heatmap with 4 high-value pixels
+    heatmap = np.array(
+        [
+            [100, 50],
+            [50, 100],
+        ],
+        dtype=np.int32,
+    )
+
+    centroids = get_heatmap_centroids(heatmap)
+
+    # Should have unique centroids
+    centroid_tuples = list(zip(centroids.x_coords, centroids.y_coords))
+    unique_centroids = list(set(centroid_tuples))
+
+    assert len(centroid_tuples) == len(unique_centroids), (
+        f"Found duplicate centroids: {centroid_tuples}"
+    )

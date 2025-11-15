@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from sklearn.cluster import KMeans
+import numpy as np
 
 
 @dataclass(frozen=False)
@@ -13,3 +15,8 @@ class CropCoords:
     x2: int
     y1: int
     y2: int
+
+
+def k_means_maker(centroids: Centroids):
+    init_centers = np.column_stack([centroids.x_coords, centroids.y_coords])
+    return KMeans(n_clusters=2, init=init_centers[:2], n_init=1)
