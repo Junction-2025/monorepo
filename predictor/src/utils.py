@@ -15,6 +15,7 @@ def draw_png(arr: np.ndarray, name="frame"):
 
     Image.fromarray(arr).save(LOG_DIR / "frame.png", format="PNG")
 
+
 def draw_labels(arr: np.ndarray, name="labels"):
     """
     Assume arr is a 1D flattened label array of length width*height and coerce to (height, width).

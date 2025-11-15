@@ -1,7 +1,13 @@
 from typing import Tuple, List
 import numpy as np
 from numpy.typing import NDArray
-from src.roo.config import EPSILON, MAX_ITERATIONS, CONVERGENCE_THRESHOLD, OUTLIER_THRESHOLD_MULTIPLIER
+from src.roo.config import (
+    EPSILON,
+    MAX_ITERATIONS,
+    CONVERGENCE_THRESHOLD,
+    OUTLIER_THRESHOLD_MULTIPLIER,
+)
+
 
 def initialize_centroids_from_heatmap(
     heatmap: NDArray[np.int64],
@@ -46,10 +52,12 @@ def initialize_centroids_from_heatmap(
         if len(valid_positions) == 0:
             break
 
-        distances = np.array([
-            np.mean([np.linalg.norm(pos - c) for c in centroids])
-            for pos in valid_positions
-        ])
+        distances = np.array(
+            [
+                np.mean([np.linalg.norm(pos - c) for c in centroids])
+                for pos in valid_positions
+            ]
+        )
 
         next_idx = np.argmax(distances)
         next_centroid = valid_positions[next_idx]
@@ -78,8 +86,7 @@ def assign_events_to_clusters(
         return np.zeros(len(events), dtype=np.int_)
 
     distances = np.linalg.norm(
-        events[:, np.newaxis, :] - centroids[np.newaxis, :, :],
-        axis=2
+        events[:, np.newaxis, :] - centroids[np.newaxis, :, :], axis=2
     )
 
     return np.argmin(distances, axis=1)
@@ -268,10 +275,9 @@ def calculate_davies_bouldin_index(
     if k <= 1:
         return 0.0
 
-    dispersions = np.array([
-        calculate_dispersion(events, labels, centroids[i], i)
-        for i in range(k)
-    ])
+    dispersions = np.array(
+        [calculate_dispersion(events, labels, centroids[i], i) for i in range(k)]
+    )
 
     dbi_sum = 0.0
     for i in range(k):
@@ -306,7 +312,7 @@ def find_optimal_k(
         Tuple of (optimal_k, best_dbi)
     """
     best_k = k_candidates[0]
-    best_dbi = float('inf')
+    best_dbi = float("inf")
 
     for k in k_candidates:
         initial_centroids = initialize_centroids_from_heatmap(heatmap, k)
@@ -348,11 +354,7 @@ def heatmap_to_weighted_events(
     counts = heatmap[rows, cols].astype(np.int64)
 
     # Expand positions by their counts
-    event_positions = np.repeat(
-        np.column_stack([rows, cols]),
-        counts,
-        axis=0
-    )
+    event_positions = np.repeat(np.column_stack([rows, cols]), counts, axis=0)
 
     # Also track which pixel each event came from
     pixel_rows = np.repeat(rows, counts)
@@ -452,7 +454,9 @@ def locate_centroids(
     initial_centroids = initialize_centroids_from_heatmap(scene, k)
 
     # Perform K-means clustering on weighted events
-    event_labels, final_centroids = kmeans_clustering(event_positions, initial_centroids)
+    event_labels, final_centroids = kmeans_clustering(
+        event_positions, initial_centroids
+    )
 
     # Remove outliers if requested
     inlier_mask = None
@@ -461,7 +465,7 @@ def locate_centroids(
             event_positions,
             event_labels,
             final_centroids,
-            threshold_multiplier=outlier_threshold
+            threshold_multiplier=outlier_threshold,
         )
 
     # Convert event-level labels back to pixel-level label map

@@ -3,11 +3,10 @@ import sys
 import time
 from pathlib import Path
 
-import numpy as np
 
 # Imports are now relative within the 'evio' package
 from src.evio_in.pacer import Pacer
-from src.evio_in.dat_file import DatFileSource, BatchRange
+from src.evio_in.dat_file import DatFileSource
 from src.evio_in.play_dat import get_frame, get_window
 from src.yolo.yolo import detect_drone_crop
 from src.roo.rotating_object_extraction import find_clusters
@@ -45,7 +44,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--window",
         type=int,
-        default=10000 * 15, # 150ms as per paper
+        default=10000 * 15,  # 150ms as per paper
         help="Batch window size in microseconds (default: 10000 µs = 10ms).",
     )
     return parser.parse_args()

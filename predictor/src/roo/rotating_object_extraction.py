@@ -1,6 +1,6 @@
 import numpy as np
 
-from src.config import DEFAULT_HEIGHT, DEFAULT_WIDTH, LOG_DIR
+from src.config import DEFAULT_HEIGHT, DEFAULT_WIDTH
 from src.roo.config import HEATMAP_PIXEL_SIZE
 from src.roo.kmeans import locate_centroids
 from src.yolo.yolo import CropCoords
@@ -69,7 +69,7 @@ def find_clusters(
     print(f"Heatmap: {heatmap.shape}")
     print(f"Labels: {labels}, unique = {np.unique(labels)}, dim = {labels.shape}")
 
-    # === TEST CODE === 
+    # === TEST CODE ===
     # mark centroid locations in the reduced heatmap as -1
     ix = np.rint(cx).astype(np.intp)
     iy = np.rint(cy).astype(np.intp)
