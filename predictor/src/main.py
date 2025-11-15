@@ -3,6 +3,7 @@ import sys
 import time
 from pathlib import Path
 
+import cv2
 import numpy as np
 
 # Imports are now relative within the 'evio' package
@@ -10,7 +11,7 @@ from src.evio_in.pacer import Pacer
 from src.evio_in.dat_file import DatFileSource
 from src.evio_in.play_dat import get_frame, get_window
 from src.yolo.yolo import detect_drone_crop
-from src.roo.aoi_detection import detect_aois
+from src.roo.aoi_detection import detect_aois, AOI
 from src.rse.rpm_estimation import estimate_rpm_from_events, RPMConfig
 
 
@@ -137,6 +138,57 @@ def compute_average_rpms(rpm_history: dict[int, list[float]]) -> dict[int, float
     }
 
 
+def draw_aoi_bboxes(
+    frame: np.ndarray,
+    aois: list[AOI],
+    rpm_estimates: dict[int, float],
+    avg_rpms: dict[int, float],
+) -> None:
+    """
+    Draw bounding boxes and RPM labels on frame.
+
+    Args:
+        frame: Image to draw on (modified in-place)
+        aois: List of detected AOIs
+        rpm_estimates: Current RPM per AOI
+        avg_rpms: Average RPM per AOI
+    """
+    for idx, aoi in enumerate(aois):
+        x1, y1, x2, y2 = aoi.bbox
+
+        # Draw bounding box in green
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+        # Prepare RPM text
+        current_rpm = rpm_estimates.get(idx)
+        avg_rpm = avg_rpms.get(idx)
+
+        if current_rpm is not None:
+            if avg_rpm is not None:
+                rpm_text = f"AOI{idx}: {current_rpm:.0f} (avg:{avg_rpm:.0f})"
+            else:
+                rpm_text = f"AOI{idx}: {current_rpm:.0f}"
+        else:
+            rpm_text = f"AOI{idx}: --"
+
+        # Draw RPM text in red above bounding box
+        text_y = max(y1 - 10, 20)  # Position above box, but not off-screen
+        cv2.putText(
+            frame,
+            rpm_text,
+            (x1, text_y),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.6,
+            (0, 0, 255),  # Red color
+            2,
+            cv2.LINE_AA,
+        )
+
+        # Draw centroid as small circle
+        cx, cy = aoi.centroid
+        cv2.circle(frame, (int(cx), int(cy)), 3, (255, 0, 0), -1)  # Blue dot
+
+
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
@@ -184,6 +236,11 @@ def parse_args() -> argparse.Namespace:
         default=3,
         help="Blade symmetry order for RPM calculation (default: 3).",
     )
+    parser.add_argument(
+        "--no-display",
+        action="store_true",
+        help="Disable visualization window (default: False).",
+    )
     return parser.parse_args()
 
 
@@ -200,6 +257,7 @@ def main():
     print(f"Playback speed: {args.speed}x")
     print(f"AOI clusters: {args.num_clusters}")
     print(f"Blade symmetry: {args.symmetry}")
+    print(f"Display: {'disabled' if args.no_display else 'enabled'}")
     print("---------------------")
 
     src = DatFileSource(
@@ -233,6 +291,10 @@ def main():
     aois = []
     last_aoi_update_us = None
     rpm_history: dict[int, list[float]] = {}  # Track RPM history per AOI
+
+    # Setup visualization window
+    if not args.no_display:
+        cv2.namedWindow("RPM Detection", cv2.WINDOW_NORMAL)
 
     print("\n--- Data Import Complete ---")
     for batch_range in pacer.pace(src.ranges()):
@@ -291,6 +353,17 @@ def main():
         rpm_history = update_rpm_history(rpm_history, rpm_estimates)
         avg_rpms = compute_average_rpms(rpm_history)
 
+        # Visualize frame with bounding boxes and RPM
+        if not args.no_display:
+            draw_aoi_bboxes(frame, aois, rpm_estimates, avg_rpms)
+            cv2.imshow("RPM Detection", frame)
+
+            # Check for quit key (ESC or 'q')
+            key = cv2.waitKey(1) & 0xFF
+            if key in (27, ord("q")):
+                print("\n\nUser requested quit.")
+                break
+
         # Display status
         wall_time = time.perf_counter() - start_time
         rpm_str = ", ".join(
@@ -305,6 +378,10 @@ def main():
             f"AOIs: {len(aois)} | RPM: [{rpm_str}]   ",
             end="",
         )
+
+    # Cleanup
+    if not args.no_display:
+        cv2.destroyAllWindows()
 
     print("\n\n--- Playback Finished ---")
 
