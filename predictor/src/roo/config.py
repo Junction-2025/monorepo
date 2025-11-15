@@ -1,4 +1,3 @@
-
 # Constants from paper
 HEATMAP_PIXEL_SIZE = 1
 EPSILON = 0.3  # Threshold factor for centroid selection

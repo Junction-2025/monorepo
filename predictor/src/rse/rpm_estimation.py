@@ -79,9 +79,7 @@ def aggregate_events_to_frames(
     return frames, times
 
 
-def normalized_correlation(
-    a: NDArray[np.float32], b: NDArray[np.float32]
-) -> float:
+def normalized_correlation(a: NDArray[np.float32], b: NDArray[np.float32]) -> float:
     """
     Compute normalized cross-correlation between two images.
 
@@ -97,7 +95,9 @@ def normalized_correlation(
     return float(num / den)
 
 
-def find_peaks(signal: NDArray[np.float32], prominence: float = 0.1) -> NDArray[np.int64]:
+def find_peaks(
+    signal: NDArray[np.float32], prominence: float = 0.1
+) -> NDArray[np.int64]:
     """
     Find local maxima in signal above threshold.
 

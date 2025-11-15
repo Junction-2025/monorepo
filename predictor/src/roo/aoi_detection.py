@@ -81,9 +81,7 @@ def init_centroids_from_heatmap(
 
     for _ in range(1, k):
         dists = np.min(
-            np.linalg.norm(
-                coords[:, None, :] - np.array(chosen)[None, :, :], axis=-1
-            ),
+            np.linalg.norm(coords[:, None, :] - np.array(chosen)[None, :, :], axis=-1),
             axis=1,
         )
         scores = dists * (vals / (vals.max() + 1e-9))
@@ -113,9 +111,7 @@ def kmeans(
     labels = np.zeros(points.shape[0], dtype=np.int32)
 
     for _ in range(max_iters):
-        dists = np.linalg.norm(
-            points[:, None, :] - centroids[None, :, :], axis=-1
-        )
+        dists = np.linalg.norm(points[:, None, :] - centroids[None, :, :], axis=-1)
         new_labels = np.argmin(dists, axis=1)
 
         if np.all(new_labels == labels):
