@@ -1,4 +1,3 @@
-from cProfile import label
 from typing import Tuple, List
 import numpy as np
 from numpy.typing import NDArray
@@ -7,12 +6,14 @@ from numpy.typing import NDArray
 EPSILON = 0.3  # Threshold factor for centroid selection
 MAX_ITERATIONS = 100  # Maximum K-means iterations
 CONVERGENCE_THRESHOLD = 1e-4  # Centroid movement threshold for convergence
+OUTLIER_THRESHOLD_MULTIPLIER = 3.0  # Threshold multiplier for outlier detection
 
 
 def initialize_centroids_from_heatmap(
-    heatmap: NDArray[np.float64],
+    heatmap: NDArray[np.int64],
     k: int,
     epsilon: float = EPSILON,
+    seed: int | None = None,
 ) -> NDArray[np.float64]:
     """
     Initialize k centroids from heatmap using stream-centroids initialization.
@@ -24,6 +25,7 @@ def initialize_centroids_from_heatmap(
         heatmap: 2D heatmap of accumulated events
         k: Number of centroids to initialize
         epsilon: Threshold factor (default 0.3 from paper)
+        seed: Random seed for reproducibility (only used for fallback case)
 
     Returns:
         Array of shape (k, 2) containing centroid coordinates [y, x]
@@ -39,7 +41,7 @@ def initialize_centroids_from_heatmap(
 
     if len(valid_positions) == 0:
         h, w = heatmap.shape
-        rng = np.random.default_rng()
+        rng = np.random.default_rng(seed)
         return rng.random((k, 2)) * [[h], [w]]
 
     max_idx = np.argmax(heatmap)
@@ -154,6 +156,58 @@ def kmeans_clustering(
     return labels, centroids
 
 
+def remove_outliers(
+    events: NDArray[np.float64],
+    labels: NDArray[np.int_],
+    centroids: NDArray[np.float64],
+    threshold_multiplier: float = OUTLIER_THRESHOLD_MULTIPLIER,
+) -> NDArray[np.bool_]:
+    """
+    Remove outliers based on median distance from centroid.
+
+    For each cluster, calculates median distance Dm and marks events with
+    distance > threshold_multiplier × Dm as outliers.
+
+    Args:
+        events: Array of shape (n, 2) containing event coordinates
+        labels: Array of shape (n,) containing cluster assignments
+        centroids: Array of shape (k, 2) containing centroid coordinates
+        threshold_multiplier: Multiplier for median distance threshold (default 3.0 from paper)
+
+    Returns:
+        Boolean mask of shape (n,) where True indicates inlier, False indicates outlier
+    """
+    if len(events) == 0:
+        return np.array([], dtype=np.bool_)
+
+    inlier_mask = np.ones(len(events), dtype=np.bool_)
+    k = len(centroids)
+
+    for cluster_id in range(k):
+        # Get events in this cluster
+        cluster_mask = labels == cluster_id
+        cluster_events = events[cluster_mask]
+
+        if len(cluster_events) == 0:
+            continue
+
+        # Calculate distances to centroid
+        distances = np.linalg.norm(cluster_events - centroids[cluster_id], axis=1)
+
+        # Calculate median distance (Dm from paper, Equation 8)
+        median_distance = np.median(distances)
+
+        # Mark outliers as events with distance > threshold_multiplier × Dm
+        threshold = threshold_multiplier * median_distance
+        outliers = distances > threshold
+
+        # Update inlier mask
+        cluster_indices = np.where(cluster_mask)[0]
+        inlier_mask[cluster_indices[outliers]] = False
+
+    return inlier_mask
+
+
 def calculate_dispersion(
     events: NDArray[np.float64],
     labels: NDArray[np.int_],
@@ -242,7 +296,7 @@ def calculate_davies_bouldin_index(
 
 
 def find_optimal_k(
-    heatmap: NDArray[np.float64],
+    heatmap: NDArray[np.int64],
     events: NDArray[np.float64],
     k_candidates: List[int],
 ) -> Tuple[int, float]:
@@ -278,8 +332,8 @@ def find_optimal_k(
 
 
 def heatmap_to_weighted_events(
-    heatmap: NDArray[np.float64],
-) -> NDArray[np.float64]:
+    heatmap: NDArray[np.int64],
+) -> Tuple[NDArray[np.float64], NDArray[np.int64], NDArray[np.int64]]:
     """
     Convert heatmap to weighted event positions.
 
@@ -291,36 +345,136 @@ def heatmap_to_weighted_events(
         heatmap: 2D heatmap of accumulated event counts
 
     Returns:
-        Array of shape (total_events, 2) containing event coordinates [row, col]
+        Tuple of (event_positions, pixel_rows, pixel_cols):
+        - event_positions: Array of shape (total_events, 2) containing event coordinates [row, col]
+        - pixel_rows: Array of shape (total_events,) indicating which pixel row each event came from
+        - pixel_cols: Array of shape (total_events,) indicating which pixel col each event came from
     """
     rows, cols = np.nonzero(heatmap)
     counts = heatmap[rows, cols].astype(np.int64)
 
+    # Expand positions by their counts
     event_positions = np.repeat(
         np.column_stack([rows, cols]),
         counts,
         axis=0
     )
 
-    return event_positions.astype(np.float64)
+    # Also track which pixel each event came from
+    pixel_rows = np.repeat(rows, counts)
+    pixel_cols = np.repeat(cols, counts)
+
+    return event_positions.astype(np.float64), pixel_rows, pixel_cols
+
+
+def events_labels_to_heatmap_labels(
+    event_labels: NDArray[np.int_],
+    pixel_rows: NDArray[np.int64],
+    pixel_cols: NDArray[np.int64],
+    heatmap_shape: Tuple[int, int],
+    inlier_mask: NDArray[np.bool_] | None = None,
+) -> NDArray[np.int_]:
+    """
+    Convert event-level labels back to pixel-level label map.
+
+    For each pixel that has events, assigns the most common label among its events.
+    Outlier events are excluded from consideration.
+
+    Args:
+        event_labels: Array of shape (n_events,) containing cluster labels for each event
+        pixel_rows: Array of shape (n_events,) indicating which pixel row each event came from
+        pixel_cols: Array of shape (n_events,) indicating which pixel col each event came from
+        heatmap_shape: Shape of the output label map (height, width)
+        inlier_mask: Optional boolean mask indicating which events are inliers (not outliers)
+
+    Returns:
+        Array of shape heatmap_shape containing cluster labels for each pixel
+        Pixels with no inlier events are labeled as -1
+    """
+    label_map = np.full(heatmap_shape, -1, dtype=np.int_)
+
+    if len(event_labels) == 0:
+        return label_map
+
+    # Apply inlier mask if provided
+    if inlier_mask is not None:
+        event_labels = event_labels[inlier_mask]
+        pixel_rows = pixel_rows[inlier_mask]
+        pixel_cols = pixel_cols[inlier_mask]
+
+    if len(event_labels) == 0:
+        return label_map
+
+    # For each unique pixel position, find the most common label
+    unique_pixels = np.unique(np.column_stack([pixel_rows, pixel_cols]), axis=0)
+
+    for pixel in unique_pixels:
+        row, col = pixel
+        # Find all events from this pixel
+        pixel_mask = (pixel_rows == row) & (pixel_cols == col)
+        pixel_event_labels = event_labels[pixel_mask]
+
+        if len(pixel_event_labels) == 0:
+            continue
+
+        # Assign most common label (mode)
+        unique_labels, counts = np.unique(pixel_event_labels, return_counts=True)
+        most_common_label = unique_labels[np.argmax(counts)]
+
+        label_map[row, col] = most_common_label
+
+    return label_map
 
 
 def locate_centroids(
-    scene: NDArray[np.float64],
+    scene: NDArray[np.int64],
     k: int = 4,
-) -> Tuple[np.ndarray, NDArray[np.float64], NDArray[np.float64]]:
+    remove_outliers_flag: bool = True,
+    outlier_threshold: float = OUTLIER_THRESHOLD_MULTIPLIER,
+) -> Tuple[NDArray[np.int_], NDArray[np.float64], NDArray[np.float64]]:
     """
     Locate centroids in heatmap using stream-centroids initialization and K-means.
 
     Args:
         scene: 2D heatmap array where values represent intensity/count
         k: Number of centroids to locate (default 4)
+        remove_outliers_flag: Whether to apply outlier removal (default True)
+        outlier_threshold: Threshold multiplier for outlier detection (default 3.0 from paper)
 
     Returns:
-        Tuple of two 1D numpy arrays: (centers_x, centers_y)
+        Tuple of (label_map, centers_x, centers_y):
+        - label_map: Array of shape scene.shape with cluster labels for each pixel (-1 for empty/outlier pixels)
+        - centers_x: Array of centroid x-coordinates
+        - centers_y: Array of centroid y-coordinates
     """
-    event_positions = heatmap_to_weighted_events(scene)
-    initial_centroids = initialize_centroids_from_heatmap(scene, k)
-    labels , final_centroids = kmeans_clustering(event_positions, initial_centroids)
+    # Convert heatmap to weighted events, tracking which pixel each event came from
+    event_positions, pixel_rows, pixel_cols = heatmap_to_weighted_events(scene)
 
-    return labels, final_centroids[:, 1].copy(), final_centroids[:, 0].copy()
+    if len(event_positions) == 0:
+        # No events, return empty label map and centroids
+        return np.full(scene.shape, -1, dtype=np.int_), np.array([]), np.array([])
+
+    # Initialize centroids from heatmap
+    initial_centroids = initialize_centroids_from_heatmap(scene, k)
+
+    # Perform K-means clustering on weighted events
+    event_labels, final_centroids = kmeans_clustering(event_positions, initial_centroids)
+
+    # Remove outliers if requested
+    inlier_mask = None
+    if remove_outliers_flag:
+        inlier_mask = remove_outliers(
+            event_positions,
+            event_labels,
+            final_centroids,
+            threshold_multiplier=outlier_threshold
+        )
+
+    # Convert event-level labels back to pixel-level label map
+    # Outliers will be excluded (marked as -1)
+    label_map = events_labels_to_heatmap_labels(
+        event_labels, pixel_rows, pixel_cols, scene.shape, inlier_mask
+    )
+
+    # Return as (label_map, x, y) coordinates (note: heatmap uses row, col indexing)
+    return label_map, final_centroids[:, 1].copy(), final_centroids[:, 0].copy()

@@ -4,18 +4,18 @@ from src.config import DEFAULT_HEIGHT, DEFAULT_WIDTH, LOG_DIR
 from src.roo.config import HEATMAP_PIXEL_SIZE
 from src.roo.kmeans import locate_centroids
 from src.yolo.yolo import CropCoords
-from src.utils import draw_heatmap
+from src.utils import draw_heatmap, draw_labels
 from numpy.typing import NDArray
 
 
 def find_heatmap(
-    x: NDArray[np.int_],
-    y: NDArray[np.int_],
+    x: NDArray[np.int64],
+    y: NDArray[np.int64],
     height: int,
     width: int,
     factor: int = HEATMAP_PIXEL_SIZE,
     crop: CropCoords | None = None,
-) -> NDArray[np.int_]:
+) -> NDArray[np.int64]:
     # apply crop if provided
     if crop is not None:
         valid_crop = (x >= crop.x1) & (x < crop.x2) & (y >= crop.y1) & (y < crop.y2)
@@ -64,8 +64,10 @@ def find_clusters(
 
     heatmap = find_heatmap(x, y, width=width, height=height, crop=drone_crop_coords)
 
-    cx, cy = locate_centroids(heatmap)
+    labels, cx, cy = locate_centroids(heatmap)
     print(f"Centroids: ({cx}, {cy})")
+    print(f"Heatmap: {heatmap.shape}")
+    print(f"Labels: {labels}, unique = {np.unique(labels)}, dim = {labels.shape}")
 
     # === TEST CODE === 
     # mark centroid locations in the reduced heatmap as -1
@@ -75,6 +77,7 @@ def find_clusters(
     valid = (ix >= 0) & (ix < w_new) & (iy >= 0) & (iy < h_new)
     heatmap[iy[valid], ix[valid]] = -1
     draw_heatmap(heatmap, name="heatmap")
+    draw_labels(labels)
     # === TEST CODE ===
 
-    return heatmap
+    return labels
