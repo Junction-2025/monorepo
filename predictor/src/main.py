@@ -12,7 +12,40 @@ from src.evio_in.dat_file import DatFileSource
 from src.evio_in.play_dat import get_frame, get_window
 from src.yolo.yolo import detect_drone_crop
 from src.roo.aoi_detection import detect_aois, AOI
-from src.rse.rpm_estimation import estimate_rpm_from_events, RPMConfig
+from src.rse.rpm_estimation import estimate_rpm_from_events
+from src.roo.rotating_object_extraction import find_heatmap
+from src.roo.kmeans import locate_centroids
+
+# Configuration and logging
+from src.config import (
+    RPMConfig,
+    DEFAULT_WIDTH,
+    DEFAULT_HEIGHT,
+    AOI_WINDOW_US,
+    AOI_UPDATE_INTERVAL_US,
+    RPM_WINDOW_US,
+    BATCH_WINDOW_US,
+    EVENT_BUFFER_MAX_US,
+    BBOX_COLOR,
+    TEXT_COLOR,
+    CENTROID_COLOR,
+    TEXT_FONT,
+    TEXT_SCALE,
+    TEXT_THICKNESS,
+    ENABLE_FRAME_LOGGING,
+    ENABLE_HEATMAP_LOGGING,
+    ENABLE_LABEL_LOGGING,
+    LOG_EVERY_N_FRAMES,
+)
+from src.logging_utils import (
+    setup_run_context,
+    save_frame,
+    save_heatmap,
+    save_labels,
+    log_aoi_detection,
+    log_rpm_estimate,
+    finalize_run,
+)
 
 
 def apply_crop_mask(
@@ -46,36 +79,49 @@ def update_aois_if_needed(
     buf_y: np.ndarray,
     buf_t: np.ndarray,
     last_update_us: int | None,
-    aoi_window_us: int,
     num_clusters: int,
-    update_interval_us: int = 50_000,
-) -> tuple[list, int | None]:
-    """Update AOI detection periodically."""
+    width: int = DEFAULT_WIDTH,
+    height: int = DEFAULT_HEIGHT,
+) -> tuple[list, int | None, np.ndarray | None, np.ndarray | None]:
+    """
+    Update AOI detection periodically.
+
+    Returns:
+        (aois, update_time, heatmap, labels) - heatmap/labels for logging
+    """
     if buf_t.size == 0:
-        return [], last_update_us
+        return [], last_update_us, None, None
 
     t_now = buf_t.max()
 
     # Check if update is needed
-    if last_update_us is not None and (t_now - last_update_us) < update_interval_us:
-        return [], last_update_us  # Return empty to signal no update
+    if last_update_us is not None and (t_now - last_update_us) < AOI_UPDATE_INTERVAL_US:
+        return [], last_update_us, None, None
 
     # Select events from AOI window
-    aoi_start = t_now - aoi_window_us
+    aoi_start = t_now - AOI_WINDOW_US
     aoi_mask = buf_t >= aoi_start
     if not np.any(aoi_mask):
-        return [], last_update_us
+        return [], last_update_us, None, None
+
+    # Generate heatmap for logging
+    heatmap = find_heatmap(
+        buf_x[aoi_mask], buf_y[aoi_mask], height=height, width=width
+    )
+
+    # Generate labels for logging
+    labels, _, _ = locate_centroids(heatmap, k=num_clusters)
 
     # Detect AOIs
     aois = detect_aois(
         buf_x[aoi_mask],
         buf_y[aoi_mask],
-        width=1280,
-        height=720,
+        width=width,
+        height=height,
         num_clusters=num_clusters,
     )
 
-    return aois, t_now
+    return aois, t_now, heatmap, labels
 
 
 def estimate_aoi_rpms(
@@ -145,7 +191,7 @@ def draw_aoi_bboxes(
     avg_rpms: dict[int, float],
 ) -> None:
     """
-    Draw bounding boxes and RPM labels on frame.
+    Draw bounding boxes and RPM labels on frame (uses config constants).
 
     Args:
         frame: Image to draw on (modified in-place)
@@ -156,8 +202,8 @@ def draw_aoi_bboxes(
     for idx, aoi in enumerate(aois):
         x1, y1, x2, y2 = aoi.bbox
 
-        # Draw bounding box in green
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        # Draw bounding box
+        cv2.rectangle(frame, (x1, y1), (x2, y2), BBOX_COLOR, 2)
 
         # Prepare RPM text
         current_rpm = rpm_estimates.get(idx)
@@ -171,22 +217,22 @@ def draw_aoi_bboxes(
         else:
             rpm_text = f"AOI{idx}: --"
 
-        # Draw RPM text in red above bounding box
-        text_y = max(y1 - 10, 20)  # Position above box, but not off-screen
+        # Draw RPM text above bounding box
+        text_y = max(y1 - 10, 20)
         cv2.putText(
             frame,
             rpm_text,
             (x1, text_y),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.6,
-            (0, 0, 255),  # Red color
-            2,
+            TEXT_FONT,
+            TEXT_SCALE,
+            TEXT_COLOR,
+            TEXT_THICKNESS,
             cv2.LINE_AA,
         )
 
-        # Draw centroid as small circle
+        # Draw centroid
         cx, cy = aoi.centroid
-        cv2.circle(frame, (int(cx), int(cy)), 3, (255, 0, 0), -1)  # Blue dot
+        cv2.circle(frame, (int(cx), int(cy)), 3, CENTROID_COLOR, -1)
 
 
 def parse_args() -> argparse.Namespace:
@@ -221,8 +267,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--window",
         type=int,
-        default=10000 * 15,  # 150ms as per paper
-        help="Batch window size in microseconds (default: 10000 µs = 10ms).",
+        default=BATCH_WINDOW_US,
+        help=f"Batch window size in microseconds (default: {BATCH_WINDOW_US}µs).",
     )
     parser.add_argument(
         "--num-clusters",
@@ -241,16 +287,24 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Disable visualization window (default: False).",
     )
+    parser.add_argument(
+        "--no-logging",
+        action="store_true",
+        help="Disable file logging (frames/heatmaps/logs).",
+    )
     return parser.parse_args()
 
 
 def main():
-    """Main streaming loop."""
+    """Main streaming loop with logging."""
     args = parse_args()
 
     if not args.input.exists():
         print(f"Error: Input file not found at '{args.input}'")
         sys.exit(1)
+
+    # Setup logging context
+    log_ctx = None if args.no_logging else setup_run_context()
 
     print("--- Configuration ---")
     print(f"Input file: {args.input}")
@@ -258,10 +312,15 @@ def main():
     print(f"AOI clusters: {args.num_clusters}")
     print(f"Blade symmetry: {args.symmetry}")
     print(f"Display: {'disabled' if args.no_display else 'enabled'}")
+    print(f"Logging: {'disabled' if args.no_logging else f'enabled -> {log_ctx.run_dir}'}")
     print("---------------------")
 
+    if log_ctx:
+        log_ctx.logger.info(f"Input file: {args.input}")
+        log_ctx.logger.info(f"Speed: {args.speed}x, Clusters: {args.num_clusters}, Symmetry: {args.symmetry}")
+
     src = DatFileSource(
-        args.input, width=1280, height=720, window_length_us=args.window
+        args.input, width=DEFAULT_WIDTH, height=DEFAULT_HEIGHT, window_length_us=args.window
     )
     pacer = Pacer(
         speed=args.speed,
@@ -271,9 +330,6 @@ def main():
 
     if len(src) == 0:
         print("\nError: No batches were generated from the source file.")
-        print(
-            "This might be due to a very large --window size for a short recording, or an empty input file."
-        )
         sys.exit(1)
 
     print(f"\n--- Starting Paced Playback ({len(src)} batches) ---")
@@ -286,11 +342,10 @@ def main():
     event_buffer_x = np.array([], dtype=np.int64)
     event_buffer_y = np.array([], dtype=np.int64)
     event_buffer_t = np.array([], dtype=np.int64)
-    aoi_window_us = 150_000  # 150ms for AOI detection
-    rpm_window_us = 30_000  # 30ms for RPM estimation
     aois = []
     last_aoi_update_us = None
-    rpm_history: dict[int, list[float]] = {}  # Track RPM history per AOI
+    rpm_history: dict[int, list[float]] = {}
+    frame_count = 0
 
     # Setup visualization window
     if not args.no_display:
@@ -321,23 +376,27 @@ def main():
         event_buffer_t = np.concatenate([event_buffer_t, timestamps])
 
         # Trim buffer to keep only recent events
-        max_window = max(aoi_window_us, rpm_window_us)
+        max_window = max(AOI_WINDOW_US, RPM_WINDOW_US)
         event_buffer_x, event_buffer_y, event_buffer_t = trim_event_buffer(
             event_buffer_x, event_buffer_y, event_buffer_t, max_window
         )
 
-        # Update AOIs periodically (every ~50ms)
-        new_aois, new_update_time = update_aois_if_needed(
+        # Update AOIs periodically with heatmap/labels for logging
+        new_aois, new_update_time, heatmap, labels = update_aois_if_needed(
             event_buffer_x,
             event_buffer_y,
             event_buffer_t,
             last_aoi_update_us,
-            aoi_window_us,
             args.num_clusters,
         )
         if len(new_aois) > 0:
             aois = new_aois
             last_aoi_update_us = new_update_time
+
+            # Log AOI detection
+            if log_ctx:
+                centroids = [aoi.centroid for aoi in aois]
+                log_aoi_detection(log_ctx.logger, frame_count, len(aois), centroids)
 
         # Estimate RPM for each AOI
         rpm_estimates = estimate_aoi_rpms(
@@ -345,17 +404,33 @@ def main():
             event_buffer_y,
             event_buffer_t,
             aois,
-            rpm_window_us,
+            RPM_WINDOW_US,
             rpm_config,
         )
+
+        # Log RPM estimates
+        if log_ctx:
+            for aoi_idx, rpm in rpm_estimates.items():
+                log_rpm_estimate(log_ctx.logger, frame_count, aoi_idx, rpm)
 
         # Update RPM history and compute averages
         rpm_history = update_rpm_history(rpm_history, rpm_estimates)
         avg_rpms = compute_average_rpms(rpm_history)
 
-        # Visualize frame with bounding boxes and RPM
+        # Draw overlays on frame (for both display and logging)
+        draw_aoi_bboxes(frame, aois, rpm_estimates, avg_rpms)
+
+        # Save artifacts periodically
+        if log_ctx and frame_count % LOG_EVERY_N_FRAMES == 0:
+            if ENABLE_FRAME_LOGGING:
+                save_frame(frame, frame_count, log_ctx.frames_dir)
+            if ENABLE_HEATMAP_LOGGING and heatmap is not None:
+                save_heatmap(heatmap, frame_count, log_ctx.heatmaps_dir)
+            if ENABLE_LABEL_LOGGING and labels is not None:
+                save_labels(labels, frame_count, log_ctx.labels_dir)
+
+        # Visualize frame
         if not args.no_display:
-            draw_aoi_bboxes(frame, aois, rpm_estimates, avg_rpms)
             cv2.imshow("RPM Detection", frame)
 
             # Check for quit key (ESC or 'q')
@@ -363,6 +438,8 @@ def main():
             if key in (27, ord("q")):
                 print("\n\nUser requested quit.")
                 break
+
+        frame_count += 1
 
         # Display status
         wall_time = time.perf_counter() - start_time
@@ -383,6 +460,8 @@ def main():
     if not args.no_display:
         cv2.destroyAllWindows()
 
+    wall_time_total = time.perf_counter() - start_time
+
     print("\n\n--- Playback Finished ---")
 
     # Display final average RPMs
@@ -393,8 +472,18 @@ def main():
             avg_rpm = final_avgs[aoi_idx]
             sample_count = len(rpm_history[aoi_idx])
             print(f"  AOI {aoi_idx}: {avg_rpm:.2f} RPM (n={sample_count} measurements)")
+
+            # Log final averages
+            if log_ctx:
+                log_ctx.logger.info(
+                    f"Final AOI {aoi_idx}: avg={avg_rpm:.2f} RPM (n={sample_count})"
+                )
     else:
         print("\nNo RPM measurements recorded.")
+
+    # Finalize logging
+    if log_ctx:
+        finalize_run(log_ctx, frame_count, wall_time_total)
 
 
 if __name__ == "__main__":
