@@ -163,8 +163,9 @@ def get_propeller_masks(frame: np.ndarray) -> np.ndarray:
     return mask
 
 
-def get_blade_count(frame: np.ndarray, clusters: np.ndarray) -> int:
+def get_blade_count(frame: np.ndarray, clusters: np.ndarray) -> list[tuple]:
     blade_counts = []
+    masks = []
     for cid in np.unique(clusters):
         if cid == 0:
             continue
@@ -174,13 +175,13 @@ def get_blade_count(frame: np.ndarray, clusters: np.ndarray) -> int:
         masked_frame = np.zeros_like(frame)
         masked_frame[cluster_mask] = frame[cluster_mask]
 
+        masks.append(masked_frame)
+
         # Get propeller masks for this blade region
         mask = get_propeller_masks(masked_frame)
         unique_vals = np.unique(mask)
         count = int(len(unique_vals) - (1 if 0 in unique_vals else 0) - (1 if -1 in unique_vals else 0))
         blade_counts.append(max(count, 0))
 
-    if not blade_counts:
-        return 0
-    return int(sum(blade_counts) / len(blade_counts))
+    return list(zip(blade_counts, masks))
 

@@ -1,6 +1,8 @@
 import argparse
 from pathlib import Path
 
+from pytest import console_main
+
 from src.config import BATCH_WINDOW_US, BASE_WIDTH, BASE_HEIGHT
 
 from src.evio_lib.pacer import Pacer
@@ -98,7 +100,7 @@ def main():
             text_pos = (tl[0], max(0, tl[1] - 8))
             cv2.putText(
                 frame,
-                f"Blades: {blade_count}",
+                ''.join([f"Blades (AVG): {int(sum([b[0] for b in blade_count]) /(len(blade_count) or 1))}"]),
                 text_pos,
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.6,
