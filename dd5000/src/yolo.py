@@ -4,11 +4,13 @@ from dataclasses import dataclass
 import numpy as np
 
 from src.config import YOLO_CONFIDENCE_THRESHOLD
+from src.logger import get_logger
 
 # Load model once globally
 model = YOLOWorld("yolov8s-worldv2.pt")
 model.set_classes(["drone", "uav", "quadrotor", "airplane"])
 
+logger = get_logger()
 
 @dataclass
 class CropCoords:
@@ -34,8 +36,7 @@ def detect_drone_crop(
     result = model.predict(frame, conf=YOLO_CONFIDENCE_THRESHOLD, verbose=False)[0]
 
     if result.boxes is None or len(result.boxes) == 0:
-        if verbose:
-            print("YOLO: No drone detected")
+        logger.debug("YOLO: No drone detected")
         return None
 
     # take first or highest-confidence box
@@ -49,8 +50,7 @@ def detect_drone_crop(
     x2 = min(w - 1, x2)
     y2 = min(h - 1, y2)
 
-    if verbose:
-        print(f"YOLO: Detected drone at ({x1},{y1})-({x2},{y2}) conf={confidence:.3f}")
+    logger.debug(f"YOLO: Detected drone at ({x1},{y1})-({x2},{y2}) conf={confidence:.3f}")
 
     # crop
     return CropCoords(x1=x1, x2=x2, y1=y1, y2=y2)

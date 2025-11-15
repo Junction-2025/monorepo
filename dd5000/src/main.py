@@ -28,10 +28,22 @@ def parse_args() -> argparse.Namespace:
         help="Playback speed multiplier (1.0 = real-time).",
     )
     parser.add_argument(
+        "--force-speed",
+        type=float,
+        default=1.0,
+        help="Playback speed multiplier (1.0 = real-time).",
+    )
+    parser.add_argument(
         "--window",
         type=int,
         default=BATCH_WINDOW_US,
         help=f"Batch window size in microseconds (default: {BATCH_WINDOW_US}µs).",
+    )
+    parser.add_argument(
+        "--drop-tolerance",
+        type=float,
+        default=0.1,
+        help="Lag tolerance in seconds before dropping batches (default: 0.1s).",
     )
 
     return parser.parse_args()
