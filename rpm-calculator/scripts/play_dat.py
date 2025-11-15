@@ -108,9 +108,10 @@ def draw_hud(
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("dat", help="Path to .dat file")
+    parser.add_argument("dat", help="Path to .dat file",
+                        default="/Users/jessesorsa/Business/Junction_2025/project/monorepo/data/drone_idle.dat")
     parser.add_argument(
-        "--window", type=float, default=2, help="Windows duration in ms"
+        "--window", type=float, default=0.2, help="Windows duration in ms"
     )
     parser.add_argument(
         "--speed", type=float, default=1, help="Playback speed (1 is real time)"
