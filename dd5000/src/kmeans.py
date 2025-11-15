@@ -1,6 +1,11 @@
 import numpy as np
 import cv2
-from src.config import HEATMAP_PIXEL_SIZE, CENTROID_EPSILON, K_CANDIDATES, OUTLIER_DISTANCE_MULTIPLIER
+from src.config import (
+    HEATMAP_PIXEL_SIZE,
+    CENTROID_EPSILON,
+    K_CANDIDATES,
+    OUTLIER_DISTANCE_MULTIPLIER,
+)
 from src.logger import get_logger
 from src.models import Centroids
 from sklearn.cluster import KMeans
@@ -75,17 +80,21 @@ def scale_centroids(centroids: Centroids, scaler: int):
     )
 
 
-def remove_outliers(points: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def remove_outliers(
+    points: np.ndarray, labels: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
     if len(points) == 0:
         return points, labels
 
     unique_labels = np.unique(labels)
     centroids = np.array([points[labels == lbl].mean(axis=0) for lbl in unique_labels])
 
-    distances = np.array([
-        np.linalg.norm(point - centroids[np.where(unique_labels == label)[0][0]])
-        for point, label in zip(points, labels)
-    ])
+    distances = np.array(
+        [
+            np.linalg.norm(point - centroids[np.where(unique_labels == label)[0][0]])
+            for point, label in zip(points, labels)
+        ]
+    )
 
     threshold = OUTLIER_DISTANCE_MULTIPLIER * np.median(distances)
     mask = distances <= threshold
@@ -94,7 +103,9 @@ def remove_outliers(points: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray,
     return points[mask], labels[mask]
 
 
-def kmeans(frame: np.ndarray, propeller_masks: Centroids) -> tuple[np.ndarray, np.ndarray]:
+def kmeans(
+    frame: np.ndarray, propeller_masks: Centroids
+) -> tuple[np.ndarray, np.ndarray]:
     rows, cols = np.nonzero(frame)
     points = np.column_stack([cols, rows])  # Now in (x, y) format
 
@@ -113,10 +124,14 @@ def kmeans(frame: np.ndarray, propeller_masks: Centroids) -> tuple[np.ndarray, n
         if k > len(propeller_masks.x_coords):
             continue
 
-        centroids_array = np.column_stack([propeller_masks.x_coords, propeller_masks.y_coords])
+        centroids_array = np.column_stack(
+            [propeller_masks.x_coords, propeller_masks.y_coords]
+        )
         centroids_normalized = (centroids_array - points_mean) / points_std
 
-        model = KMeans(n_clusters=k, init=centroids_normalized[:k], n_init=1, random_state=42)
+        model = KMeans(
+            n_clusters=k, init=centroids_normalized[:k], n_init=1, random_state=42
+        )
         model.fit(points_normalized)
         labels = model.labels_
 
@@ -136,7 +151,6 @@ def kmeans(frame: np.ndarray, propeller_masks: Centroids) -> tuple[np.ndarray, n
     points_filtered, labels_filtered = remove_outliers(points, best_labels)
 
     return points_filtered, labels_filtered
-
 
 
 def get_propeller_masks(frame: np.ndarray) -> np.ndarray:
@@ -180,8 +194,11 @@ def get_blade_count(frame: np.ndarray, clusters: np.ndarray) -> list[tuple]:
         # Get propeller masks for this blade region
         mask = get_propeller_masks(masked_frame)
         unique_vals = np.unique(mask)
-        count = int(len(unique_vals) - (1 if 0 in unique_vals else 0) - (1 if -1 in unique_vals else 0))
+        count = int(
+            len(unique_vals)
+            - (1 if 0 in unique_vals else 0)
+            - (1 if -1 in unique_vals else 0)
+        )
         blade_counts.append(max(count, 0))
 
     return list(zip(blade_counts, masks))
-

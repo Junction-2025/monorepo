@@ -74,10 +74,16 @@ def estimate_rpm_from_event_frames(frames, fps, blade_count):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("dat", help="Path to .dat file")
-    #parser.add_argument("--window", type=float, default=0.25, help="Window duration in ms")
+    # parser.add_argument("--window", type=float, default=0.25, help="Window duration in ms")
     parser.add_argument("--window", type=float, default=1, help="Window duration in ms")
-    parser.add_argument("--speed", type=float, default=1, help="Playback speed (1 is real time)")
-    parser.add_argument("--force-speed", action="store_true", help="Force playback speed by dropping windows")
+    parser.add_argument(
+        "--speed", type=float, default=1, help="Playback speed (1 is real time)"
+    )
+    parser.add_argument(
+        "--force-speed",
+        action="store_true",
+        help="Force playback speed by dropping windows",
+    )
     args = parser.parse_args()
 
     ### HARDCODED VALUES
@@ -101,7 +107,7 @@ def main():
     roi_frames = []
     fps = 1000.0 / args.window  # window duration in ms
     max_frames = 100
-    
+
     for batch_range in pacer.pace(src.ranges()):
         if len(roi_frames) >= max_frames:
             break
@@ -118,7 +124,7 @@ def main():
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q") or key == 27:  # Quit on 'q' or ESC
             break
-        
+
     print("Frames loaded")
 
     print("Calculating RPM...")

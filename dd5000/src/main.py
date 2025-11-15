@@ -1,7 +1,6 @@
 import argparse
 from pathlib import Path
 
-from pytest import console_main
 
 from src.config import BATCH_WINDOW_US, BASE_WIDTH, BASE_HEIGHT
 
@@ -91,16 +90,26 @@ def main():
             br = (int(yolo_bounding_box.x2), int(yolo_bounding_box.y2))
             cv2.rectangle(frame, tl, br, (0, 255, 0), 2)
 
-            cropped_frame = frame[yolo_bounding_box.y1:yolo_bounding_box.y2, yolo_bounding_box.x1:yolo_bounding_box.x2]
+            cropped_frame = frame[
+                yolo_bounding_box.y1 : yolo_bounding_box.y2,
+                yolo_bounding_box.x1 : yolo_bounding_box.x2,
+            ]
             mask = get_propeller_masks(cropped_frame)
             cropped_overlay = overlay_mask(cropped_frame, mask)
-            frame[yolo_bounding_box.y1:yolo_bounding_box.y2, yolo_bounding_box.x1:yolo_bounding_box.x2] = cropped_overlay
+            frame[
+                yolo_bounding_box.y1 : yolo_bounding_box.y2,
+                yolo_bounding_box.x1 : yolo_bounding_box.x2,
+            ] = cropped_overlay
 
             blade_count = get_blade_count(cropped_frame, mask)
             text_pos = (tl[0], max(0, tl[1] - 8))
             cv2.putText(
                 frame,
-                ''.join([f"Blades (AVG): {int(sum([b[0] for b in blade_count]) /(len(blade_count) or 1))}"]),
+                "".join(
+                    [
+                        f"Blades (AVG): {int(sum([b[0] for b in blade_count]) / (len(blade_count) or 1))}"
+                    ]
+                ),
                 text_pos,
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.6,
@@ -110,7 +119,7 @@ def main():
         cv2.imshow(window_name, frame)
         cv2.waitKey(1)
     cv2.destroyAllWindows()
-  
+
 
 if __name__ == "__main__":
     main()
