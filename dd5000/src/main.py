@@ -85,12 +85,10 @@ def main():
 
         yolo_bounding_box = detect_drone_crop(frame)
         if yolo_bounding_box:
-            # Draw YOLO bounding box
             tl = (int(yolo_bounding_box.x1), int(yolo_bounding_box.y1))
             br = (int(yolo_bounding_box.x2), int(yolo_bounding_box.y2))
             cv2.rectangle(frame, tl, br, (0, 255, 0), 2)
 
-            # Get and display blade count
             blade_count = get_blade_count()
             text_pos = (tl[0], max(0, tl[1] - 8))
             cv2.putText(
@@ -104,13 +102,7 @@ def main():
             )
 
         cv2.imshow(window_name, frame)
-
-        # Process GUI events and check for exit key
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord('q') or key == 27:  # 'q' or ESC
-            logger.info("Exiting...")
-            break
-
+        cv2.waitKey(1)
     cv2.destroyAllWindows()
   
 
