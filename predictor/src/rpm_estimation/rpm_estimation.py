@@ -9,18 +9,8 @@ Functional approach based on EE3P methodology:
 """
 
 import numpy as np
-from typing import NamedTuple
 from numpy.typing import NDArray
-
-
-class RPMConfig(NamedTuple):
-    """Configuration for RPM estimation."""
-
-    slice_us: int = 500  # Time slice duration in microseconds
-    min_slices: int = 10  # Minimum slices needed for correlation
-    symmetry_order: int = 3  # Blade/pattern repeats per revolution
-    peak_prominence: float = 0.1  # Peak detection threshold
-    max_peaks: int = 10  # Maximum peaks to consider
+from src.config import RPMConfig
 
 
 def aggregate_events_to_frames(
@@ -129,7 +119,7 @@ def find_peaks(
 def estimate_rpm(
     frames: NDArray[np.uint16],
     times: NDArray[np.float64],
-    config: RPMConfig = RPMConfig(),
+    config: RPMConfig | None = None,
 ) -> float | None:
     """
     Estimate RPM from aggregated event frames using correlation.
@@ -148,6 +138,9 @@ def estimate_rpm(
     Returns:
         RPM estimate or None if insufficient structure
     """
+    if config is None:
+        config = RPMConfig()
+
     num_slices = frames.shape[0]
     if num_slices < config.min_slices:
         return None
@@ -196,7 +189,7 @@ def estimate_rpm_from_events(
     y: NDArray[np.int64],
     t: NDArray[np.int64],
     bbox: tuple[int, int, int, int],
-    config: RPMConfig = RPMConfig(),
+    config: RPMConfig | None = None,
 ) -> float | None:
     """
     Convenience function: estimate RPM directly from ROI events.
@@ -209,6 +202,9 @@ def estimate_rpm_from_events(
     Returns:
         RPM estimate or None
     """
+    if config is None:
+        config = RPMConfig()
+
     frames, times = aggregate_events_to_frames(x, y, t, bbox, config.slice_us)
 
     if frames.shape[0] < config.min_slices:

@@ -11,10 +11,10 @@ from src.evio_in.pacer import Pacer
 from src.evio_in.dat_file import DatFileSource
 from src.evio_in.play_dat import get_frame, get_window
 from src.yolo.yolo import detect_drone_crop
-from src.roo.aoi_detection import detect_aois, AOI
-from src.rse.rpm_estimation import estimate_rpm_from_events
-from src.roo.rotating_object_extraction import find_heatmap
-from src.roo.kmeans import locate_centroids
+from src.rpm_estimation.aoi_detection import detect_aois, AOI
+from src.rpm_estimation.rpm_estimation import estimate_rpm_from_events
+from src.rpm_estimation.rotating_object_extraction import find_heatmap
+from src.rpm_estimation.kmeans import locate_centroids
 
 # Configuration and logging
 from src.config import (
