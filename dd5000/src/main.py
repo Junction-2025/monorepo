@@ -9,8 +9,7 @@ from src.evio_lib.play_dat import get_frame, get_window
 
 from src.yolo import detect_drone_crop
 from src.logger import get_logger
-from src.kmeans import get_propeller_masks, get_blade_count
-from src.utils import draw_labels
+from src.kmeans import get_blade_count
 import cv2
 
 
@@ -69,7 +68,12 @@ def main():
 
     logger = get_logger()
 
+    window_name = "Drone Detection"
+    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+
     logger.info("\n--- Data Import Complete ---")
+    logger.info("Press 'q' or ESC to exit")
+
     for batch_range in pacer.pace(src.ranges()):
         window = get_window(
             src.event_words,
@@ -80,32 +84,34 @@ def main():
         frame = get_frame(window)
 
         yolo_bounding_box = detect_drone_crop(frame)
-        if not yolo_bounding_box:
-            continue
+        if yolo_bounding_box:
+            # Draw YOLO bounding box
+            tl = (int(yolo_bounding_box.x1), int(yolo_bounding_box.y1))
+            br = (int(yolo_bounding_box.x2), int(yolo_bounding_box.y2))
+            cv2.rectangle(frame, tl, br, (0, 255, 0), 2)
 
-        cropped_frame = frame[
-            yolo_bounding_box.y1 : yolo_bounding_box.y2,
-            yolo_bounding_box.x1 : yolo_bounding_box.x2,
-        ]
-        #propeller_masks = get_propeller_masks(frame=cropped_frame)
-        #draw_labels(propeller_masks)
-        blade_count = get_blade_count()
+            # Get and display blade count
+            blade_count = get_blade_count()
+            text_pos = (tl[0], max(0, tl[1] - 8))
+            cv2.putText(
+                frame,
+                f"Blades: {blade_count}",
+                text_pos,
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.6,
+                (0, 255, 0),
+                2,
+            )
 
-        # Draw YOLO bbox and blade count on the frame
-        tl = (int(yolo_bounding_box.x1), int(yolo_bounding_box.y1))
-        br = (int(yolo_bounding_box.x2), int(yolo_bounding_box.y2))
-        cv2.rectangle(frame, tl, br, (0, 255, 0), 2)
-        text_pos = (tl[0], max(0, tl[1] - 8))
-        cv2.putText(
-            frame,
-            f"Blades: {blade_count}",
-            text_pos,
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.6,
-            (0, 255, 0),
-            2,
-        )
-        cv2.imshow("Drone RPM", frame)
+        cv2.imshow(window_name, frame)
+
+        # Process GUI events and check for exit key
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q') or key == 27:  # 'q' or ESC
+            logger.info("Exiting...")
+            break
+
+    cv2.destroyAllWindows()
   
 
 
