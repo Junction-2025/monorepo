@@ -56,7 +56,9 @@ def get_heatmap_centroids(heatmap: np.ndarray) -> Centroids:
     while remaining_candidates:
         furthest_centroid = find_furthest_centroid(centroids, remaining_candidates)
         centroids.append(furthest_centroid)
-        remaining_candidates = [c for c in remaining_candidates if c != furthest_centroid]
+        remaining_candidates = [
+            c for c in remaining_candidates if c != furthest_centroid
+        ]
 
     return Centroids(
         x_coords=[c[0] for c in centroids], y_coords=[c[1] for c in centroids]
@@ -66,7 +68,7 @@ def get_heatmap_centroids(heatmap: np.ndarray) -> Centroids:
 def scale_centroids(centroids: Centroids, scaler: int):
     return Centroids(
         x_coords=[x * scaler for x in centroids.x_coords],
-        y_coords=[y * scaler for y in centroids.y_coords]
+        y_coords=[y * scaler for y in centroids.y_coords],
     )
 
 
@@ -74,7 +76,7 @@ def kmeans(frame: np.ndarray, propeller_masks: Centroids) -> np.ndarray:
     k_means_model = k_means_maker(propeller_masks)
     # Convert frame pixels to (x, y) coordinate pairs for clustering
     height, width = frame.shape
-    y_coords, x_coords = np.meshgrid(range(height), range(width), indexing='ij')
+    y_coords, x_coords = np.meshgrid(range(height), range(width), indexing="ij")
     pixel_coords = np.column_stack([x_coords.ravel(), y_coords.ravel()])
 
     k_means_model.fit(pixel_coords)
@@ -93,7 +95,9 @@ def get_propeller_masks(frame: np.ndarray) -> np.ndarray:
     logger.info(f"Prediction: {prediction}")
 
     # Scale prediction back to original frame dimensions
-    mask = np.repeat(np.repeat(prediction, HEATMAP_PIXEL_SIZE, axis=0), HEATMAP_PIXEL_SIZE, axis=1)
+    mask = np.repeat(
+        np.repeat(prediction, HEATMAP_PIXEL_SIZE, axis=0), HEATMAP_PIXEL_SIZE, axis=1
+    )
 
     # Pad to match original frame size if needed
     h_diff = frame.shape[0] - mask.shape[0]
@@ -101,7 +105,7 @@ def get_propeller_masks(frame: np.ndarray) -> np.ndarray:
 
     if h_diff > 0 or w_diff > 0:
         # Pad with edge values
-        mask = np.pad(mask, ((0, h_diff), (0, w_diff)), mode='edge')
+        mask = np.pad(mask, ((0, h_diff), (0, w_diff)), mode="edge")
 
     return mask
 

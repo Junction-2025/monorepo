@@ -10,7 +10,7 @@ from src.evio_lib.play_dat import get_frame, get_window
 from src.yolo import detect_drone_crop
 from src.logger import get_logger
 from src.kmeans import get_propeller_masks, get_blade_count
-from src.rmp_estimator import estimate_rpm
+from src.utils import draw_labels
 
 
 def parse_args() -> argparse.Namespace:
@@ -87,8 +87,9 @@ def main():
             yolo_bounding_box.x1 : yolo_bounding_box.x2,
         ]
         propeller_masks = get_propeller_masks(frame=cropped_frame)
+        draw_labels(propeller_masks)
+
         blade_count = get_blade_count()
-        rpm = estimate_rpm()
 
 
 if __name__ == "__main__":

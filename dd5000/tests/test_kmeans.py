@@ -1,5 +1,9 @@
 import numpy as np
-from src.kmeans import get_heatmap_centroids, get_propeller_masks, find_furthest_centroid, construct_heatmap
+from src.kmeans import (
+    get_heatmap_centroids,
+    find_furthest_centroid,
+    construct_heatmap,
+)
 from src.models import Centroids
 
 
@@ -202,7 +206,6 @@ def test_get_heatmap_centroids_no_duplicates():
     centroid_tuples = list(zip(centroids.x_coords, centroids.y_coords))
     unique_centroids = list(set(centroid_tuples))
 
-    assert len(centroid_tuples) == len(unique_centroids), \
+    assert len(centroid_tuples) == len(unique_centroids), (
         f"Found duplicate centroids: {centroid_tuples}"
-
-
+    )

@@ -1,4 +1,3 @@
-import cv2
 from ultralytics import YOLO
 
 from src.models import CropCoords
@@ -11,6 +10,7 @@ from src.logger import get_logger
 model = YOLO("best.pt")  # Use standard YOLO, not YOLOWorld
 logger = get_logger()
 
+
 def detect_drone_crop(frame: np.ndarray) -> CropCoords | None:
     """
     Input:  frame (H,W,3) BGR ndarray
@@ -21,7 +21,12 @@ def detect_drone_crop(frame: np.ndarray) -> CropCoords | None:
     """
     # Inference
     results = model.predict(frame, conf=YOLO_CONFIDENCE_THRESHOLD, verbose=False)
-    if not results or not hasattr(results[0], 'boxes') or results[0].boxes is None or len(results[0].boxes) == 0:
+    if (
+        not results
+        or not hasattr(results[0], "boxes")
+        or results[0].boxes is None
+        or len(results[0].boxes) == 0
+    ):
         logger.debug("YOLO: No drone detected")
         return None
 
