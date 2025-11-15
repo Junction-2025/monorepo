@@ -11,6 +11,7 @@ from src.yolo import detect_drone_crop
 from src.logger import get_logger
 from src.kmeans import get_propeller_masks, get_blade_count
 from src.utils import draw_labels
+import cv2
 
 
 def parse_args() -> argparse.Namespace:
@@ -86,10 +87,26 @@ def main():
             yolo_bounding_box.y1 : yolo_bounding_box.y2,
             yolo_bounding_box.x1 : yolo_bounding_box.x2,
         ]
-        propeller_masks = get_propeller_masks(frame=cropped_frame)
-        draw_labels(propeller_masks)
-
+        #propeller_masks = get_propeller_masks(frame=cropped_frame)
+        #draw_labels(propeller_masks)
         blade_count = get_blade_count()
+
+        # Draw YOLO bbox and blade count on the frame
+        tl = (int(yolo_bounding_box.x1), int(yolo_bounding_box.y1))
+        br = (int(yolo_bounding_box.x2), int(yolo_bounding_box.y2))
+        cv2.rectangle(frame, tl, br, (0, 255, 0), 2)
+        text_pos = (tl[0], max(0, tl[1] - 8))
+        cv2.putText(
+            frame,
+            f"Blades: {blade_count}",
+            text_pos,
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.6,
+            (0, 255, 0),
+            2,
+        )
+        cv2.imshow("Drone RPM", frame)
+  
 
 
 if __name__ == "__main__":
