@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 from src.config import HEATMAP_PIXEL_SIZE, CENTROID_EPSILON, K_CANDIDATES, OUTLIER_DISTANCE_MULTIPLIER
 from src.logger import get_logger
 from src.models import Centroids
@@ -139,7 +140,13 @@ def kmeans(frame: np.ndarray, propeller_masks: Centroids) -> tuple[np.ndarray, n
 
 
 def get_propeller_masks(frame: np.ndarray) -> np.ndarray:
-    frame = np.array([[int(p[0]) for p in row] for row in frame], dtype=np.uint8)
+    # Convert to grayscale if needed
+    if len(frame.shape) == 3:
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # Ensure frame is a uint8 array
+    if frame.dtype != np.uint8:
+        frame = frame.astype(np.uint8)
 
     heatmap = construct_heatmap(frame, factor=HEATMAP_PIXEL_SIZE)
     logger.info(f"Constructed heatmap: {heatmap} of dim {heatmap.shape}")
@@ -157,19 +164,23 @@ def get_propeller_masks(frame: np.ndarray) -> np.ndarray:
 
 
 def get_blade_count(frame: np.ndarray, clusters: np.ndarray) -> int:
-    blade_regions = []
+    blade_counts = []
     for cid in np.unique(clusters):
         if cid == 0:
             continue
-        mask = clusters == cid
-        blade_regions.append(frame[mask])
 
-    blade_counts = []
-    for blade_region in blade_regions:
-        mask = get_propeller_masks(blade_region)
+        # Create a masked version of the frame (preserving 2D structure)
+        cluster_mask = clusters == cid
+        masked_frame = np.zeros_like(frame)
+        masked_frame[cluster_mask] = frame[cluster_mask]
+
+        # Get propeller masks for this blade region
+        mask = get_propeller_masks(masked_frame)
         unique_vals = np.unique(mask)
         count = int(len(unique_vals) - (1 if 0 in unique_vals else 0) - (1 if -1 in unique_vals else 0))
         blade_counts.append(max(count, 0))
 
+    if not blade_counts:
+        return 0
     return int(sum(blade_counts) / len(blade_counts))
 
