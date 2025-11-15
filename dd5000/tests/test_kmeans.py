@@ -1,6 +1,8 @@
 from src.kmeans import construct_heatmap
 import numpy as np
 from src.kmeans import find_furthest_centroid
+from src.kmeans import get_heatmap_centroids
+from src.models import Centroids
 
 
 def test_reduction_by_factor_two():
@@ -144,12 +146,38 @@ def test_reduction_9x9_by_factor_two():
         ),
     )
 
+
 def test_find_furthest_centroid_linear_monotonic():
     existing = [(0, 0), (2, 0), (4, 0)]
     candidates = [(5, 0), (9, 0), (6, 0), (3, 0)]
     assert find_furthest_centroid(existing, candidates) == (9, 0)
 
+
 def test_find_furthest_centroid_linear_symmetry():
     existing = [(1, 0), (9, 0)]
     candidates = [(0, 0), (5, 0), (10, 0)]
     assert find_furthest_centroid(existing, candidates) == (10, 0)
+
+
+def test_get_heatmap_centroids_four_clusters():
+    # 9x9 heatmap with four identical 3x3 clusters placed with centers at
+    # (2,2), (6,2), (2,6), (6,6) (x,y). Each cluster:
+    heatmap = np.array(
+        [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 1, 0, 0],
+            [0, 1, 100, 1, 0, 1, 2, 1, 0],
+            [0, 0, 1, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0, 1, 0, 0],
+            [0, 1, 2, 1, 0, 1, 50, 1, 0],
+            [0, 0, 1, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ],
+        dtype=np.int32,
+    )
+
+    centers = Centroids(x_coords=[2, 6], y_coords=[2, 6])
+    centroids = get_heatmap_centroids(heatmap)
+
+    assert centroids == centers

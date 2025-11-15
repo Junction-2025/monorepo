@@ -1,11 +1,10 @@
 from dataclasses import dataclass
-import numpy as np
 
 
 @dataclass(frozen=True)
 class Centroids:
-    x_coords: np.ndarray
-    y_coords: np.ndarray
+    x_coords: list
+    y_coords: list
 
 
 @dataclass
