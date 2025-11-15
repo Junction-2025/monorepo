@@ -1,6 +1,7 @@
 from ultralytics import YOLO
 from pathlib import Path
 import sys
+import argparse
 
 # Configuration
 # Path to the base YOLO model to use for training
@@ -28,41 +29,47 @@ def validate_dataset():
 
 # --- Main training routine ---
 def main():
+    parser = argparse.ArgumentParser(description="Train FRED YOLO model with flexible options")
+    parser.add_argument('--base_model', type=str, default=BASE_MODEL, help='Base YOLO model to use for training')
+    parser.add_argument('--imgsz', type=int, default=IMG_SIZE, help='Input image size')
+    parser.add_argument('--batch', type=int, default=BATCH_SIZE, help='Batch size')
+    parser.add_argument('--device', type=str, default=str(DEVICE), help='Device for training (cpu, cuda, mps, 0, 1, etc)')
+    parser.add_argument('--epochs', type=int, default=50, help='Number of training epochs')
+    parser.add_argument('--dataset_dir', type=str, default=str(DATASET_DIR), help='Dataset directory')
+    parser.add_argument('--yaml', type=str, default=str(YAML_PATH), help='Path to dataset YAML')
+    parser.add_argument('--project', type=str, default='runs/fred_event', help='Project directory for logs/weights')
+    parser.add_argument('--name', type=str, default='yolo11s_fast_train', help='Run name')
+    parser.add_argument('--no_export', action='store_true', help='Skip TensorRT export step')
+    args = parser.parse_args()
+
+    global DATASET_DIR, YAML_PATH
+    DATASET_DIR = Path(args.dataset_dir)
+    YAML_PATH = Path(args.yaml)
+
     validate_dataset()
 
-    model = YOLO(BASE_MODEL)
-
+    model = YOLO(args.base_model)
     print("Starting HIGH-SPEED training...\n")
-
     model.train(
         data=str(YAML_PATH),
-        imgsz=IMG_SIZE,
-        epochs=50,
-        batch=BATCH_SIZE,
+        imgsz=args.imgsz,
+        epochs=args.epochs,
+        batch=args.batch,
         workers=8,
-
-        # Performance options
-        amp=True,           # use mixed precision (FP16) for speed
+        amp=True,
         pretrained=True,
-        cos_lr=True,        # cosine learning rate schedule
-        device=DEVICE,
-        cache="ram",        # load all data into RAM (if you have enough memory)
-
-        # Logging options
-        project="runs/fred_event",
-        name="yolo11s_fast_train",
+        cos_lr=True,
+        device=args.device,
+        cache="ram",
+        project=args.project,
+        name=args.name,
     )
-
-    # Run validation after training
     print("\nRunning validation...\n")
-    model.val(data=str(YAML_PATH), device=DEVICE)
-
-    # Export the trained model to TensorRT (FP16) for fast inference
-    print("\nExporting TensorRT FP16 engine for ultra-fast inference...\n")
-    model.export(format="engine", half=True, device=DEVICE)
-
+    model.val(data=str(YAML_PATH), device=args.device)
+    if not args.no_export:
+        print("\nExporting TensorRT FP16 engine for ultra-fast inference...\n")
+        model.export(format="engine", half=True, device=args.device)
     print("\n✓ Done. Ready for high-speed TensorRT inference.\n")
-
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,5 @@
-from ultralytics import YOLOWorld
+import cv2
+from ultralytics import YOLO
 
 from src.models import CropCoords
 import numpy as np
@@ -7,11 +8,8 @@ from src.config import YOLO_CONFIDENCE_THRESHOLD
 from src.logger import get_logger
 
 # Load model once globally
-model = YOLOWorld("yolov8s-worldv2.pt")
-model.set_classes(["drone", "uav", "quadrotor", "airplane"])
-
+model = YOLO("best.pt")  # Use standard YOLO, not YOLOWorld
 logger = get_logger()
-
 
 def detect_drone_crop(frame: np.ndarray) -> CropCoords | None:
     """
@@ -20,17 +18,15 @@ def detect_drone_crop(frame: np.ndarray) -> CropCoords | None:
 
     Args:
         frame: Input frame to detect drone in
-        conf_threshold: Minimum confidence threshold (0-1), default 0.1 for event camera frames
-        verbose: Whether to print detection info
     """
-    result = model.predict(frame, conf=YOLO_CONFIDENCE_THRESHOLD, verbose=False)[0]
-
-    if result.boxes is None or len(result.boxes) == 0:
+    # Inference
+    results = model.predict(frame, conf=YOLO_CONFIDENCE_THRESHOLD, verbose=False)
+    if not results or not hasattr(results[0], 'boxes') or results[0].boxes is None or len(results[0].boxes) == 0:
         logger.debug("YOLO: No drone detected")
         return None
 
-    # take first or highest-confidence box
-    b = result.boxes[0]
+    # Take first or highest-confidence box
+    b = results[0].boxes[0]
     confidence = float(b.conf[0])
     x1, y1, x2, y2 = map(int, b.xyxy[0])
 
@@ -44,5 +40,4 @@ def detect_drone_crop(frame: np.ndarray) -> CropCoords | None:
         f"YOLO: Detected drone at ({x1},{y1})-({x2},{y2}) conf={confidence:.3f}"
     )
 
-    # crop
     return CropCoords(x1=x1, x2=x2, y1=y1, y2=y2)

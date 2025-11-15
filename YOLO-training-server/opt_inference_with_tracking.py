@@ -3,6 +3,7 @@ import time
 from ultralytics import YOLO
 from pathlib import Path
 import natsort
+import argparse
 
 # ============================================================
 # CONFIG
@@ -32,98 +33,88 @@ SHOW_WINDOW = False
 # ============================================================
 
 def main():
-    print(f"Loading TensorRT engine: {MODEL_PATH}")
-    model = YOLO(MODEL_PATH)
+    parser = argparse.ArgumentParser(description="YOLO TensorRT/ONNX Inference with Tracking Pipeline")
+    parser.add_argument('--model', type=str, default=MODEL_PATH, help='Path to YOLO model or engine')
+    parser.add_argument('--data', type=str, default=str(TEST_DIR), help='Directory with input images')
+    parser.add_argument('--output', type=str, default=OUTPUT_VIDEO, help='Output video filename')
+    parser.add_argument('--imgsz', type=int, default=IMG_SIZE, help='Inference image size')
+    parser.add_argument('--device', type=str, default='0', help='Device for inference (cpu, cuda, mps, 0, 1, etc)')
+    parser.add_argument('--tracker', type=str, default='botsort.yaml', help='Tracker config file')
+    parser.add_argument('--conf', type=float, default=0.3, help='Confidence threshold')
+    parser.add_argument('--show', action='store_true', help='Show window (GUI)')
+    args = parser.parse_args()
 
+    print(f"Loading model: {args.model}")
+    model = YOLO(args.model)
     if USE_TRACKER:
-        model.tracker = "botsort.yaml"
+        model.tracker = args.tracker
 
-    # Load test frames
     image_paths = natsort.natsorted(
-        list(TEST_DIR.glob("*.png")) +
-        list(TEST_DIR.glob("*.jpg")) +
-        list(TEST_DIR.glob("*.jpeg"))
+        list(Path(args.data).glob("*.png")) +
+        list(Path(args.data).glob("*.jpg")) +
+        list(Path(args.data).glob("*.jpeg"))
     )
-
     if len(image_paths) == 0:
-        raise RuntimeError(f"No image frames found in: {TEST_DIR}")
-
+        raise RuntimeError(f"No image frames found in: {args.data}")
     print(f"Found {len(image_paths)} frames.")
 
-    # Get frame dimensions
     first_frame = cv2.imread(str(image_paths[0]))
     h, w = first_frame.shape[:2]
-
-    # Output video writer
     writer = cv2.VideoWriter(
-        OUTPUT_VIDEO,
+        args.output,
         cv2.VideoWriter_fourcc(*"mp4v"),
         30.0,
         (w, h)
     )
-
     total_ms = 0
     total_frames = 0
-
+    inference_times = []
     for img_path in image_paths:
         frame = cv2.imread(str(img_path))
         if frame is None:
             continue
-
-        # ------------------ TensorRT Inference + Timing ------------------
         t0 = time.time()
         results = model.predict(
             frame,
-            imgsz=IMG_SIZE,        # MUST be 960 for TensorRT engine
-            conf=0.3,
-            device=0,
+            imgsz=args.imgsz,
+            conf=args.conf,
+            device=args.device,
             verbose=False
         )
         infer_ms = (time.time() - t0) * 1000
+        inference_times.append(infer_ms)
         total_ms += infer_ms
         total_frames += 1
-
         fps = 1000 / infer_ms
-
-        # ------------------ Overlay stats ------------------
         annotated = results[0].plot()
-
         cv2.putText(
             annotated, f"{infer_ms:.2f} ms", (12, 42),
             cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 255), 2
         )
-
         cv2.putText(
             annotated, f"{fps:.1f} FPS", (12, 90),
             cv2.FONT_HERSHEY_SIMPLEX, 1.3, (0, 255, 0), 2
         )
-
-        # Save frame to video
         writer.write(annotated)
-
-        # Print to terminal
         print(f"[{total_frames}]  {infer_ms:.2f} ms   ({fps:.1f} FPS)")
-
-        # Optional GUI (disabled for SSH)
-        if SHOW_WINDOW:
+        if args.show:
             cv2.imshow("TensorRT Tracking", annotated)
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
-
     writer.release()
-    if SHOW_WINDOW:
+    if args.show:
         cv2.destroyAllWindows()
-
-    # Summary
-    avg_ms = total_ms / total_frames
-
+    avg_ms = total_ms / total_frames if total_frames > 0 else 0
     print("\n=========================================")
     print(f"Total frames:      {total_frames}")
     print(f"Average latency:   {avg_ms:.2f} ms")
-    print(f"Average FPS:       {1000/avg_ms:.1f}")
-    print(f"Saved video:       {OUTPUT_VIDEO}")
+    print(f"Average FPS:       {1000/avg_ms:.1f}" if avg_ms > 0 else "Average FPS: N/A")
+    print(f"Saved video:       {args.output}")
     print("=========================================\n")
-
+    with open(args.output + "_metrics.txt", "w") as f:
+        f.write(f"Total frames: {total_frames}\n")
+        f.write(f"Average latency: {avg_ms:.2f} ms\n")
+        f.write(f"Average FPS: {1000/avg_ms:.1f}\n" if avg_ms > 0 else "Average FPS: N/A\n")
 
 if __name__ == "__main__":
     main()
