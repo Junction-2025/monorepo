@@ -1,13 +1,7 @@
 from typing import Tuple, List
 import numpy as np
 from numpy.typing import NDArray
-
-# Constants from paper
-EPSILON = 0.3  # Threshold factor for centroid selection
-MAX_ITERATIONS = 100  # Maximum K-means iterations
-CONVERGENCE_THRESHOLD = 1e-4  # Centroid movement threshold for convergence
-OUTLIER_THRESHOLD_MULTIPLIER = 3.0  # Threshold multiplier for outlier detection
-
+from src.roo.config import EPSILON, MAX_ITERATIONS, CONVERGENCE_THRESHOLD, OUTLIER_THRESHOLD_MULTIPLIER
 
 def initialize_centroids_from_heatmap(
     heatmap: NDArray[np.int64],
