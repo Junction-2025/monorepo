@@ -85,6 +85,8 @@ def kmeans(frame: np.ndarray, propeller_masks: Centroids) -> np.ndarray:
 
 
 def get_propeller_masks(frame: np.ndarray) -> np.ndarray:
+    frame = np.array([[int(p[0]) for p in row] for row in frame], dtype=np.uint8)
+
     heatmap = construct_heatmap(frame, factor=HEATMAP_PIXEL_SIZE)
     logger.info(f"Constructed heatmap: {heatmap} of dim {heatmap.shape}")
     centroids = get_heatmap_centroids(heatmap)
@@ -99,7 +101,6 @@ def get_propeller_masks(frame: np.ndarray) -> np.ndarray:
         np.repeat(prediction, HEATMAP_PIXEL_SIZE, axis=0), HEATMAP_PIXEL_SIZE, axis=1
     )
 
-    # Pad to match original frame size if needed
     h_diff = frame.shape[0] - mask.shape[0]
     w_diff = frame.shape[1] - mask.shape[1]
 

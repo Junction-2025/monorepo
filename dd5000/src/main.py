@@ -88,6 +88,9 @@ def main():
             br = (int(yolo_bounding_box.x2), int(yolo_bounding_box.y2))
             cv2.rectangle(frame, tl, br, (0, 255, 0), 2)
 
+            cropped_frame = frame[yolo_bounding_box.y1:yolo_bounding_box.y2, yolo_bounding_box.x1:yolo_bounding_box.x2]
+
+            mask = get_propeller_masks(cropped_frame)
             blade_count = get_blade_count()
             text_pos = (tl[0], max(0, tl[1] - 8))
             cv2.putText(
