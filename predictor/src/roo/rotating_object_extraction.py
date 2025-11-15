@@ -63,18 +63,16 @@ def find_clusters(
     """
 
     heatmap = find_heatmap(x, y, width=width, height=height, crop=drone_crop_coords)
-    np.savetxt(str(LOG_DIR / "heatmap.txt"), heatmap, fmt="%d")
 
     cx, cy = locate_centroids(heatmap)
+    print(f"Centroids: ({cx}, {cy})")
 
     # mark centroid locations in the reduced heatmap as -1
-    if cx is not None and cy is not None and len(cx) and len(cy):
-        h_new, w_new = heatmap.shape
-        ix = np.rint(cx).astype(np.intp)
-        iy = np.rint(cy).astype(np.intp)
-        valid = (ix >= 0) & (ix < w_new) & (iy >= 0) & (iy < h_new)
-        if np.any(valid):
-            heatmap[iy[valid], ix[valid]] = -1
+    ix = np.rint(cx).astype(np.intp)
+    iy = np.rint(cy).astype(np.intp)
+    h_new, w_new = heatmap.shape
+    valid = (ix >= 0) & (ix < w_new) & (iy >= 0) & (iy < h_new)
+    heatmap[iy[valid], ix[valid]] = -1
     draw_heatmap(heatmap, name="heatmap")
 
     return heatmap

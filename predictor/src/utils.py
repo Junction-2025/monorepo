@@ -25,28 +25,21 @@ def display_frame(frame: np.ndarray):
 
 
 def draw_heatmap(arr: np.ndarray, name="heatmap"):
-    heatmap = np.asarray(arr)
-    # work with a single-channel view (use first channel if given a 3-channel array)
-    if heatmap.ndim == 2:
-        scalar = heatmap
-    else:
-        scalar = heatmap[..., 0]
-
-    h, w = scalar.shape
+    h, w = arr.shape
     out = np.zeros((h, w, 3), dtype=np.uint8)
 
     # zeros -> white (255,255,255)
-    mask_zero = scalar == 0
+    mask_zero = arr == 0
     out[mask_zero] = [255, 255, 255]
 
     # -1 -> pure red (255,0,0)
-    mask_neg1 = scalar == -1
+    mask_neg1 = arr == -1
     out[mask_neg1] = [255, 0, 0]
 
     # scale all other (finite) values to 0..255 but reversed: min->255 and max->0
-    mask_other = ~(mask_zero | mask_neg1) & np.isfinite(scalar)
+    mask_other = ~(mask_zero | mask_neg1) & np.isfinite(arr)
     if np.any(mask_other):
-        vals = scalar[mask_other].astype(np.float64)
+        vals = arr[mask_other].astype(np.float64)
         vmin = vals.min()
         vmax = vals.max()
         if vmax == vmin:

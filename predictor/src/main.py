@@ -86,7 +86,7 @@ def main():
     print("---------------------")
 
     src = DatFileSource(
-        args.input, width=1280, height=720, window_length_us=args.window * 50
+        args.input, width=1280, height=720, window_length_us=args.window * 15
     )
     pacer = Pacer(
         speed=args.speed,
