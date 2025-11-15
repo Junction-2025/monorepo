@@ -70,8 +70,8 @@ def scale_centroids(centroids: Centroids, scaler: int):
     )
 
 
-def get_propeller_masks(heatmap: np.ndarray, propeller_masks: Centroids):
-    return
+def kmeans(heatmap: np.ndarray, propeller_masks: Centroids) -> np.ndarray:
+    return np.array([])
 
 
 def get_propeller_masks(frame: np.ndarray) -> np.ndarray:
@@ -81,8 +81,7 @@ def get_propeller_masks(frame: np.ndarray) -> np.ndarray:
     centroids = scale_centroids(centroids, HEATMAP_PIXEL_SIZE)
 
     logger.info(f"Found centroids: {centroids}")
-    propeller_masks = get_propeller_masks(heatmap, centroids)
-    return np.array([])
+    return kmeans(heatmap=heatmap, propeller_masks=centroids)
 
 
 def get_blade_count() -> int:
