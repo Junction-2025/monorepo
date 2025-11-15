@@ -3,7 +3,7 @@ from ultralytics import YOLO
 from src.models import CropCoords
 import numpy as np
 
-from src.config import YOLO_CONFIDENCE_THRESHOLD
+from src.config import YOLO_CONFIDENCE_THRESHOLD, MODEL_LOGGING_VERBOSE
 from src.logger import get_logger
 
 # Load model once globally
@@ -20,7 +20,7 @@ def detect_drone_crop(frame: np.ndarray) -> CropCoords | None:
         frame: Input frame to detect drone in
     """
     # Inference
-    results = model.predict(frame, conf=YOLO_CONFIDENCE_THRESHOLD, verbose=False)
+    results = model.predict(frame, conf=YOLO_CONFIDENCE_THRESHOLD, verbose=MODEL_LOGGING_VERBOSE)
     if (
         not results
         or not hasattr(results[0], "boxes")
