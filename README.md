@@ -8,3 +8,4 @@ This repository is our monorepo for the Junction 2025 Sensofusion challenge! It 
 - `rpm-calculator`: calculating RPM from cropped frames with fft
 - `YOLO-training-server`: server we used to fine-tune our YOLO model
 - `pyntcloud-implementation`: an implementation of a pyntcloud transition [SCRAPPED]
+- `dd5000-gigachad variant`: ???
