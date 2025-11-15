@@ -1,5 +1,6 @@
 from src.kmeans import construct_heatmap
 import numpy as np
+from src.kmeans import find_furthest_centroid
 
 
 def test_reduction_by_factor_two():
@@ -142,3 +143,13 @@ def test_reduction_9x9_by_factor_two():
             dtype=np.int32,
         ),
     )
+
+def test_find_furthest_centroid_linear_monotonic():
+    existing = [(0, 0), (2, 0), (4, 0)]
+    candidates = [(5, 0), (9, 0), (6, 0), (3, 0)]
+    assert find_furthest_centroid(existing, candidates) == (9, 0)
+
+def test_find_furthest_centroid_linear_symmetry():
+    existing = [(1, 0), (9, 0)]
+    candidates = [(0, 0), (5, 0), (10, 0)]
+    assert find_furthest_centroid(existing, candidates) == (10, 0)

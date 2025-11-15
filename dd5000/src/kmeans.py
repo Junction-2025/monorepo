@@ -18,7 +18,12 @@ def construct_heatmap(frame: np.ndarray, factor: int) -> np.ndarray:
 
     return reduced
 
-def find_furthest_centroid():
+def find_furthest_centroid(existing_centroids: list[tuple[int,int]], centroids: list[tuple[int,int]]) -> tuple[int,int]:
+    ex = np.asarray(existing_centroids, dtype=float)
+    cands = np.asarray(centroids, dtype=float)
+    mean_distances = ((cands[:, None, :] - ex[None, :, :])).sum(axis=2).mean(axis=1)
+    chosen = int(mean_distances.argmax())
+    return (int(cands[chosen, 0]), int(cands[chosen, 1]))
 
 def get_heatmap_centroids(heatmap: np.ndarray) -> Centroids:   
     heatmap_max_val = heatmap.max()
@@ -30,11 +35,12 @@ def get_heatmap_centroids(heatmap: np.ndarray) -> Centroids:
         if sorted_contiguous_heatmap[i] > centroid_inclusion_threshold:
             sorted_centroid_indices.append(i)
 
-    sorted_centroid_indices_xy = list(map(lambda idx: (idx % heatmap.shape[1], idx // heatmap.shape[1]), sorted_centroid_indices))
+    sorted_centroid_indices_xy = [(idx % heatmap.shape[1], idx // heatmap.shape[1]) for idx in sorted_centroid_indices]
     centroids = [sorted_centroid_indices_xy[0]]
     for i, centroid_index in enumerate(sorted_centroid_indices_xy[1:]):
+        existing_centroids = sorted_centroid_indices_xy[:i]
         remaining_centroids_xy = sorted_centroid_indices_xy[i+1:]
-
+        furthest_centroid = find_furthest_centroid(existing_centroids, remaining_centroids_xy)
 
     return Centroids(
         x_coords=centroids[1],
