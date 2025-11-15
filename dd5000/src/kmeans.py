@@ -1,5 +1,5 @@
 import numpy as np
-from src.config import HEATMAP_PIXEL_SIZE, CENTROID_EPSILON, K_CANDIDATES
+from src.config import HEATMAP_PIXEL_SIZE, CENTROID_EPSILON, K_CANDIDATES, OUTLIER_DISTANCE_MULTIPLIER
 from src.logger import get_logger
 from src.models import Centroids
 from sklearn.cluster import KMeans
@@ -74,6 +74,25 @@ def scale_centroids(centroids: Centroids, scaler: int):
     )
 
 
+def remove_outliers(points: np.ndarray, labels: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    if len(points) == 0:
+        return points, labels
+
+    unique_labels = np.unique(labels)
+    centroids = np.array([points[labels == lbl].mean(axis=0) for lbl in unique_labels])
+
+    distances = np.array([
+        np.linalg.norm(point - centroids[np.where(unique_labels == label)[0][0]])
+        for point, label in zip(points, labels)
+    ])
+
+    threshold = OUTLIER_DISTANCE_MULTIPLIER * np.median(distances)
+    mask = distances <= threshold
+
+    logger.info(f"Removed {(~mask).sum()} outliers (threshold: {threshold:.2f})")
+    return points[mask], labels[mask]
+
+
 def kmeans(frame: np.ndarray, propeller_masks: Centroids) -> tuple[np.ndarray, np.ndarray]:
     rows, cols = np.nonzero(frame)
     points = np.column_stack([cols, rows])  # Now in (x, y) format
@@ -111,7 +130,11 @@ def kmeans(frame: np.ndarray, propeller_masks: Centroids) -> tuple[np.ndarray, n
         return points, np.zeros(len(points), dtype=int)
 
     best_labels = labels_list[int(np.argmin(scores))]
-    return points, best_labels
+
+    # Remove outliers based on median distance threshold
+    points_filtered, labels_filtered = remove_outliers(points, best_labels)
+
+    return points_filtered, labels_filtered
 
 
 

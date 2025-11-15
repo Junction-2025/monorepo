@@ -29,11 +29,25 @@ def detect_drone_crop(frame: np.ndarray) -> CropCoords | None:
     ):
         logger.debug("YOLO: No drone detected")
         return None
+    # Take the box with the largest area
+    boxes = results[0].boxes
+    # Extract xyxy and confidences (handle torch tensors or numpy)
+    try:
+        xyxy = boxes.xyxy.cpu().numpy()
+        confs = boxes.conf.cpu().numpy()
+    except Exception:
+        xyxy = np.array(boxes.xyxy)
+        confs = np.array(boxes.conf)
 
-    # Take first or highest-confidence box
-    b = results[0].boxes[0]
-    confidence = float(b.conf[0])
-    x1, y1, x2, y2 = map(int, b.xyxy[0])
+    # Defensive: if nothing found (should be covered above), bail out
+    if xyxy.size == 0:
+        logger.debug("YOLO: No drone detected after extracting boxes")
+        return None
+
+    areas = (xyxy[:, 2] - xyxy[:, 0]) * (xyxy[:, 3] - xyxy[:, 1])
+    idx = int(np.argmax(areas))
+    x1, y1, x2, y2 = map(int, xyxy[idx])
+    confidence = float(confs[idx])
 
     h, w = frame.shape[:2]
     x1 = max(0, x1)
