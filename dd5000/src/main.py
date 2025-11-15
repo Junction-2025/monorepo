@@ -9,7 +9,7 @@ from src.evio_lib.play_dat import get_frame, get_window
 
 from src.yolo import detect_drone_crop
 from src.logger import get_logger
-from src.kmeans import get_blade_count
+from src.kmeans import get_blade_count, get_propeller_masks
 import cv2
 
 
@@ -72,8 +72,6 @@ def main():
     cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
 
     logger.info("\n--- Data Import Complete ---")
-    logger.info("Press 'q' or ESC to exit")
-
     for batch_range in pacer.pace(src.ranges()):
         window = get_window(
             src.event_words,
@@ -84,6 +82,7 @@ def main():
         frame = get_frame(window)
 
         yolo_bounding_box = detect_drone_crop(frame)
+
         if yolo_bounding_box:
             tl = (int(yolo_bounding_box.x1), int(yolo_bounding_box.y1))
             br = (int(yolo_bounding_box.x2), int(yolo_bounding_box.y2))
@@ -97,7 +96,6 @@ def main():
                 text_pos,
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.6,
-                (0, 255, 0),
                 2,
             )
 
