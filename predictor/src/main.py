@@ -45,31 +45,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--window",
         type=int,
-        default=10000,
+        default=10000 * 15, # 150ms as per paper
         help="Batch window size in microseconds (default: 10000 µs = 10ms).",
     )
-    # The --gui argument is no longer needed without a GUI
     return parser.parse_args()
-
-
-def decode_batch(
-    source: DatFileSource, batch: BatchRange
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Decode the event data for a given batch range."""
-    # Get the time-ordered indices for the current batch
-    ordered_indices = source.order[batch.start : batch.stop]
-
-    # Get the corresponding packed event words
-    w32 = source.event_words[ordered_indices].astype(np.uint32)
-
-    # Decode polarity, x, and y from the packed words
-    # Polarity: > 0 -> ON (1), 0 -> OFF (0)
-    pol = ((w32 >> 28) & 0xF).astype(np.uint8)
-    pol = (pol > 0).astype(np.uint8)
-    y = ((w32 >> 14) & 0x3FFF).astype(np.int64)
-    x = (w32 & 0x3FFF).astype(np.int64)
-
-    return x, y, pol
 
 
 def main():
@@ -86,7 +65,7 @@ def main():
     print("---------------------")
 
     src = DatFileSource(
-        args.input, width=1280, height=720, window_length_us=args.window * 15
+        args.input, width=1280, height=720, window_length_us=args.window
     )
     pacer = Pacer(
         speed=args.speed,
