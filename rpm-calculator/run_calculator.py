@@ -75,10 +75,10 @@ def main():
     # Hardcoded roi drone_idle (bounding box)
     #roi = (500, 700, 300, 450)
     # Hardcoded roi fan_const_rpm (bounding box)
-    roi = (550, 700, 250, 440)
+    #roi = (550, 700, 250, 440)
     # Hardcoded roi drone_moving (bounding box)
-    #roi = (800, 880, 22, 300)
-    blade_count = 3
+    roi = (750, 950, 200, 330)
+    blade_count = 2
     
     print("Loading data...")
 
@@ -101,10 +101,12 @@ def main():
         roi_frames.append(roi_frame)
         
         # Show the ROI video
+        """
         cv2.imshow("ROI Video", roi_frame)
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q") or key == 27:  # Quit on 'q' or ESC
             break
+        """
         
     print("Frames loaded")
     
