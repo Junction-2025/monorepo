@@ -85,9 +85,8 @@ def main():
     print(f"Playback speed: {args.speed}x")
     print("---------------------")
 
-    # The issue was here: args.window is already in µs, so multiplying by 1000 was incorrect.
     src = DatFileSource(
-        args.input, width=1280, height=720, window_length_us=args.window * 100
+        args.input, width=1280, height=720, window_length_us=args.window * 50
     )
     pacer = Pacer(
         speed=args.speed,

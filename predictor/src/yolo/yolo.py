@@ -38,7 +38,7 @@ def detect_drone_crop(
     b = result.boxes[0]
     confidence = float(b.conf[0])
     x1, y1, x2, y2 = map(int, b.xyxy[0])
-    margin = 10
+    margin = 30
     h, w = frame.shape[:2]
     x1 = max(0, x1 - margin)
     y1 = max(0, y1 - margin)

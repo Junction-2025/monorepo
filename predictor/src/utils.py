@@ -43,5 +43,20 @@ def draw_heatmap(arr: np.ndarray, name="heatmap"):
     mask_neg1 = scalar == -1
     out[mask_neg1] = [255, 0, 0]
 
+    # scale all other (finite) values to 0..255 but reversed: min->255 and max->0
+    mask_other = ~(mask_zero | mask_neg1) & np.isfinite(scalar)
+    if np.any(mask_other):
+        vals = scalar[mask_other].astype(np.float64)
+        vmin = vals.min()
+        vmax = vals.max()
+        if vmax == vmin:
+            # single value -> map to 0 (reversed)
+            scaled = np.full(vals.shape, 0, dtype=np.uint8)
+        else:
+            # normalize to 0..255 then invert so min->255 and max->0
+            norm = np.clip((vals - vmin) / (vmax - vmin) * 255, 0, 255).astype(np.uint8)
+            scaled = (255 - norm).astype(np.uint8)
+        out[mask_other] = np.stack([scaled, scaled, scaled], axis=-1)
+
     Image.fromarray(out).save(LOG_DIR / f"{name}.png", format="PNG")
     print(f"--- Drew {LOG_DIR / f'{name}.png'} ---")
