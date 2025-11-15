@@ -102,3 +102,43 @@ def test_reduction_8x8_by_factor_four():
             dtype=np.int32,
         ),
     )
+
+
+def test_reduction_9x9_by_factor_two():
+    """Test reduction of 9x9 array with factor 2 - tests handling of non-divisible dimensions"""
+    test_frame = np.array(
+        [
+            [1, 1, 2, 2, 3, 3, 4, 4, 5],
+            [1, 1, 2, 2, 3, 3, 4, 4, 5],
+            [2, 2, 3, 3, 4, 4, 5, 5, 6],
+            [2, 2, 3, 3, 4, 4, 5, 5, 6],
+            [3, 3, 4, 4, 5, 5, 6, 6, 7],
+            [3, 3, 4, 4, 5, 5, 6, 6, 7],
+            [4, 4, 5, 5, 6, 6, 7, 7, 8],
+            [4, 4, 5, 5, 6, 6, 7, 7, 8],
+            [5, 5, 6, 6, 7, 7, 8, 8, 9],
+        ],
+        dtype=np.int32,
+    )
+    reduced = construct_heatmap(test_frame, factor=2)
+
+    print(reduced)
+
+    assert reduced.shape == (4, 4)
+    # Each 2x2 block is summed
+    # Row 0: [1,1,1,1]=4, [2,2,2,2]=8, [3,3,3,3]=12, [4,4,4,4]=16
+    # Row 1: [2,2,2,2]=8, [3,3,3,3]=12, [4,4,4,4]=16, [5,5,5,5]=20
+    # Row 2: [3,3,3,3]=12, [4,4,4,4]=16, [5,5,5,5]=20, [6,6,6,6]=24
+    # Row 3: [4,4,4,4]=16, [5,5,5,5]=20, [6,6,6,6]=24, [7,7,7,7]=28
+    assert np.array_equal(
+        reduced,
+        np.array(
+            [
+                [4, 8, 12, 16],
+                [8, 12, 16, 20],
+                [12, 16, 20, 24],
+                [16, 20, 24, 28],
+            ],
+            dtype=np.int32,
+        ),
+    )
