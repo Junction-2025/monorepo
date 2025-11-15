@@ -1,7 +1,9 @@
 import numpy as np
-from src.config import HEATMAP_PIXEL_SIZE, CENTROID_EPSILON
+from src.config import HEATMAP_PIXEL_SIZE, CENTROID_EPSILON, K_CANDIDATES
 from src.logger import get_logger
-from src.models import Centroids, k_means_maker
+from src.models import Centroids
+from sklearn.cluster import KMeans
+from sklearn.metrics import davies_bouldin_score
 
 logger = get_logger()
 
@@ -72,16 +74,45 @@ def scale_centroids(centroids: Centroids, scaler: int):
     )
 
 
-def kmeans(frame: np.ndarray, propeller_masks: Centroids) -> np.ndarray:
-    k_means_model = k_means_maker(propeller_masks)
-    # Convert frame pixels to (x, y) coordinate pairs for clustering
-    height, width = frame.shape
-    y_coords, x_coords = np.meshgrid(range(height), range(width), indexing="ij")
-    pixel_coords = np.column_stack([x_coords.ravel(), y_coords.ravel()])
+def kmeans(frame: np.ndarray, propeller_masks: Centroids) -> tuple[np.ndarray, np.ndarray]:
+    rows, cols = np.nonzero(frame)
+    points = np.column_stack([cols, rows])  # Now in (x, y) format
 
-    k_means_model.fit(pixel_coords)
-    labels = k_means_model.predict(pixel_coords)
-    return labels.reshape(frame.shape)
+    if len(points) == 0:
+        logger.warning("No non-zero points found in frame")
+        return points, np.array([])
+
+    points_mean = points.mean(axis=0)
+    points_std = points.std(axis=0)
+
+    points_std = np.where(points_std == 0, 1, points_std)
+    points_normalized = (points - points_mean) / points_std
+
+    labels_list, scores = [], []
+    for k in K_CANDIDATES:
+        if k > len(propeller_masks.x_coords):
+            continue
+
+        centroids_array = np.column_stack([propeller_masks.x_coords, propeller_masks.y_coords])
+        centroids_normalized = (centroids_array - points_mean) / points_std
+
+        model = KMeans(n_clusters=k, init=centroids_normalized[:k], n_init=1, random_state=42)
+        model.fit(points_normalized)
+        labels = model.labels_
+
+        if len(np.unique(labels)) < 2:
+            continue
+
+        labels_list.append(labels)
+        scores.append(davies_bouldin_score(points_normalized, labels))
+
+    if not labels_list:
+        logger.warning("No valid clustering found, returning all zeros")
+        return points, np.zeros(len(points), dtype=int)
+
+    best_labels = labels_list[int(np.argmin(scores))]
+    return points, best_labels
+
 
 
 def get_propeller_masks(frame: np.ndarray) -> np.ndarray:
@@ -93,20 +124,11 @@ def get_propeller_masks(frame: np.ndarray) -> np.ndarray:
     centroids = scale_centroids(centroids, HEATMAP_PIXEL_SIZE)
 
     logger.info(f"Found centroids: {centroids}")
-    prediction = kmeans(frame=frame, propeller_masks=centroids)
-    logger.info(f"Prediction: {prediction}")
+    points, labels = kmeans(frame=frame, propeller_masks=centroids)
+    logger.info(f"Labels shape: {labels.shape}, unique labels: {np.unique(labels)}")
 
-    # Scale prediction back to original frame dimensions
-    mask = np.repeat(
-        np.repeat(prediction, HEATMAP_PIXEL_SIZE, axis=0), HEATMAP_PIXEL_SIZE, axis=1
-    )
-
-    h_diff = frame.shape[0] - mask.shape[0]
-    w_diff = frame.shape[1] - mask.shape[1]
-
-    if h_diff > 0 or w_diff > 0:
-        # Pad with edge values
-        mask = np.pad(mask, ((0, h_diff), (0, w_diff)), mode="edge")
+    mask = np.zeros(frame.shape, dtype=np.uint8)
+    mask[points[:, 1], points[:, 0]] = labels
 
     return mask
 

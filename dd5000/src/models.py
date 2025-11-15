@@ -17,6 +17,6 @@ class CropCoords:
     y2: int
 
 
-def k_means_maker(centroids: Centroids):
+def k_means_maker(centroids: Centroids, n_clusters: int = 2):
     init_centers = np.column_stack([centroids.x_coords, centroids.y_coords])
-    return KMeans(n_clusters=2, init=init_centers[:2], n_init=1)
+    return KMeans(n_clusters=n_clusters, init=init_centers[:n_clusters], n_init=1)
