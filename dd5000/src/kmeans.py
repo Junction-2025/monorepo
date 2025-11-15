@@ -1,33 +1,32 @@
 import numpy as np
-from src.config import HEATMAP_PIXEL_SIZE
+from src.config import HEATMAP_PIXEL_SIZE, CENTROID_EPSILON
 from src.logger import get_logger
-from dataclasses import dataclass
+from src.models import Centroids
 
 logger = get_logger()
 
 def construct_heatmap(frame: np.ndarray, factor: int) -> np.ndarray:
-    x, y = frame[0], frame[1]
-    width, height = len(x), len(y)
-
-    heatmap = np.zeros((height, width), dtype=np.int32)
-    np.add.at(heatmap, (x, y), 1)
-
+    height, width = frame.shape
     h_new = height // factor
     w_new = width // factor
     reduced = (
-        heatmap[: h_new * factor, : w_new * factor]
+        frame[: h_new * factor, : w_new * factor]
         .reshape(h_new, factor, w_new, factor)
         .sum(axis=(1, 3))
     )
 
     return reduced
 
-@dataclass(frozen=True)
-class Centroids():
-    x_coords: np.ndarray
-    y_coords: np.ndarray
+def get_heatmap_centroids(heatmap: np.ndarray) -> Centroids:   
+    heatmap_max_val = heatmap.max()
+    centroid_inclusion_threshold = heatmap_max_val * CENTROID_EPSILON
 
-def get_heatmap_centroids(heatmap: np.ndarray) -> :
+
+
+    return Centroids(
+
+    )
+
 
 
 def get_propeller_masks(frame: np.ndarray) -> np.ndarray:
