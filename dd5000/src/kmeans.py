@@ -1,7 +1,7 @@
 import numpy as np
 from src.config import HEATMAP_PIXEL_SIZE, CENTROID_EPSILON
 from src.logger import get_logger
-from src.models import Centroids
+from src.models import Centroids, k_means_maker
 
 logger = get_logger()
 
@@ -51,13 +51,12 @@ def get_heatmap_centroids(heatmap: np.ndarray) -> Centroids:
         for idx in sorted_centroid_indices
     ]
     centroids = [sorted_centroid_indices_xy[0]]
-    for i, _ in enumerate(sorted_centroid_indices_xy[1:]):
-        existing_centroids = sorted_centroid_indices_xy[:i]
-        remaining_centroids_xy = sorted_centroid_indices_xy[i + 1 :]
-        furthest_centroid = find_furthest_centroid(
-            existing_centroids, remaining_centroids_xy
-        )
+    remaining_candidates = sorted_centroid_indices_xy[1:]
+
+    while remaining_candidates:
+        furthest_centroid = find_furthest_centroid(centroids, remaining_candidates)
         centroids.append(furthest_centroid)
+        remaining_candidates = [c for c in remaining_candidates if c != furthest_centroid]
 
     return Centroids(
         x_coords=[c[0] for c in centroids], y_coords=[c[1] for c in centroids]
@@ -66,12 +65,21 @@ def get_heatmap_centroids(heatmap: np.ndarray) -> Centroids:
 
 def scale_centroids(centroids: Centroids, scaler: int):
     return Centroids(
-        x_coords=centroids.x_coords * scaler, y_coords=centroids.x_coords * scaler
+        x_coords=[x * scaler for x in centroids.x_coords],
+        y_coords=[y * scaler for y in centroids.y_coords]
     )
 
 
-def kmeans(heatmap: np.ndarray, propeller_masks: Centroids) -> np.ndarray:
-    return np.array([])
+def kmeans(frame: np.ndarray, propeller_masks: Centroids) -> np.ndarray:
+    k_means_model = k_means_maker(propeller_masks)
+    # Convert frame pixels to (x, y) coordinate pairs for clustering
+    height, width = frame.shape
+    y_coords, x_coords = np.meshgrid(range(height), range(width), indexing='ij')
+    pixel_coords = np.column_stack([x_coords.ravel(), y_coords.ravel()])
+
+    k_means_model.fit(pixel_coords)
+    labels = k_means_model.predict(pixel_coords)
+    return labels.reshape(frame.shape)
 
 
 def get_propeller_masks(frame: np.ndarray) -> np.ndarray:
@@ -81,7 +89,21 @@ def get_propeller_masks(frame: np.ndarray) -> np.ndarray:
     centroids = scale_centroids(centroids, HEATMAP_PIXEL_SIZE)
 
     logger.info(f"Found centroids: {centroids}")
-    return kmeans(heatmap=heatmap, propeller_masks=centroids)
+    prediction = kmeans(frame=frame, propeller_masks=centroids)
+    logger.info(f"Prediction: {prediction}")
+
+    # Scale prediction back to original frame dimensions
+    mask = np.repeat(np.repeat(prediction, HEATMAP_PIXEL_SIZE, axis=0), HEATMAP_PIXEL_SIZE, axis=1)
+
+    # Pad to match original frame size if needed
+    h_diff = frame.shape[0] - mask.shape[0]
+    w_diff = frame.shape[1] - mask.shape[1]
+
+    if h_diff > 0 or w_diff > 0:
+        # Pad with edge values
+        mask = np.pad(mask, ((0, h_diff), (0, w_diff)), mode='edge')
+
+    return mask
 
 
 def get_blade_count() -> int:
