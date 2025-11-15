@@ -67,6 +67,7 @@ def find_clusters(
     cx, cy = locate_centroids(heatmap)
     print(f"Centroids: ({cx}, {cy})")
 
+    # === TEST CODE === 
     # mark centroid locations in the reduced heatmap as -1
     ix = np.rint(cx).astype(np.intp)
     iy = np.rint(cy).astype(np.intp)
@@ -74,5 +75,6 @@ def find_clusters(
     valid = (ix >= 0) & (ix < w_new) & (iy >= 0) & (iy < h_new)
     heatmap[iy[valid], ix[valid]] = -1
     draw_heatmap(heatmap, name="heatmap")
+    # === TEST CODE ===
 
     return heatmap
