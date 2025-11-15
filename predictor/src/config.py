@@ -15,6 +15,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).parent.parent
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(exist_ok=True)
+DATA_DIR = BASE_DIR.parent / "data"
 
 
 # =============================================================================
@@ -37,11 +38,12 @@ YOLO_MARGIN = 30  # Padding around detected drone region
 # =============================================================================
 
 # Heatmap parameters
-HEATMAP_PIXEL_SIZE = 4  # Bin size for spatial heatmap (pixels)
+HEATMAP_PIXEL_SIZE = 4  # Bin size for spatial heatmap (pixels) - from paper
+EPSILON = 0.3  # Threshold factor for centroid selection
 
 # K-means clustering
 DEFAULT_K = 4  # Default number of clusters when adaptive selection disabled
-MAX_KMEANS_ITERATIONS = 20  # Maximum iterations for k-means convergence
+MAX_ITERATIONS = 100  # Maximum iterations for k-means convergence
 CONVERGENCE_THRESHOLD = 1e-4  # Centroid movement threshold for convergence
 
 # Adaptive K selection
@@ -59,6 +61,7 @@ AOI_UPDATE_INTERVAL_US = 50_000  # Update frequency (50ms)
 # =============================================================================
 # RPM Estimation
 # =============================================================================
+
 
 @dataclass
 class RPMConfig:
@@ -78,7 +81,7 @@ RPM_WINDOW_US = 30_000  # Time window for RPM estimation (30ms)
 # Streaming / Buffering
 # =============================================================================
 
-BATCH_WINDOW_US = 150_000  # Default batch window size (150ms as per paper)
+BATCH_WINDOW_US = 100_000  # Default batch window size (150ms as per paper)
 EVENT_BUFFER_MAX_US = 200_000  # Maximum event buffer retention (200ms)
 
 
@@ -101,4 +104,4 @@ TEXT_THICKNESS = 2
 ENABLE_FRAME_LOGGING = True  # Save frames with overlays
 ENABLE_HEATMAP_LOGGING = True  # Save heatmaps
 ENABLE_LABEL_LOGGING = True  # Save cluster labels
-LOG_EVERY_N_FRAMES = 10  # Save every Nth frame (to avoid excessive I/O)
+LOG_EVERY_N_FRAMES = 3  # Save every Nth frame (to avoid excessive I/O)

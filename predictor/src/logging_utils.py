@@ -243,11 +243,6 @@ def log_rpm_estimate(
     logger.info(f"Frame {frame_number}: AOI {aoi_idx} RPM={rpm:.2f}")
 
 
-def log_error(logger: logging.Logger, error_msg: str) -> None:
-    """Log error message."""
-    logger.error(error_msg)
-
-
 def finalize_run(
     ctx: RunContext,
     total_frames: int,

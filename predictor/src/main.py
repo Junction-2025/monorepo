@@ -25,7 +25,6 @@ from src.config import (
     AOI_UPDATE_INTERVAL_US,
     RPM_WINDOW_US,
     BATCH_WINDOW_US,
-    EVENT_BUFFER_MAX_US,
     BBOX_COLOR,
     TEXT_COLOR,
     CENTROID_COLOR,
@@ -105,9 +104,7 @@ def update_aois_if_needed(
         return [], last_update_us, None, None
 
     # Generate heatmap for logging
-    heatmap = find_heatmap(
-        buf_x[aoi_mask], buf_y[aoi_mask], height=height, width=width
-    )
+    heatmap = find_heatmap(buf_x[aoi_mask], buf_y[aoi_mask], height=height, width=width)
 
     # Generate labels for logging
     labels, _, _ = locate_centroids(heatmap, k=num_clusters)
@@ -312,15 +309,22 @@ def main():
     print(f"AOI clusters: {args.num_clusters}")
     print(f"Blade symmetry: {args.symmetry}")
     print(f"Display: {'disabled' if args.no_display else 'enabled'}")
-    print(f"Logging: {'disabled' if args.no_logging else f'enabled -> {log_ctx.run_dir}'}")
+    print(
+        f"Logging: {'disabled' if args.no_logging else f'enabled -> {log_ctx.run_dir}'}"
+    )
     print("---------------------")
 
     if log_ctx:
         log_ctx.logger.info(f"Input file: {args.input}")
-        log_ctx.logger.info(f"Speed: {args.speed}x, Clusters: {args.num_clusters}, Symmetry: {args.symmetry}")
+        log_ctx.logger.info(
+            f"Speed: {args.speed}x, Clusters: {args.num_clusters}, Symmetry: {args.symmetry}"
+        )
 
     src = DatFileSource(
-        args.input, width=DEFAULT_WIDTH, height=DEFAULT_HEIGHT, window_length_us=args.window
+        args.input,
+        width=DEFAULT_WIDTH,
+        height=DEFAULT_HEIGHT,
+        window_length_us=args.window,
     )
     pacer = Pacer(
         speed=args.speed,

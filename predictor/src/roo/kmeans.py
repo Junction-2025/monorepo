@@ -1,7 +1,7 @@
 from typing import Tuple, List
 import numpy as np
 from numpy.typing import NDArray
-from src.roo.config import (
+from src.config import (
     EPSILON,
     MAX_ITERATIONS,
     CONVERGENCE_THRESHOLD,

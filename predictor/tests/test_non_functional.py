@@ -3,6 +3,7 @@ Non-functional test battery for RPM detection.
 
 Tests the predictor against known scenarios with expected RPM ranges.
 """
+
 import subprocess
 from pathlib import Path
 from dataclasses import dataclass
@@ -11,6 +12,7 @@ from dataclasses import dataclass
 @dataclass
 class TestCase:
     """Defines a test scenario with expected RPM range."""
+
     name: str
     filename: str
     expected_min: float
@@ -27,35 +29,35 @@ TEST_CASES = [
         filename="fan_const_rpm.dat",
         expected_min=1000,
         expected_max=1200,
-        notes="Fan rotating at constant speed, ~10s duration"
+        notes="Fan rotating at constant speed, ~10s duration",
     ),
     TestCase(
         name="Fan Varying RPM",
         filename="fan_varying_rpm.dat",
         expected_min=1100,
         expected_max=1300,
-        notes="Fan with changing speed, ~20s duration"
+        notes="Fan with changing speed, ~20s duration",
     ),
     TestCase(
         name="Fan Varying RPM Turning",
         filename="fan_varying_rpm_turning.dat",
         expected_min=1100,
         expected_max=1300,
-        notes="Fan with changing speed and orientation, ~25s duration"
+        notes="Fan with changing speed and orientation, ~25s duration",
     ),
     TestCase(
         name="Drone Idle",
         filename="drone_idle.dat",
         expected_min=5000,
         expected_max=6000,
-        notes="Stationary drone at ~100m, yolo-verified frames only"
+        notes="Stationary drone at ~100m, yolo-verified frames only",
     ),
     TestCase(
         name="Drone Moving",
         filename="drone_moving.dat",
         expected_min=5500,
         expected_max=6500,
-        notes="Moving drone at ~100m, ~20s duration"
+        notes="Moving drone at ~100m, ~20s duration",
     ),
 ]
 
@@ -73,13 +75,18 @@ def run_predictor(file_path: Path, num_clusters: int, symmetry: int) -> float | 
 
     cmd = [
         str(venv_python),
-        "-m", "src.main",
-        "--input", str(file_path),
+        "-m",
+        "src.main",
+        "--input",
+        str(file_path),
         "--no-display",
         "--no-logging",
-        "--speed", "5",  # Run at 5x speed for faster testing
-        "--num-clusters", str(num_clusters),
-        "--symmetry", str(symmetry),
+        "--speed",
+        "5",  # Run at 5x speed for faster testing
+        "--num-clusters",
+        str(num_clusters),
+        "--symmetry",
+        str(symmetry),
     ]
 
     try:
@@ -140,7 +147,9 @@ def run_tests():
 
         print(f"Test: {test_case.name}")
         print(f"  File: {test_case.filename}")
-        print(f"  Expected range: [{test_case.expected_min:.2f}, {test_case.expected_max:.2f}] RPM")
+        print(
+            f"  Expected range: [{test_case.expected_min:.2f}, {test_case.expected_max:.2f}] RPM"
+        )
 
         if not file_path.exists():
             print("  SKIPPED - File not found\n")
@@ -148,14 +157,18 @@ def run_tests():
             continue
 
         print("  Running predictor...")
-        measured_rpm = run_predictor(file_path, test_case.num_clusters, test_case.symmetry)
+        measured_rpm = run_predictor(
+            file_path, test_case.num_clusters, test_case.symmetry
+        )
 
         if measured_rpm is None:
             print("  FAILED - No RPM measurement obtained\n")
             results.append((test_case.name, None, None, "FAILED"))
             continue
 
-        error = calculate_error(measured_rpm, test_case.expected_min, test_case.expected_max)
+        error = calculate_error(
+            measured_rpm, test_case.expected_min, test_case.expected_max
+        )
 
         print(f"  Measured: {measured_rpm:.2f} RPM")
 
