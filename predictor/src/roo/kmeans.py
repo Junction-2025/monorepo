@@ -6,6 +6,9 @@ from src.roo.config import (
     MAX_ITERATIONS,
     CONVERGENCE_THRESHOLD,
     OUTLIER_THRESHOLD_MULTIPLIER,
+    K_CANDIDATES,
+    USE_ADAPTIVE_K,
+    DEFAULT_K,
 )
 
 
@@ -273,7 +276,8 @@ def calculate_davies_bouldin_index(
     """
     k = len(centroids)
     if k <= 1:
-        return 0.0
+        # DBI is undefined for k <= 1, return infinity to prevent selection
+        return float("inf")
 
     dispersions = np.array(
         [calculate_dispersion(events, labels, centroids[i], i) for i in range(k)]
@@ -424,18 +428,22 @@ def events_labels_to_heatmap_labels(
 
 def locate_centroids(
     scene: NDArray[np.int64],
-    k: int = 4,
+    k: int = DEFAULT_K,
     remove_outliers_flag: bool = True,
     outlier_threshold: float = OUTLIER_THRESHOLD_MULTIPLIER,
+    use_adaptive_k: bool = USE_ADAPTIVE_K,
+    k_candidates: List[int] | None = None,
 ) -> Tuple[NDArray[np.int_], NDArray[np.float64], NDArray[np.float64]]:
     """
     Locate centroids in heatmap using stream-centroids initialization and K-means.
 
     Args:
         scene: 2D heatmap array where values represent intensity/count
-        k: Number of centroids to locate (default 4)
+        k: Number of centroids to locate (default from config, used when adaptive selection disabled)
         remove_outliers_flag: Whether to apply outlier removal (default True)
         outlier_threshold: Threshold multiplier for outlier detection (default 3.0 from paper)
+        use_adaptive_k: Enable adaptive K selection using Davies-Bouldin Index (default from config)
+        k_candidates: List of K values to evaluate for adaptive selection (default from config)
 
     Returns:
         Tuple of (label_map, centers_x, centers_y):
@@ -449,6 +457,15 @@ def locate_centroids(
     if len(event_positions) == 0:
         # No events, return empty label map and centroids
         return np.full(scene.shape, -1, dtype=np.int_), np.array([]), np.array([])
+
+    # Determine optimal K using adaptive selection if enabled
+    if use_adaptive_k:
+        if k_candidates is None:
+            k_candidates = K_CANDIDATES
+        k, best_dbi = find_optimal_k(scene, event_positions, k_candidates)
+        print(f"Adaptive K selection: k={k}, DBI={best_dbi:.4f}")
+    else:
+        print(f"Using fixed k={k}")
 
     # Initialize centroids from heatmap
     initial_centroids = initialize_centroids_from_heatmap(scene, k)

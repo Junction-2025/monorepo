@@ -94,8 +94,7 @@ def main():
         frame = get_frame(window)
 
         drone_crop_coords = detect_drone_crop(frame)
-        if drone_crop_coords:
-            find_clusters(window[0], window[1], drone_crop_coords=drone_crop_coords)
+        find_clusters(window[0], window[1], drone_crop_coords=drone_crop_coords)
 
         wall_time = time.perf_counter() - start_time
         print(
