@@ -98,13 +98,13 @@ if len(intensity) > 20:
     fft_vals = np.abs(np.fft.rfft(signal))
     freqs = np.fft.rfftfreq(len(signal), 1 / fps)
 
-    
+    """
     plt.plot(freqs, fft_vals)
     plt.xlabel('Frequency (Hz)')
     plt.ylabel('Amplitude')
     plt.title('FFT of Signal')
     plt.show()
-    
+    """
     
     # Find strongest non-zero frequency
     peak_idx = np.argmax(fft_vals[1:]) + 1
