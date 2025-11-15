@@ -151,7 +151,7 @@ def estimate_aoi_rpms(
 
         if np.any(roi_mask):
             rpm = estimate_rpm_from_events(
-                xr[roi_mask], yr[roi_mask], tr[roi_mask], aoi.bbox, rpm_config
+                xr[roi_mask], yr[roi_mask], tr[roi_mask], aoi.bbox, config=rpm_config
             )
             if rpm is not None:
                 rpm_estimates[idx] = rpm
@@ -451,9 +451,11 @@ def main():
             f"AOI{i}={rpm:.0f}(avg:{avg_rpms.get(i, 0):.0f})"
             for i, rpm in rpm_estimates.items()
         )
+        # Calculate theoretical window end time for consistent intervals
+        window_end_time_us = batch_range.start_ts_us + args.window
         print(
             f"\rWall Time: {wall_time: >6.2f}s | "
-            f"Event Time: {batch_range.end_ts_us / 1e6: >6.2f}s | "
+            f"Event Time: {window_end_time_us / 1e6: >6.2f}s | "
             f"Emitted: {pacer.emitted_batches: >5} | "
             f"Dropped: {pacer.dropped_batches: >5} | "
             f"AOIs: {len(aois)} | RPM: [{rpm_str}]   ",

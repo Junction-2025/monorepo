@@ -47,14 +47,14 @@ MAX_ITERATIONS = 100  # Maximum iterations for k-means convergence
 CONVERGENCE_THRESHOLD = 1e-4  # Centroid movement threshold for convergence
 
 # Adaptive K selection
-USE_ADAPTIVE_K = True  # Enable automatic cluster count selection
-K_CANDIDATES = [2, 3, 4, 5, 6]  # Candidate values to evaluate
+USE_ADAPTIVE_K = False  # Enable automatic cluster count selection
+K_CANDIDATES = [2, 3, 4]  # Candidate values to evaluate
 
 # Outlier removal
 OUTLIER_THRESHOLD_MULTIPLIER = 3.0  # Distance threshold factor (× median distance)
 
 # AOI update timing
-AOI_WINDOW_US = 150_000  # Time window for AOI detection (150ms)
+AOI_WINDOW_US = 10000  # Time window for AOI detection (150ms)
 AOI_UPDATE_INTERVAL_US = 50_000  # Update frequency (50ms)
 
 
@@ -104,4 +104,4 @@ TEXT_THICKNESS = 2
 ENABLE_FRAME_LOGGING = True  # Save frames with overlays
 ENABLE_HEATMAP_LOGGING = True  # Save heatmaps
 ENABLE_LABEL_LOGGING = True  # Save cluster labels
-LOG_EVERY_N_FRAMES = 3  # Save every Nth frame (to avoid excessive I/O)
+LOG_EVERY_N_FRAMES = 1  # Save every Nth frame (to avoid excessive I/O)
