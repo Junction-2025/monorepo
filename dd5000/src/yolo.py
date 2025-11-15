@@ -12,9 +12,8 @@ model.set_classes(["drone", "uav", "quadrotor", "airplane"])
 
 logger = get_logger()
 
-def detect_drone_crop(
-    frame: np.ndarray
-) -> CropCoords | None:
+
+def detect_drone_crop(frame: np.ndarray) -> CropCoords | None:
     """
     Input:  frame (H,W,3) BGR ndarray
     Output: cropped drone CropCoords OR None
@@ -41,7 +40,9 @@ def detect_drone_crop(
     x2 = min(w - 1, x2)
     y2 = min(h - 1, y2)
 
-    logger.debug(f"YOLO: Detected drone at ({x1},{y1})-({x2},{y2}) conf={confidence:.3f}")
+    logger.debug(
+        f"YOLO: Detected drone at ({x1},{y1})-({x2},{y2}) conf={confidence:.3f}"
+    )
 
     # crop
     return CropCoords(x1=x1, x2=x2, y1=y1, y2=y2)
