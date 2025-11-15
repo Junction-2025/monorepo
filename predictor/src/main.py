@@ -289,6 +289,12 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Disable file logging (frames/heatmaps/logs).",
     )
+    parser.add_argument(
+        "--yolo-interval",
+        type=int,
+        default=10,
+        help="Run YOLO drone detection every Nth frame (default: 10). Set to 1 to run every frame.",
+    )
     return parser.parse_args()
 
 
@@ -308,6 +314,7 @@ def main():
     print(f"Playback speed: {args.speed}x")
     print(f"AOI clusters: {args.num_clusters}")
     print(f"Blade symmetry: {args.symmetry}")
+    print(f"YOLO interval: every {args.yolo_interval} frame(s)")
     print(f"Display: {'disabled' if args.no_display else 'enabled'}")
     print(
         f"Logging: {'disabled' if args.no_logging else f'enabled -> {log_ctx.run_dir}'}"
@@ -317,7 +324,7 @@ def main():
     if log_ctx:
         log_ctx.logger.info(f"Input file: {args.input}")
         log_ctx.logger.info(
-            f"Speed: {args.speed}x, Clusters: {args.num_clusters}, Symmetry: {args.symmetry}"
+            f"Speed: {args.speed}x, Clusters: {args.num_clusters}, Symmetry: {args.symmetry}, YOLO interval: {args.yolo_interval}"
         )
 
     src = DatFileSource(
@@ -351,6 +358,9 @@ def main():
     rpm_history: dict[int, list[float]] = {}
     frame_count = 0
 
+    # YOLO throttling: cache drone crop and update only every Nth frame
+    drone_crop = None
+
     # Setup visualization window
     if not args.no_display:
         cv2.namedWindow("RPM Detection", cv2.WINDOW_NORMAL)
@@ -367,9 +377,10 @@ def main():
         x_coords, y_coords = window[0], window[1]
         timestamps = src.timestamps_sorted[batch_range.start : batch_range.stop]
 
-        # Optional: detect and apply drone crop region
+        # Optional: detect and apply drone crop region (throttled based on --yolo-interval)
         frame = get_frame(window)
-        drone_crop = detect_drone_crop(frame)
+        if frame_count % args.yolo_interval == 0:
+            drone_crop = detect_drone_crop(frame)
         x_coords, y_coords, timestamps = apply_crop_mask(
             x_coords, y_coords, timestamps, drone_crop
         )
