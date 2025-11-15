@@ -11,6 +11,7 @@ from src.evio_in.pacer import Pacer
 from src.evio_in.dat_file import DatFileSource
 from src.evio_in.play_dat import get_frame, get_window
 from src.yolo.yolo import detect_drone_crop
+from src.utils import draw_png, display_frame
 from src.rpm_estimation.aoi_detection import detect_aois, AOI
 from src.rpm_estimation.rpm_estimation import estimate_rpm_from_events
 from src.rpm_estimation.rotating_object_extraction import find_heatmap
@@ -379,11 +380,13 @@ def main():
 
         # Optional: detect and apply drone crop region (throttled based on --yolo-interval)
         frame = get_frame(window)
-        if frame_count % args.yolo_interval == 0:
-            drone_crop = detect_drone_crop(frame)
-        x_coords, y_coords, timestamps = apply_crop_mask(
-            x_coords, y_coords, timestamps, drone_crop
-        )
+        # if frame_count % args.yolo_interval == 0:
+        drone_crop = detect_drone_crop(frame)
+        if drone_crop is not None:
+            x_coords, y_coords, timestamps = apply_crop_mask(
+                x_coords, y_coords, timestamps, drone_crop
+            )
+            display_frame(drone_crop)  # Log raw frame with detected drone bounding box
 
         # Append to buffer
         event_buffer_x = np.concatenate([event_buffer_x, x_coords])

@@ -71,7 +71,7 @@ def main():
     )
     args = parser.parse_args()
 
-    print("Importing YOLOv8...")
+    print("Importing model...")
 
     # Load a pretrained YOLOv8 model
     # Options: 'yolov8n.pt' (nano), 'yolov8s.pt' (small),

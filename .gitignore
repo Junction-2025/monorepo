@@ -210,5 +210,6 @@ marimo/_lsp/
 __marimo__/
 
 
-*.pt
 *.ts
+YOLO-training-server/val-rgb
+YOLO-training-server/val

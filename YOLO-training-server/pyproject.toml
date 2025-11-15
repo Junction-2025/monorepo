@@ -1,0 +1,16 @@
+[project]
+name = "yolo"
+version = "0.1.0"
+description = "YOLOv8 detection"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "ultralytics>=8.0.0",
+    # Note: PyTorch and torchvision are installed separately for macOS x86_64 compatibility
+    # They were installed via: uv pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
