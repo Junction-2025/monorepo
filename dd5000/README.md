@@ -55,11 +55,10 @@ these are ran on validation sets, and inference time taken on those
 
 | Model File                     | mAP50 (Final Epoch) | Inference Speed (GPU) | Inference Speed (M4 Max) | Notes |
 |-------------------------------|----------------------|-------------------------|----------------------------|--------|
-| **best-final.pt**             | **0.95138**          | **6.1 ms**             | **—**                      | Best fine-tuned model. Combines different datasets |
+| **best-final.pt**             | **0.95138**          | **6.1 ms**             | **12.2ms**                      | Best fine-tuned model. Combines different datasets |
 | **best-custom.pt**            | **0.99500**          | **7.3 ms**             | **—**                      | Trained on custom dataset extracted from .dat file from FRED dataset |
 | **best-m.pt**                 | **0.92544**          | **7.6 ms**             | **—**                      | Same model but finetuned on yolo11(m).pt |
 | **best-custom-added-drone.pt**| **0.99500**          | **7.4 ms**             | **—**                      | Added extra drone examples; similar accuracy to best-custom.pt |
-
 
 
 More efficiency gains can be achieved when exporting these models to different formats like tflite to deploy these on edge devices too (code provided).
