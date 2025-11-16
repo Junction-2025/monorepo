@@ -107,7 +107,7 @@ def main():
 
     roi_signals = []
     fps = 1000.0 / args.window  # window duration in ms
-    max_signals = 500
+    max_signals = 100
     
     frame_counter = 0
     for batch_range in pacer.pace(src.ranges()):
