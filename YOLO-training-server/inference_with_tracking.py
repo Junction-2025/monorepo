@@ -6,8 +6,8 @@ import natsort
 import argparse
 
 # CONFIG
-MODEL_PATH = "best-custom.pt"
-TEST_DIR = Path("/Users/harshitpoudel/Desktop/JUNCTION/monorepo/evio/output-frames")
+MODEL_PATH = "best-m.pt"
+TEST_DIR = Path("val")
 OUTPUT_VIDEO = "drone_tracking.mp4"
 IMG_SIZE = 640
 USE_TRACKER = True
