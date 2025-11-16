@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from src.config import BATCH_WINDOW_MS, BASE_WIDTH, BASE_HEIGHT
+from src.config import BATCH_WINDOW_US, BASE_WIDTH, BASE_HEIGHT
 
 from src.evio_lib.pacer import Pacer
 from src.evio_lib.dat_file import DatFileSource
@@ -39,7 +39,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--window",
         type=int,
-        default=BATCH_WINDOW_MS,
+        default=BATCH_WINDOW_US,
         help=f"Batch window size in ms.",
     )
     parser.add_argument(
@@ -57,7 +57,7 @@ def main():
 
     print("\n=== INITIALIZING DATA SOURCE ===")
     print(f"Input file: {args.input}")
-    print(f"Window length (ms): {args.window}")
+    print(f"Window length (us): {args.window}")
     print(f"Speed: {args.speed}, Force speed: {args.force_speed}")
     print("--------------------------------")
 
@@ -79,7 +79,7 @@ def main():
     cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
     
     roi_frames = []
-    fps = 1000 / BATCH_WINDOW_MS
+    fps = 1000000 / BATCH_WINDOW_US
 
     print(f"Computed FPS from event window: {fps:.2f}")
 
@@ -89,8 +89,6 @@ def main():
 
     for batch_range in pacer.pace(src.ranges()):
         frame_index += 1
-        print(f"\n--- Processing batch #{frame_index} ---")
-        print(f"Batch range: start={batch_range.start}, stop={batch_range.stop}")
 
         # Extract event window
         window = get_window(
@@ -99,47 +97,45 @@ def main():
             batch_range.start,
             batch_range.stop,
         )
-        print(f"Window extracted -> #events: {len(window[0])}")
 
         # Convert events to a frame
         frame = get_frame(window)
-        print("Frame generated.")
 
         # Use fixed bounding box
-        yolo_bounding_box = (500, 700, 300, 450)
-        print(f"Using bounding box: {yolo_bounding_box}")
+        yolo_bounding_box = (500, 700, 250, 450)
         x1, x2, y1, y2 = yolo_bounding_box
-        
+
         # Extract ROI frame
         roi_frame = frame[y1:y2, x1:x2]
-        print("ROI extracted.")
 
         roi_frames.append(roi_frame)
-        print(f"Stored ROI frames: {len(roi_frames)}")
 
         # Perform RPM estimation every 100 frames
-        if len(roi_frames) % 100 == 0:
-            print("\n=== Performing RPM Estimation ===")
-            print(f"Frames in batch: {len(roi_frames)}")
-            print(f"Using fps={fps}, blade_count=2")
+        #if frame_index % 100 == 0:
+        if frame_index == 100:
+            
+            print(f"Frame index: {frame_index}")
+            
+            print(f"ROI frames: {len(roi_frames)}")
 
             rpm, freqs, fft_vals = estimate_rpm_from_event_frames(
                 roi_frames, fps, 2
             )
             print(f"Estimated RPM: {rpm}")
-            print("FFT peak frequency:", freqs[np.argmax(fft_vals[1:]) + 1])
 
             roi_frames.clear()
-            print("Cleared ROI frame buffer.\n")
-
+            break
+        
         # Draw bbox on display frame
         tl = (int(x1), int(y1))
         br = (int(x2), int(y2))
         cv2.rectangle(frame, tl, br, (0, 255, 0), 2)
+        
+        cv2.imshow("Evio Player", frame)
 
-        cv2.imshow(window_name, frame)
-        cv2.waitKey(1)
-
+        if (cv2.waitKey(1) & 0xFF) in (27, ord("q")):
+            break
+        
     print("\n=== PROCESSING COMPLETE ===")
     cv2.destroyAllWindows()
 

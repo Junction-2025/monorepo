@@ -1,6 +1,6 @@
 from pathlib import Path
 
-BATCH_WINDOW_MS = 1
+BATCH_WINDOW_US = 1000
 BASE_DIR = Path(__file__).parent.parent
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(exist_ok=True)
