@@ -7,7 +7,7 @@ from src.config import YOLO_CONFIDENCE_THRESHOLD, MODEL_LOGGING_VERBOSE
 from src.logger import get_logger
 
 # Load model once globally
-model = YOLO("best-custom.pt")  # Use standard YOLO, not YOLOWorld
+model = YOLO("best-m.pt")  # Use standard YOLO, not YOLOWorld
 logger = get_logger()
 
 
@@ -24,7 +24,6 @@ def detect_drone_crop(frame: np.ndarray) -> CropCoords | None:
         conf=YOLO_CONFIDENCE_THRESHOLD,
         verbose=MODEL_LOGGING_VERBOSE,
         device="mps",
-        iou=0.5,
     )
     if (
         not results
