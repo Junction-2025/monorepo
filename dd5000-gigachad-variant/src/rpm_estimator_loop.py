@@ -89,11 +89,13 @@ def main():
 
     ### HARDCODED VALUES
     # Hardcoded roi drone_idle (bounding box)
-    roi = (500, 700, 230, 430)
+    #roi = (500, 700, 230, 430)
     # Hardcoded roi fan_const_rpm (bounding box)
     # roi = (550, 700, 250, 440)
     # Hardcoded roi drone_moving (bounding box)
     #roi = (720, 920, 200, 330)
+    # The whole image
+    roi = (0, 1280, 0, 720)
     blade_count = 2
 
     print("Loading data...")
