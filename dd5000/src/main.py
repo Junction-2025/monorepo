@@ -182,6 +182,8 @@ def main():
                 ]
                 mask = get_propeller_masks(cropped_frame)
                 cropped_overlay = overlay_mask(cropped_frame, mask)
+                t1 = time.perf_counter()
+                add_timing(timings, "identification_delay", t1-t0)
                 frame[
                     yolo_bounding_box.y1 : yolo_bounding_box.y2,
                     yolo_bounding_box.x1 : yolo_bounding_box.x2,
@@ -190,8 +192,6 @@ def main():
                 # Detect blade count using KNN and add to tracker
                 blade_count_array = get_blade_count(cropped_frame, mask)
                 blade_tracker.add_observation(blade_count_array)
-                t1 = time.perf_counter()
-                add_timing(timings, "identification_delay", t1-t0)
                 detected_avg = (
                     int(
                         sum([b[0] for b in blade_count_array])
