@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import 'dotenv/config';
 import EventEmitter from "events"
 import { runAgent } from "./agent/agent.js";
 
@@ -69,6 +70,8 @@ app.get('/events', async (req, res) => {
         description: "Target detected via event camera system. Classification: Commercial hexacopter. Status: Active monitoring. Last detected: 0.5 seconds ago. Confidence: 94.7%",
         timestamp: new Date().toLocaleString()
     });
+
+    await runAgent("Detected a DJI R 600 drone hovering at 70 meters, 4 rotors at 5600 RPM, make up the date and detection confidence, and maybe other stats as well");
 
     req.on('close', () => {
         eventEmitter.off('sendEvent', userSendEvents);

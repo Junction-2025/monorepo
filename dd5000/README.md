@@ -16,6 +16,14 @@ Drone Detector 5000 is based on a simple event loop (`src/main.py`).
 - We once again run KMeans to detect blades of the rotor, with similar principles. (`src/kmeans.py`)
 - We use the blade count for each rotor to compute RPM (`src/rpm_estimator.py`)
 
+## Standalone RPM Calculation
+
+For testing and validation purposes, `src/pure_rpm_calculations.py` provides a standalone implementation that calculates RPM directly from event data using a hardcoded ROI (Region of Interest). This utility demonstrates the core RPM estimation algorithm using FFT analysis on event intensity signals, without requiring the full YOLO detection and KMeans clustering pipeline. It's useful for:
+- Validating RPM calculation accuracy
+- Testing different ROI configurations
+- Benchmarking FFT-based frequency detection
+- Understanding the core RPM estimation logic in isolation
+
 ## Technical achievements
 - In our experiments, the fine-tuned YOLO model could detect drones frame-by-frame, running on a normal Macbook, in only 8ms. This is a significant finding, as even the Sensofusion challenge providers did not believe this could be achieved.
     - With a YOLO-based drone detection system, it's possible to label enemy drones accurately in real time. It is possible to teach YOLO models to detect different drone types.
