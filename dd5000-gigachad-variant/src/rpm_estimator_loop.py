@@ -44,8 +44,10 @@ def extract_roi_intensity(window, roi):
         (y >= y1) & (y < y2)
     )
 
-    # Example metric: number of ON events
-    return np.sum(pol[mask])
+    on_count  = np.sum(pol[mask])
+    off_count = np.sum(~pol[mask])
+    contrast = on_count - off_count
+    return on_count
 
 
 def estimate_rpm_from_signals(signals, fps, blade_count):
@@ -87,7 +89,7 @@ def main():
 
     ### HARDCODED VALUES
     # Hardcoded roi drone_idle (bounding box)
-    roi = (500, 700, 250, 450)
+    roi = (500, 700, 230, 300)
     # Hardcoded roi fan_const_rpm (bounding box)
     # roi = (550, 700, 250, 440)
     # Hardcoded roi drone_moving (bounding box)
@@ -105,7 +107,7 @@ def main():
 
     roi_signals = []
     fps = 1000.0 / args.window  # window duration in ms
-    max_signals = 100
+    max_signals = 500
     
     frame_counter = 0
     for batch_range in pacer.pace(src.ranges()):
@@ -125,8 +127,11 @@ def main():
             print(f"RPM: {rpm:.2f}")
             roi_signals.clear()        
         
-        if frame_counter % 300 == 0:
+        if frame_counter % 30 == 0:
             frame = get_frame(window)
+            # Draw ROI bounding box
+            x1, x2, y1, y2 = roi
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)  # Green rectangle
             cv2.imshow("Events", frame)
             cv2.waitKey(1)
 
