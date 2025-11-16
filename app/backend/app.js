@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import EventEmitter from "events"
+import { runAgent } from "./agent/agent.js";
+
 const app = express();
 const PORT = 8000;
 
@@ -11,13 +13,19 @@ app.use(express.json());
 
 const eventEmitter = new EventEmitter();
 
-async function sendSSE(data) {
+export async function sendSSE(data) {
     console.log("sending dta via sse");
     console.log(data);
     eventEmitter.emit("sendEvent", data);
-}
+};
 
-app.post('/trigger-event', async (req, res) => {
+app.post('/agent', async (req, res) => {
+    const data = req.body;
+    const result = await runAgent(data);
+    res.json({ success: true, message: result });
+});
+
+app.post('/trigger_event', async (req, res) => {
     const droneData = req.body;
     /*
     {

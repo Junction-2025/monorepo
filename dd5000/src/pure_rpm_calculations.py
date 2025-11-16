@@ -7,6 +7,11 @@ import cv2
 from src.evio_lib.pacer import Pacer
 from src.evio_lib.dat_file import DatFileSource
 
+""""
+Run this file by running:
+uv run python src/.py /path/to/file.dat
+"""
+
 
 def get_window(
     event_words: np.ndarray, time_order: np.ndarray, win_start: int, win_stop: int

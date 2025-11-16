@@ -1,6 +1,8 @@
 import { Agent, run } from '@openai/agents';
+import { sendSSE } from '../app.js';
+import { z } from 'zod';
 
-export default async function agent(data) {
+export async function runAgent(data) {
 
     const DroneDetectionReport = z.object({
         type: z.string().describe('The type of drone detection, should be one of the following: "drone-detected"'),
@@ -27,6 +29,8 @@ export default async function agent(data) {
         userPrompt,
     );
 
+
     console.log(result.finalOutput);
-    return result.finalOutput;
+    sendSSE(result.finalOutput);
+    return "Agent finished";
 }
