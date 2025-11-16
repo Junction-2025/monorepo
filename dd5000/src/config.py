@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).parent.parent
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 
-MODEL_NAME = "best-custom.pt"
+MODEL_NAME = "best-final.pt"
 
 BASE_WIDTH = 1280
 BASE_HEIGHT = 720
