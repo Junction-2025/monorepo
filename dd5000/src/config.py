@@ -1,6 +1,6 @@
 from pathlib import Path
 
-BATCH_WINDOW_US = 1000
+BATCH_WINDOW_US = 5000
 BASE_DIR = Path(__file__).parent.parent
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(exist_ok=True)
@@ -8,7 +8,7 @@ LOG_DIR.mkdir(exist_ok=True)
 BASE_WIDTH = 1280
 BASE_HEIGHT = 720
 
-MODEL_LOGGING_VERBOSE = False
+MODEL_LOGGING_VERBOSE = True
 
 YOLO_CONFIDENCE_THRESHOLD = 0.01
 HEATMAP_PIXEL_SIZE = 4

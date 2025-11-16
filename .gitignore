@@ -12,6 +12,7 @@ data/
 build/
 develop-eggs/
 dist/
+.pt
 downloads/
 eggs/
 .eggs/
