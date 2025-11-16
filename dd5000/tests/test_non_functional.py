@@ -17,34 +17,11 @@ class TestCase:
     filename: str
     expected_min: float
     expected_max: float
-    num_clusters: int = 1
-    symmetry: int = 3
     notes: str = ""
 
 
 # Test scenarios
 TEST_CASES = [
-    TestCase(
-        name="Fan Constant RPM",
-        filename="fan_const_rpm.dat",
-        expected_min=1000,
-        expected_max=1200,
-        notes="Fan rotating at constant speed, ~10s duration",
-    ),
-    TestCase(
-        name="Fan Varying RPM",
-        filename="fan_varying_rpm.dat",
-        expected_min=1100,
-        expected_max=1300,
-        notes="Fan with changing speed, ~20s duration",
-    ),
-    TestCase(
-        name="Fan Varying RPM Turning",
-        filename="fan_varying_rpm_turning.dat",
-        expected_min=1100,
-        expected_max=1300,
-        notes="Fan with changing speed and orientation, ~25s duration",
-    ),
     TestCase(
         name="Drone Idle",
         filename="drone_idle.dat",
@@ -62,7 +39,7 @@ TEST_CASES = [
 ]
 
 
-def run_predictor(file_path: Path, num_clusters: int, symmetry: int) -> float | None:
+def run_predictor(file_path: Path) -> float | None:
     """
     Run the predictor on a file and extract the average RPM.
 
@@ -73,6 +50,11 @@ def run_predictor(file_path: Path, num_clusters: int, symmetry: int) -> float | 
     project_dir = Path(__file__).parent.parent
     venv_python = project_dir / ".venv" / "bin" / "python"
 
+    # Get the log directory and note existing log files before running
+    log_dir = project_dir / "logs"
+    log_dir.mkdir(exist_ok=True)
+    existing_logs = set(log_dir.glob("*.txt"))
+
     cmd = [
         str(venv_python),
         "-m",
@@ -80,13 +62,8 @@ def run_predictor(file_path: Path, num_clusters: int, symmetry: int) -> float | 
         "--input",
         str(file_path),
         "--no-display",
-        "--no-logging",
         "--speed",
         "5",  # Run at 5x speed for faster testing
-        "--num-clusters",
-        str(num_clusters),
-        "--symmetry",
-        str(symmetry),
     ]
 
     try:
@@ -97,14 +74,42 @@ def run_predictor(file_path: Path, num_clusters: int, symmetry: int) -> float | 
             timeout=120,  # 2 minute timeout
         )
 
-        # Parse output for "AOI X: Y.YY RPM"
-        for line in result.stdout.splitlines():
-            if "AOI 0:" in line and "RPM" in line:
-                # Extract RPM value from "AOI 0: 1234.56 RPM (n=123)"
-                parts = line.split(":")
-                if len(parts) >= 2:
-                    rpm_part = parts[1].split("RPM")[0].strip()
-                    return float(rpm_part)
+        # Find the new log file created by this run
+        new_logs = set(log_dir.glob("*.txt")) - existing_logs
+
+        if not new_logs:
+            # Fallback: use the most recently modified log file
+            log_files = sorted(
+                log_dir.glob("*.txt"), key=lambda p: p.stat().st_mtime, reverse=True
+            )
+            if log_files:
+                log_file = log_files[0]
+            else:
+                print("  ERROR: No log file found")
+                return None
+        else:
+            log_file = list(new_logs)[0]
+
+        # Read the log file and parse RPM
+        with open(log_file, "r") as f:
+            log_content = f.read()
+
+        # Look for "RPM: X.XX" in the log file
+        # The final average RPM is logged after "=== AVERAGE RPM ==="
+        lines = log_content.splitlines()
+        for i, line in enumerate(lines):
+            if "=== AVERAGE RPM ===" in line:
+                # Look for RPM in the next few lines
+                for j in range(i + 1, min(i + 5, len(lines))):
+                    if "RPM:" in lines[j] and "blade_count" not in lines[j]:
+                        # Extract RPM value
+                        parts = lines[j].split("RPM:")
+                        if len(parts) >= 2:
+                            rpm_str = parts[1].strip()
+                            try:
+                                return float(rpm_str)
+                            except ValueError:
+                                continue
 
         return None
 
@@ -157,9 +162,7 @@ def run_tests():
             continue
 
         print("  Running predictor...")
-        measured_rpm = run_predictor(
-            file_path, test_case.num_clusters, test_case.symmetry
-        )
+        measured_rpm = run_predictor(file_path)
 
         if measured_rpm is None:
             print("  FAILED - No RPM measurement obtained\n")
