@@ -54,11 +54,6 @@ def get_heatmap_centroids(heatmap: np.ndarray) -> Centroids:
         if flat_heatmap[idx] > centroid_inclusion_threshold:
             sorted_centroid_indices.append(idx)
 
-    # Handle case where no centroids are found
-    if not sorted_centroid_indices:
-        logger.warning("No centroids found in heatmap")
-        return Centroids(x_coords=[], y_coords=[])
-
     sorted_centroid_indices_xy = [
         (idx % heatmap.shape[1], idx // heatmap.shape[1])
         for idx in sorted_centroid_indices
@@ -118,11 +113,6 @@ def kmeans(
         logger.warning("No non-zero points found in frame")
         return points, np.array([])
 
-    # Handle empty centroids
-    if not propeller_masks.x_coords or not propeller_masks.y_coords:
-        logger.warning("No propeller mask centroids provided")
-        return points, np.zeros(len(points), dtype=int)
-
     points_mean = points.mean(axis=0)
     points_std = points.std(axis=0)
 
@@ -149,18 +139,7 @@ def kmeans(
             continue
 
         labels_list.append(labels)
-
-        # Catch warnings from davies_bouldin_score when clusters have zero dispersion
-        with np.errstate(divide='ignore', invalid='ignore'):
-            try:
-                score = davies_bouldin_score(points_normalized, labels)
-                # Check for invalid scores (inf, nan)
-                if not np.isfinite(score):
-                    score = float('inf')
-                scores.append(score)
-            except Exception as e:
-                logger.warning(f"Error calculating davies_bouldin_score: {e}")
-                scores.append(float('inf'))
+        scores.append(davies_bouldin_score(points_normalized, labels))
 
     if not labels_list:
         logger.warning("No valid clustering found, returning all zeros")

@@ -7,7 +7,6 @@ Tests the predictor against known scenarios with expected RPM ranges.
 import subprocess
 from pathlib import Path
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -63,7 +62,7 @@ TEST_CASES = [
 ]
 
 
-def run_predictor(file_path: Path, num_clusters: int, symmetry: int) -> Optional[float]:
+def run_predictor(file_path: Path, num_clusters: int, symmetry: int) -> float | None:
     """
     Run the predictor on a file and extract the average RPM.
 
