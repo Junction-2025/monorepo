@@ -1,16 +1,13 @@
 # exporters.py
-import os
+import argparse
+import shutil
 from pathlib import Path
+import subprocess
+import sys
+
 from ultralytics import YOLO
 
-# Optional imports
-try:
-    import onnx
-    from onnxsim import simplify
-    ONNX_OK = True
-except:
-    ONNX_OK = False
-
+# Optional Apple Silicon support
 try:
     import coremltools as ct
     COREML_OK = True
@@ -18,128 +15,153 @@ except:
     COREML_OK = False
 
 
-# ---------------------------------------------------------
-# Helper
-# ---------------------------------------------------------
 def mkdir(path: Path):
     path.mkdir(parents=True, exist_ok=True)
 
 
-# ---------------------------------------------------------
-# Main modular export function
-# ---------------------------------------------------------
-def run_all_exports(best_pt_path: str, export_root: str = "exports"):
+def safe_move(src: Path, dst: Path):
+    if src and src.exists():
+        shutil.move(str(src), str(dst))
+
+
+def get_ultra_output(pt_dir: Path, ext: str):
     """
-    Run all GPU, CPU, Apple Silicon, and edge-device exports.
-    Can be safely called from any script after training finishes.
+    Ultralytics writes exports next to the .pt file:
+        best.pt → best.engine, best.mlpackage
     """
-    best_pt_path = Path(best_pt_path)
-    if not best_pt_path.exists():
-        raise FileNotFoundError(f"best.pt not found: {best_pt_path}")
+    f = pt_dir / f"best{ext}"
+    return f if f.exists() else None
+
+
+# =========================================================================
+# CUSTOM TFLITE CONVERTER (ONNX → SavedModel → TFLite FP16 + SELECT_TF_OPS)
+# =========================================================================
+TFLITE_CONVERTER_SCRIPT = """
+import onnx
+from onnx_tf.backend import prepare
+import tensorflow as tf
+import sys
+import pathlib
+
+onnx_path = pathlib.Path(sys.argv[1])
+out_dir = pathlib.Path(sys.argv[2])
+saved = out_dir / "saved_model"
+tflite_path = out_dir / "model_fp16_selectops.tflite"
+
+# 1. Load ONNX
+model = onnx.load(str(onnx_path))
+tf_rep = prepare(model)
+tf_rep.export_graph(str(saved))
+
+# 2. Convert to TFLite FP16 (SELECT_TF_OPS)
+converter = tf.lite.TFLiteConverter.from_saved_model(str(saved))
+converter.optimizations = [tf.lite.Optimize.DEFAULT]
+converter.target_spec.supported_ops = [
+    tf.lite.OpsSet.TFLITE_BUILTINS,
+    tf.lite.OpsSet.SELECT_TF_OPS,
+]
+converter.target_spec.supported_types = [tf.float16]
+
+tflite = converter.convert()
+with open(tflite_path, "wb") as f:
+    f.write(tflite)
+
+print("TFLITE_EXPORT_OK")
+"""
+
+def run_custom_tflite_export(onnx_file: Path, out_dir: Path):
+    mkdir(out_dir)
+
+    script_file = out_dir / "_tmp_tflite_export.py"
+    script_file.write_text(TFLITE_CONVERTER_SCRIPT)
+
+    print("[TFLite FP16 SELECT_OPS] Converting ONNX → SavedModel → TFLite…")
+    cmd = [sys.executable, str(script_file), str(onnx_file), str(out_dir)]
+    subprocess.run(cmd, check=True)
+
+    script_file.unlink(missing_ok=True)
+    print("[TFLite FP16 SELECT_OPS] Done.")
+
+
+# =========================================================================
+# MAIN EXPORT PIPELINE
+# =========================================================================
+def run_all_exports(best_pt: str, export_root: str = "exports", export_apple: bool = False):
+    best_pt = Path(best_pt)
+    if not best_pt.exists():
+        raise FileNotFoundError(f"No such file: {best_pt}")
 
     export_root = Path(export_root)
     mkdir(export_root)
 
-    GPU_DIR = export_root / "gpu"
-    CPU_DIR = export_root / "cpu"
+    TRT_DIR = export_root / "tensorrt"
+    TFLITE_DIR = export_root / "tflite"
     APPLE_DIR = export_root / "apple"
-    EDGE_DIR = export_root / "edge"
-    BASE_DIR = export_root / "base"
 
-    for d in [GPU_DIR, CPU_DIR, APPLE_DIR, EDGE_DIR, BASE_DIR]:
+    for d in [TRT_DIR, TFLITE_DIR, APPLE_DIR]:
         mkdir(d)
 
-    print("\n=== LOADING MODEL ===")
-    model = YOLO(str(best_pt_path))
+    pt_dir = best_pt.parent
 
-    # -------------------------------------------
-    # 1. GPU EXPORTS
-    # -------------------------------------------
-    print("\n[GPU] Exporting TensorRT FP16…")
-    model.export(
-        format="engine",
-        half=True,
-        device=0,
-        imgsz=960,
-        path=str(GPU_DIR / "model_fp16.engine")
-    )
+    print(f"\n=== LOADING MODEL: {best_pt} ===\n")
+    model = YOLO(str(best_pt))
 
-    print("[GPU] Exporting TensorRT INT8…")
-    model.export(
-        format="engine",
-        int8=True,
-        device=0,
-        imgsz=960,
-        path=str(GPU_DIR / "model_int8.engine")
-    )
+    # ----------------------------------------------------------
+    # 1. TensorRT INT8
+    # ----------------------------------------------------------
+    # print("[TensorRT INT8] Exporting…")
+    # model.export(format="engine", int8=True, device='mps')
+    # trt_int8 = get_ultra_output(pt_dir, ".engine")
+    # safe_move(trt_int8, TRT_DIR / "model_int8.engine")
 
-    # -------------------------------------------
-    # 2. BASE EXPORTS
-    # -------------------------------------------
-    print("\n[BASE] Exporting ONNX…")
-    onnx_out = BASE_DIR / "model.onnx"
-    model.export(format="onnx", opset=12, simplify=False, path=str(onnx_out))
+    # # ----------------------------------------------------------
+    # # 2. ONNX export (needed for TFLite)
+    # # ----------------------------------------------------------
+    # print("[ONNX] Exporting for TFLite pipeline…")
+    # model.export(format="onnx", imgsz=960, opset=17)
+    # onnx_file = get_ultra_output(pt_dir, ".onnx")
+    # if not onnx_file:
+    #     raise RuntimeError("ONNX export did not produce a file.")
+    # safe_move(onnx_file, TFLITE_DIR / "model.onnx")
+    # onnx_file = TFLITE_DIR / "model.onnx"
 
-    if ONNX_OK:
-        print("[BASE] Simplifying ONNX…")
-        onnx_model = onnx.load(str(onnx_out))
-        simplified, _ = simplify(onnx_model)
-        onnx.save(simplified, str(BASE_DIR / "model_simplified.onnx"))
+    # # ----------------------------------------------------------
+    # # 3. Custom TFLite FP16 exporter (SELECT_TF_OPS)
+    # # ----------------------------------------------------------
+    # try:
+    #     run_custom_tflite_export(onnx_file, TFLITE_DIR)
+    # except Exception as e:
+    #     print("[TFLite FP16 SELECT_OPS] FAILED:", e)
 
-    print("[BASE] Exporting TorchScript…")
-    model.export(format="torchscript", path=str(BASE_DIR / "model.torchscript"))
+    # ----------------------------------------------------------
+    # 4. Optional CoreML
+    # ----------------------------------------------------------
+    if export_apple:
+        if not COREML_OK:
+            print("[CoreML] coremltools not installed → skipping.")
+        else:
+            print("[CoreML FP16] Exporting…")
+            model.export(format="coreml", half=True)
+            pkg = get_ultra_output(pt_dir, ".mlpackage")
+            if pkg:
+                safe_move(pkg, APPLE_DIR / "model_fp16.mlpackage")
 
-    # -------------------------------------------
-    # 3. CPU EXPORTS
-    # -------------------------------------------
-    print("\n[CPU] Exporting OpenVINO FP16…")
-    model.export(format="openvino", half=True, path=str(CPU_DIR / "openvino_fp16"))
-
-    # INT8 stub
-    (CPU_DIR / "INT8_README.txt").write_text(
-        "Run OpenVINO POT tool to quantize to INT8:\n"
-        "pot -c pot_config.json -m openvino_fp16.xml -w openvino_fp16.bin\n"
-    )
-
-    # -------------------------------------------
-    # 4. APPLE EXPORTS
-    # -------------------------------------------
-    if COREML_OK:
-        print("\n[APPLE] Exporting CoreML FP16…")
-        fp16_path = APPLE_DIR / "model_fp16.mlpackage"
-        model.export(format="coreml", half=True, path=str(fp16_path))
-
-        print("[APPLE] Quantizing CoreML → INT8…")
-        mlmodel = ct.models.MLModel(str(fp16_path))
-        mlmodel_int8 = ct.models.neural_network.quantization_utils.quantize_weights(
-            mlmodel, nbits=8
-        )
-        mlmodel_int8.save(str(APPLE_DIR / "model_int8.mlpackage"))
-    else:
-        print("\n[APPLE] CoreMLTools missing; skipping CoreML.")
-
-    # -------------------------------------------
-    # 5. EDGE EXPORTS
-    # -------------------------------------------
-    print("\n[EDGE] Exporting TFLite FP16…")
-    model.export(format="tflite", half=True, path=str(EDGE_DIR / "model_fp16.tflite"))
-
-    print("[EDGE] Exporting TFLite INT8…")
-    model.export(format="tflite", int8=True, path=str(EDGE_DIR / "model_int8.tflite"))
-
-    (EDGE_DIR / "compile_edgetpu.sh").write_text(
-        "edgetpu_compiler model_int8.tflite\n"
-    )
-
-    # -------------------------------------------
+    # ----------------------------------------------------------
     # Summary
-    # -------------------------------------------
-    print("\n=== SIZE SUMMARY ===")
+    # ----------------------------------------------------------
+    print("\n=== EXPORT COMPLETE ===\n")
     for f in export_root.rglob("*.*"):
         try:
-            size = f.stat().st_size / 1024**2
-            print(f"{f}: {size:.2f} MB")
+            print(f"{f} — {f.stat().st_size/1024**2:.2f} MB")
         except:
             pass
 
-    print("\n=== ALL EXPORTS COMPLETE ===\n")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Minimal YOLO exporter")
+    parser.add_argument("best_pt", type=str, help="Path to best.pt")
+    parser.add_argument("--out", type=str, default="exports")
+    parser.add_argument("--apple", action="store_true")
+
+    args = parser.parse_args()
+    run_all_exports(args.best_pt, export_root=args.out, export_apple=args.apple)

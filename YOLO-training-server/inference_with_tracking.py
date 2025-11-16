@@ -6,8 +6,8 @@ import natsort
 import argparse
 
 # CONFIG
-MODEL_PATH = "best.pt"
-TEST_DIR = Path("val")
+MODEL_PATH = "best-custom.pt"
+TEST_DIR = Path("/Users/harshitpoudel/Desktop/JUNCTION/monorepo/evio/output-frames")
 OUTPUT_VIDEO = "drone_tracking.mp4"
 IMG_SIZE = 640
 USE_TRACKER = True
@@ -20,7 +20,7 @@ def main():
     parser.add_argument('--imgsz', type=int, default=IMG_SIZE, help='Inference image size')
     parser.add_argument('--device', type=str, default='mps', help='Device for inference (cpu, cuda, mps, 0, 1, etc)')
     parser.add_argument('--tracker', type=str, default='botsort.yaml', help='Tracker config file')
-    parser.add_argument('--conf', type=float, default=0.3, help='Confidence threshold')
+    parser.add_argument('--conf', type=float, default=0.1, help='Confidence threshold')
     parser.add_argument('--show', action='store_true', help='Show window (GUI)')
     args = parser.parse_args()
 
@@ -63,6 +63,15 @@ def main():
         infer_time = time.time() - t0
         inference_times.append(infer_time)
         annotated = results[0].plot()
+
+        # Draw all bounding boxes with confidence and class
+        for box in results[0].boxes:
+            x1, y1, x2, y2 = map(int, box.xyxy[0])
+            conf = float(box.conf[0]) if hasattr(box, 'conf') else 0.0
+            cls = int(box.cls[0]) if hasattr(box, 'cls') else 0
+            label = f"{cls} {conf:.2f}"
+            cv2.rectangle(annotated, (x1, y1), (x2, y2), (0, 255, 255), 2)
+            cv2.putText(annotated, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
 
         frame_count += 1
         if frame_count % 10 == 0:
