@@ -9,7 +9,7 @@ The project is based on a simple event loop (`src/main.py`):
 - The frame is fed to a fine-tuned YOLO model (`src/yolo.py`)
     - YOLO detects if the event contains a drone (`src/yolo.py`)
         - If not, discard frame
-        - If yeS, continue
+        - If yes, continue
 - YOLO gives us a bounding box containing the drone (`src/yolo.py`)
 - We use KMeans to detect clusters of high frequency events inside of the bounding box. These will be the drone's propellers. (`src/kmeans.py`)
     - KMeans is customized to be intialized via specific centroids (`src/kmeans.py`)
@@ -32,4 +32,4 @@ The project is based on a simple event loop (`src/main.py`):
 ## Development philosophy
 - We utilized a mild functional development philosophy. The aim was to create composable modules that could be called on their lonesome using `uv -m`. (`src/main.py`, `src/kmeans.py`, `src/yolo.py`)
 - We did some software testing where it made sense in the interest of time. The k-means implementation needed testing to verify that it works (`tests/test_kmeans.py`), and we optimized our final product via `tests/test_non_functional.py`, that automatically ran the prediction on all benchmark datasets.
-- We implemented a profiler [TODO]
+- We implemented a profiler through `src/profiling.py` in order to estimate running times of individual running blocks of the code. It runs on the logic of time substraction between the start of the function call and the end of the function call. It gave us hints when certain algorithmical solutions became too slow for the context of the challenge, helping us to remove expensive solutions early. (i.e. staying within millisecond-level response rate)
