@@ -43,3 +43,10 @@ The project is based on a simple event loop (`src/main.py`):
 - We did some software testing where it made sense in the interest of time. The k-means implementation needed testing to verify that it works (`tests/test_kmeans.py`), and we optimized our final product via `tests/test_non_functional.py`, that automatically ran the prediction on all benchmark datasets.
 ![alt text](docs/image.png)
 - We implemented a profiler through `src/profiling.py` in order to estimate running times of individual running blocks of the code. It runs on the logic of time substraction between the start of the function call and the end of the function call. It gave us hints when certain algorithmical solutions became too slow for the context of the challenge, helping us to remove expensive solutions early. (i.e. staying within millisecond-level response rate)
+```
+=== Main function benchmarks ===
+INFO - extract_roi_intensity: avg=0.01 ms, min=0.01 ms, max=0.23 ms, n=2071
+INFO - identification_delay: avg=95.41 ms, min=41.12 ms, max=1369.72 ms, n=207
+INFO - estimate_rpm_from_signal: avg=0.04 ms, min=0.02 ms, max=0.72 ms, n=69
+```
+You can see that we're able to run this feature-rich inference in 100 milliseconds. The code can be optimized a lot further by our estimates as well.
