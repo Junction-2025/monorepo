@@ -173,6 +173,8 @@ def main():
                 tl = (int(yolo_bounding_box.x1), int(yolo_bounding_box.y1))
                 br = (int(yolo_bounding_box.x2), int(yolo_bounding_box.y2))
                 cv2.rectangle(frame, tl, br, (0, 255, 0), 2)
+                
+                roi = (yolo_bounding_box.x1, yolo_bounding_box.x2, yolo_bounding_box.y1, yolo_bounding_box.y2)
 
                 cropped_frame = frame[
                     yolo_bounding_box.y1 : yolo_bounding_box.y2,
