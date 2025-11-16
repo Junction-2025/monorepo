@@ -1,9 +1,10 @@
 import argparse
 from pathlib import Path
+import time
 
 from src.config import BATCH_WINDOW_US, BASE_WIDTH, BASE_HEIGHT, LOWER_RPM_BOUND
 from src.logger import get_logger
-from src.profiling import create_timings, log_timings, timing_section
+from src.profiling import create_timings, log_timings, timing_section, add_timing
 
 
 from src.evio_lib.pacer import Pacer
@@ -160,6 +161,7 @@ def main():
             )
             frame = get_frame(window)
 
+            t0 = time.perf_counter()
             yolo_bounding_box = detect_drone_crop(frame)
 
             if yolo_bounding_box:
@@ -188,7 +190,8 @@ def main():
                 # Detect blade count using KNN and add to tracker
                 blade_count_array = get_blade_count(cropped_frame, mask)
                 blade_tracker.add_observation(blade_count_array)
-
+                t1 = time.perf_counter()
+                add_timing(timings, "identification_delay", t1-t0)
                 detected_avg = (
                     int(
                         sum([b[0] for b in blade_count_array])
