@@ -5,6 +5,7 @@ Tests the predictor against known scenarios with expected RPM ranges.
 """
 
 import subprocess
+import glob
 from pathlib import Path
 from dataclasses import dataclass
 
@@ -62,8 +63,6 @@ def run_predictor(file_path: Path) -> float | None:
         "--input",
         str(file_path),
         "--no-display",
-        "--speed",
-        "5",  # Run at 5x speed for faster testing
     ]
 
     try:
@@ -74,42 +73,22 @@ def run_predictor(file_path: Path) -> float | None:
             timeout=120,  # 2 minute timeout
         )
 
-        # Find the new log file created by this run
-        new_logs = set(log_dir.glob("*.txt")) - existing_logs
+        # Parse output for "RPM: Y.YY" from logger
+        # Check both stdout and stderr as logger might output to either
+        combined_output = result.stdout + "\n" + result.stderr
 
-        if not new_logs:
-            # Fallback: use the most recently modified log file
-            log_files = sorted(
-                log_dir.glob("*.txt"), key=lambda p: p.stat().st_mtime, reverse=True
-            )
-            if log_files:
-                log_file = log_files[0]
-            else:
-                print("  ERROR: No log file found")
-                return None
-        else:
-            log_file = list(new_logs)[0]
-
-        # Read the log file and parse RPM
-        with open(log_file, "r") as f:
-            log_content = f.read()
-
-        # Look for "RPM: X.XX" in the log file
-        # The final average RPM is logged after "=== AVERAGE RPM ==="
-        lines = log_content.splitlines()
-        for i, line in enumerate(lines):
-            if "=== AVERAGE RPM ===" in line:
-                # Look for RPM in the next few lines
-                for j in range(i + 1, min(i + 5, len(lines))):
-                    if "RPM:" in lines[j] and "blade_count" not in lines[j]:
-                        # Extract RPM value
-                        parts = lines[j].split("RPM:")
-                        if len(parts) >= 2:
-                            rpm_str = parts[1].strip()
-                            try:
-                                return float(rpm_str)
-                            except ValueError:
-                                continue
+        for line in combined_output.splitlines():
+            # Look for the final average RPM output
+            # Format: "INFO - RPM: 1234.56" (without blade_count in the line)
+            if "RPM:" in line and "blade_count" not in line:
+                # Extract RPM value from "INFO - RPM: 1234.56"
+                parts = line.split("RPM:")
+                if len(parts) >= 2:
+                    rpm_str = parts[1].strip()
+                    try:
+                        return float(rpm_str)
+                    except ValueError:
+                        continue
 
         return None
 
