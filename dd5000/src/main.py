@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 import time
 
-from src.config import BATCH_WINDOW_US, BASE_WIDTH, BASE_HEIGHT
+from src.config import BATCH_WINDOW_US, BASE_WIDTH, BASE_HEIGHT, LOWER_RPM_BOUND
 
 from src.evio_lib.pacer import Pacer
 from src.evio_lib.dat_file import DatFileSource
@@ -131,6 +131,7 @@ def main():
     blade_count = 2 # Assume 2
     
     frame_counter = 0
+    rpm_records = []
 
     logger.info("\n--- Data Import Complete ---")
     for batch_range in pacer.pace(src.ranges()):
@@ -149,6 +150,7 @@ def main():
             )
             assert output is not None
             rpm, _, _ = output
+            rpm_records.append(rpm)
             logger.info(f"RPM: {rpm:.2f}")
             roi_signals.clear()        
         
@@ -219,6 +221,14 @@ def main():
             f"max={max(times) * 1000:.2f} ms, "
             f"n={len(times)}"
         )
+
+    logger.info("\n=== AVERAGE RPM ===")
+    rpm_records = [r for r in rpm_records if r >= LOWER_RPM_BOUND]
+    if rpm_records:
+        avg_rpm = float(sum(rpm_records)) / len(rpm_records)
+        logger.info("RPM: %.2f", avg_rpm)
+    else:
+        logger.info("No RPM records above LOWER_RPM_BOUND (%s)", LOWER_RPM_BOUND)
 
     logger.info("\n=== Timing stats ===")
     for key in timings:
