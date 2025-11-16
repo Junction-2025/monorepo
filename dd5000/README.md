@@ -62,6 +62,9 @@ these are ran on validation sets, and inference time taken on those
 
 
 
+More efficiency gains can be achieved when exporting these models to different formats like tflite to deploy these on edge devices too (code provided).
+
+Sensofusion's products like Airfence is more than capable of inferencing at more blazing fast speeds, even surpassing the inference speeds as shown in NVIDIA A30 Tensor Core GPU above.
 
 
 ## Technical achievements
