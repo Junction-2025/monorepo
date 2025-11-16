@@ -14,12 +14,13 @@ Drone Detector 5000 is based on a simple event loop (`src/main.py`).
     - KMeans auto-adjusts its' chosen `k` (`src/kmeans.py`)
 - Once we have `k` clusters of high event frequency, we process each of these clusters separately (`src/main.py`)
 - We once again run KMeans to detect blades of the rotor, with similar principles. (`src/kmeans.py`)
-- We use the blade count for each toror to compute RPM (`src/rpm_estimator.py`)
+- We use the blade count for each rotor to compute RPM (`src/rpm_estimator.py`)
 
-## Outcomes
+## Technical achievements
+- In our experiments, the fine-tuned YOLO model could detect drones frame-by-frame, running on a normal Macbook, in only 8ms. This is a significant finding, as even the Sensofusion challenge providers did not believe this could be achieved.
+    - With a YOLO-based drone detection system, it's possible to label enemy drones accurately in real time. It is possible to teach YOLO models to detect different drone types.
+- We completely implemented the KNN propeller detection concept from [this publication](https://arxiv.org/pdf/2209.02205). 
 
-## Technical Specifications
-In our experiments, the fine-tuned YOLO model could detect drones frame-by-frame, running on a normal Macbook, in only 8ms. This is a significant finding, as even the Sensofusion challenge providers did not believe this could be achieved.
 
 ## Development philosophy
 - We utilized a mild functional development philosophy. The aim was to create composable modules that could be called on their lonesome using `uv -m`. (`src/main.py`, `src/kmeans.py`, `src/yolo.py`)
