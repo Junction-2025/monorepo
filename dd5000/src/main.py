@@ -3,13 +3,15 @@ from pathlib import Path
 import time
 
 from src.config import BATCH_WINDOW_US, BASE_WIDTH, BASE_HEIGHT, LOWER_RPM_BOUND
+from src.logger import get_logger
+from src.profiling import create_timings, add_timing, log_timings, timing_section
+
 
 from src.evio_lib.pacer import Pacer
 from src.evio_lib.dat_file import DatFileSource
 from src.evio_lib.play_dat import get_frame, get_window
 
 from src.yolo import detect_drone_crop
-from src.logger import get_logger
 from src.kmeans import get_blade_count, get_propeller_masks
 from src.utils import overlay_mask
 from src.rpm import extract_roi_intensity, estimate_rpm_from_signals
@@ -19,7 +21,7 @@ import cv2
 import numpy as np
 
 logger = get_logger()
-
+timings = create_timings()
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -101,14 +103,17 @@ def main():
         window = get_window(
             src.event_words, src.order, batch_range.start, batch_range.stop
         )
-        event_intensity = extract_roi_intensity(window, roi)
+        with timing_section(timings, "extract_roi_intensity"):
+            event_intensity = extract_roi_intensity(window, roi)
+
         roi_signals.append(event_intensity)
 
         # Run FFT every N frames
         if len(roi_signals) >= max_signals:
-            output = estimate_rpm_from_signals(
-                roi_signals, fps, blade_count
-            )
+            with timing_section(timings, "estimate_rpm_from_signal"):
+                output = estimate_rpm_from_signals(
+                    roi_signals, fps, blade_count
+                )
             assert output is not None
             rpm, _, _ = output
             rpm_records.append(rpm)
@@ -116,7 +121,6 @@ def main():
             roi_signals.clear()        
         
         if frame_counter % 30 == 0:
-            t0 = time.perf_counter()
             window = get_window(
                 src.event_words,
                 src.order,
@@ -124,14 +128,9 @@ def main():
                 batch_range.stop,
             )
             frame = get_frame(window)
-            t1 = time.perf_counter()
-            timings["get_data"].append(t1 - t0)
-            t2 = time.perf_counter()
-            yolo_bounding_box = detect_drone_crop(frame)
-            t3 = time.perf_counter()
-            timings["yolo"].append(t3 - t2)
 
-            t4 = time.perf_counter()
+            yolo_bounding_box = detect_drone_crop(frame)
+
             if yolo_bounding_box:
                 tl = (int(yolo_bounding_box.x1), int(yolo_bounding_box.y1))
                 br = (int(yolo_bounding_box.x2), int(yolo_bounding_box.y2))
@@ -164,24 +163,11 @@ def main():
                     0.6,
                     2,
                 )
-            t5 = time.perf_counter()
-            timings["post_processing"].append(t5 - t4)
             cv2.imshow(window_name, frame)
             cv2.waitKey(1)
         cv2.destroyAllWindows()
 
-    def _profiling(name):
-        times = timings[name]
-        if not times:
-            return
-        avg = sum(times) / len(times)
-        logger.info(
-            f"{name:>10}: "
-            f"avg={avg * 1000:.2f} ms, "
-            f"min={min(times) * 1000:.2f} ms, "
-            f"max={max(times) * 1000:.2f} ms, "
-            f"n={len(times)}"
-        )
+    log_timings(logger, timings, title="Main function benchmarks")
 
     logger.info("\n=== AVERAGE RPM ===")
     rpm_records = [r for r in rpm_records if r >= LOWER_RPM_BOUND]
@@ -190,10 +176,6 @@ def main():
         logger.info("RPM: %.2f", avg_rpm)
     else:
         logger.info("No RPM records above LOWER_RPM_BOUND (%s)", LOWER_RPM_BOUND)
-
-    logger.info("\n=== Timing stats ===")
-    for key in timings:
-        _profiling(key)
 
 
 if __name__ == "__main__":

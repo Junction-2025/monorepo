@@ -4,14 +4,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 
+from src.profiling import create_timings, add_timing, log_timings, timing_section
+from src.logger import get_logger
+
 from src.evio_lib.pacer import Pacer
 from src.evio_lib.dat_file import DatFileSource
+
+timings = create_timings()
+logger = get_logger()
 
 """"
 Run this file by running:
 uv run python src/.py /path/to/file.dat
 """
-
 
 def get_window(
     event_words: np.ndarray, time_order: np.ndarray, win_start: int, win_stop: int
@@ -51,6 +56,7 @@ def extract_roi_intensity(window, roi):
 
     on_count  = np.sum(pol[mask])
     off_count = np.sum(~pol[mask])
+    #why only on_count?
     contrast = on_count - off_count
     return on_count
 
@@ -94,11 +100,11 @@ def main():
 
     ### HARDCODED VALUES
     # Hardcoded roi drone_idle (bounding box)
-    roi = (500, 700, 230, 430)
+    #roi = (500, 700, 230, 430)
     # Hardcoded roi fan_const_rpm (bounding box)
     # roi = (550, 700, 250, 440)
     # Hardcoded roi drone_moving (bounding box)
-    #roi = (720, 920, 200, 330)
+    roi = (720, 920, 200, 330)
     blade_count = 2
 
     print("Loading data...")
@@ -121,14 +127,19 @@ def main():
         window = get_window(
             src.event_words, src.order, batch_range.start, batch_range.stop
         )
-        event_intensity = extract_roi_intensity(window, roi)
+        with timing_section(timings, "extract_roi_intensity"):
+            event_intensity = extract_roi_intensity(window, roi)
+        
         roi_signals.append(event_intensity)
 
         # Run FFT every N frames
         if len(roi_signals) >= max_signals:
-            rpm, freqs, fft_vals = estimate_rpm_from_signals(
-                roi_signals, fps, blade_count
-            )
+            with timing_section(timings, "estimate_rpm_from_signals"):
+                rpm, freqs, fft_vals = estimate_rpm_from_signals(
+                    roi_signals, fps, blade_count
+                )
+
+
             print(f"RPM: {rpm:.2f}")
             roi_signals.clear()        
         
@@ -140,5 +151,6 @@ def main():
             cv2.imshow("Events", frame)
             cv2.waitKey(1)
 
+    log_timings(logger, timings, title="RPM benchmarks")
 if __name__ == "__main__":
     main()
