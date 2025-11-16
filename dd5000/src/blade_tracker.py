@@ -25,7 +25,7 @@ class BladeCountTracker:
         self,
         window_size: int = 10,
         min_observations: int = 3,
-        default_blade_count: int = 3
+        default_blade_count: int = 3,
     ):
         """
         Initialize the blade count tracker.
@@ -67,7 +67,9 @@ class BladeCountTracker:
         avg_blade_count = int(np.round(np.mean(blade_counts)))
 
         self.observations.append(avg_blade_count)
-        logger.info(f"Added blade count observation: {avg_blade_count}, window size: {len(self.observations)}")
+        logger.info(
+            f"Added blade count observation: {avg_blade_count}, window size: {len(self.observations)}"
+        )
 
         # Update current estimate if we have enough observations
         if len(self.observations) >= self.min_observations:
@@ -142,7 +144,7 @@ class BladeCountTracker:
                 "count": 0,
                 "current_estimate": self._current_estimate,
                 "is_default": True,
-                "is_confident": False
+                "is_confident": False,
             }
 
         obs_array = np.array(list(self.observations))
@@ -155,5 +157,5 @@ class BladeCountTracker:
             "min": int(np.min(obs_array)),
             "max": int(np.max(obs_array)),
             "is_default": False,
-            "is_confident": self.has_confident_estimate()
+            "is_confident": self.has_confident_estimate(),
         }

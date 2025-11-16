@@ -71,7 +71,9 @@ def get_heatmap_centroids(heatmap: np.ndarray) -> Centroids:
             c for c in remaining_candidates if c != furthest_centroid
         ]
 
-    logger.info(f"Selected {len(centroids)} centroids from {len(sorted_centroid_indices_xy)} candidates")
+    logger.info(
+        f"Selected {len(centroids)} centroids from {len(sorted_centroid_indices_xy)} candidates"
+    )
 
     return Centroids(
         x_coords=[c[0] for c in centroids], y_coords=[c[1] for c in centroids]
@@ -127,7 +129,9 @@ def kmeans(
     labels_list, scores = [], []
     for k in K_CANDIDATES:
         if k > len(propeller_masks.x_coords):
-            logger.debug(f"Skipping k={k}, only have {len(propeller_masks.x_coords)} centroids")
+            logger.debug(
+                f"Skipping k={k}, only have {len(propeller_masks.x_coords)} centroids"
+            )
             continue
 
         centroids_array = np.column_stack(
@@ -142,13 +146,15 @@ def kmeans(
         labels = model.labels_
         unique_labels = np.unique(labels)
 
-        logger.debug(f"k={k}: got {len(unique_labels)} unique clusters: {unique_labels}")
+        logger.debug(
+            f"k={k}: got {len(unique_labels)} unique clusters: {unique_labels}"
+        )
 
         # For k=1, we can't use Davies-Bouldin score (requires >=2 clusters)
         # Give it a high penalty score so multi-cluster solutions are preferred
         if k == 1:
             labels_list.append(labels)
-            scores.append(float('inf'))  # Penalize single cluster
+            scores.append(float("inf"))  # Penalize single cluster
             continue
 
         if len(unique_labels) < 2:
@@ -164,15 +170,21 @@ def kmeans(
         logger.warning("No valid clustering found, returning all zeros")
         return points, np.zeros(len(points), dtype=int)
 
-    best_k = K_CANDIDATES[int(np.argmin(scores))] if len(scores) > 1 else K_CANDIDATES[0]
+    best_k = (
+        K_CANDIDATES[int(np.argmin(scores))] if len(scores) > 1 else K_CANDIDATES[0]
+    )
     best_labels = labels_list[int(np.argmin(scores))]
 
-    logger.debug(f"Selected best k={best_k} with {len(np.unique(best_labels))} clusters")
+    logger.debug(
+        f"Selected best k={best_k} with {len(np.unique(best_labels))} clusters"
+    )
 
     # Remove outliers based on median distance threshold
     points_filtered, labels_filtered = remove_outliers(points, best_labels)
 
-    logger.debug(f"After outlier removal: {len(np.unique(labels_filtered))} clusters remain")
+    logger.debug(
+        f"After outlier removal: {len(np.unique(labels_filtered))} clusters remain"
+    )
 
     return points_filtered, labels_filtered
 

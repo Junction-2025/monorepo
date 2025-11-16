@@ -1,10 +1,9 @@
 import argparse  # noqa: INP001
 
 import numpy as np
-import matplotlib.pyplot as plt
 import cv2
 
-from src.profiling import create_timings, add_timing, log_timings, timing_section
+from src.profiling import create_timings, log_timings, timing_section
 from src.logger import get_logger
 
 from src.evio_lib.pacer import Pacer
@@ -17,6 +16,7 @@ logger = get_logger()
 Run this file by running:
 uv run python src/.py /path/to/file.dat
 """
+
 
 def get_window(
     event_words: np.ndarray, time_order: np.ndarray, win_start: int, win_stop: int
@@ -45,18 +45,16 @@ def get_frame(
     frame[y_coords[~polarities_on], x_coords[~polarities_on]] = off_color
     return frame
 
+
 def extract_roi_intensity(window, roi):
     x, y, pol = window
     x1, x2, y1, y2 = roi
 
-    mask = (
-        (x >= x1) & (x < x2) &
-        (y >= y1) & (y < y2)
-    )
+    mask = (x >= x1) & (x < x2) & (y >= y1) & (y < y2)
 
-    on_count  = np.sum(pol[mask])
+    on_count = np.sum(pol[mask])
     off_count = np.sum(~pol[mask])
-    #why only on_count?
+    # why only on_count?
     contrast = on_count - off_count
     return on_count
 
@@ -93,16 +91,25 @@ def estimate_rpm_from_signals(signals, fps, blade_count):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("dat", help="Path to .dat file")
-    parser.add_argument("--no-blades", type=int, default=2, help="Number of blades of a `propeller`")
-    parser.add_argument("--roi", type=tuple, default=(720, 920, 200, 330), help="Pixel area of type (x1, x2, y1, y2) to look for the frequency")
-    #parser.add_argument("--window", type=float, default=0.25, help="Window duration in ms")
+    parser.add_argument(
+        "--no-blades", type=int, default=2, help="Number of blades of a `propeller`"
+    )
+    parser.add_argument(
+        "--roi",
+        type=tuple,
+        default=(720, 920, 200, 330),
+        help="Pixel area of type (x1, x2, y1, y2) to look for the frequency",
+    )
+    # parser.add_argument("--window", type=float, default=0.25, help="Window duration in ms")
     parser.add_argument("--window", type=float, default=1, help="Window duration in ms")
-    parser.add_argument("--speed", type=float, default=1, help="Playback speed (1 is real time)")
+    parser.add_argument(
+        "--speed", type=float, default=1, help="Playback speed (1 is real time)"
+    )
     args = parser.parse_args()
 
     ### HARDCODED VALUES
     # Hardcoded roi drone_idle (bounding box)
-    #roi = (500, 700, 230, 430)
+    # roi = (500, 700, 230, 430)
     # Hardcoded roi fan_const_rpm (bounding box)
     # roi = (550, 700, 250, 440)
     # Hardcoded roi drone_moving (bounding box)
@@ -121,17 +128,17 @@ def main():
     roi_signals = []
     fps = 1000.0 / args.window  # window duration in ms
     max_signals = 100
-    
+
     frame_counter = 0
     for batch_range in pacer.pace(src.ranges()):
         frame_counter += 1
-        
+
         window = get_window(
             src.event_words, src.order, batch_range.start, batch_range.stop
         )
         with timing_section(timings, "extract_roi_intensity"):
             event_intensity = extract_roi_intensity(window, roi)
-        
+
         roi_signals.append(event_intensity)
 
         # Run FFT every N frames
@@ -141,10 +148,9 @@ def main():
                     roi_signals, fps, blade_count
                 )
 
-
             print(f"RPM: {rpm:.2f}")
-            roi_signals.clear()        
-        
+            roi_signals.clear()
+
         if frame_counter % 30 == 0:
             frame = get_frame(window)
             # Draw ROI bounding box
@@ -154,5 +160,7 @@ def main():
             cv2.waitKey(1)
 
     log_timings(logger, timings, title="RPM benchmarks")
+
+
 if __name__ == "__main__":
     main()

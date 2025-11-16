@@ -3,6 +3,7 @@ from src.logger import get_logger
 
 logger = get_logger()
 
+
 def extract_roi_intensity(window, roi):
     x, y, pol = window
     x1, x2, y1, y2 = roi

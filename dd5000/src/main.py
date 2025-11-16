@@ -1,10 +1,9 @@
 import argparse
 from pathlib import Path
-import time
 
 from src.config import BATCH_WINDOW_US, BASE_WIDTH, BASE_HEIGHT, LOWER_RPM_BOUND
 from src.logger import get_logger
-from src.profiling import create_timings, add_timing, log_timings, timing_section
+from src.profiling import create_timings, log_timings, timing_section
 
 
 from src.evio_lib.pacer import Pacer
@@ -20,6 +19,7 @@ import cv2
 
 logger = get_logger()
 timings = create_timings()
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -63,6 +63,7 @@ def parse_args() -> argparse.Namespace:
 
     return parser.parse_args()
 
+
 def main():
     args = parse_args()
 
@@ -102,7 +103,7 @@ def main():
     blade_tracker = BladeCountTracker(
         window_size=10,
         min_observations=3,
-        default_blade_count=2  # Fallback assumption
+        default_blade_count=2,  # Fallback assumption
     )
 
     frame_counter = 0
@@ -113,7 +114,7 @@ def main():
     logger.info("\n--- Data Import Complete ---")
     for batch_range in pacer.pace(src.ranges()):
         frame_counter += 1
-        
+
         window = get_window(
             src.event_words, src.order, batch_range.start, batch_range.stop
         )
@@ -129,9 +130,7 @@ def main():
             tracker_stats = blade_tracker.get_stats()
 
             with timing_section(timings, "estimate_rpm_from_signal"):
-                output = estimate_rpm_from_signals(
-                    roi_signals, fps, blade_count
-                )
+                output = estimate_rpm_from_signals(roi_signals, fps, blade_count)
             assert output is not None
             rpm, _, _ = output
             rpm_records.append(rpm)
@@ -148,8 +147,8 @@ def main():
                 f"RPM: {rpm:.2f} (using blade_count={blade_count}, {confidence_str}, "
                 f"observations={tracker_stats['count']})"
             )
-            roi_signals.clear()        
-        
+            roi_signals.clear()
+
         # Run YOLO/KNN detection periodically to update blade count
         # Run early and frequently to populate tracker before first RPM calculation
         if frame_counter % 10 == 0:
@@ -167,8 +166,13 @@ def main():
                 tl = (int(yolo_bounding_box.x1), int(yolo_bounding_box.y1))
                 br = (int(yolo_bounding_box.x2), int(yolo_bounding_box.y2))
                 cv2.rectangle(frame, tl, br, (0, 255, 0), 2)
-                
-                roi = (yolo_bounding_box.x1, yolo_bounding_box.x2, yolo_bounding_box.y1, yolo_bounding_box.y2)
+
+                roi = (
+                    yolo_bounding_box.x1,
+                    yolo_bounding_box.x2,
+                    yolo_bounding_box.y1,
+                    yolo_bounding_box.y2,
+                )
 
                 cropped_frame = frame[
                     yolo_bounding_box.y1 : yolo_bounding_box.y2,
@@ -185,7 +189,14 @@ def main():
                 blade_count_array = get_blade_count(cropped_frame, mask)
                 blade_tracker.add_observation(blade_count_array)
 
-                detected_avg = int(sum([b[0] for b in blade_count_array]) / (len(blade_count_array) or 1)) if blade_count_array else 0
+                detected_avg = (
+                    int(
+                        sum([b[0] for b in blade_count_array])
+                        / (len(blade_count_array) or 1)
+                    )
+                    if blade_count_array
+                    else 0
+                )
                 current_estimate = blade_tracker.get_blade_count()
 
                 text_pos = (tl[0], max(0, tl[1] - 8))
