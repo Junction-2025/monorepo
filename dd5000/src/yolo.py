@@ -3,11 +3,11 @@ from ultralytics import YOLO
 from src.models import CropCoords
 import numpy as np
 
-from src.config import YOLO_CONFIDENCE_THRESHOLD, MODEL_LOGGING_VERBOSE
+from src.config import YOLO_CONFIDENCE_THRESHOLD, MODEL_LOGGING_VERBOSE, MODEL_NAME
 from src.logger import get_logger
 
 # Load model once globally
-model = YOLO("best-custom.pt")  # Use standard YOLO, not YOLOWorld
+model = YOLO(MODEL_NAME)  # Use standard YOLO, not YOLOWorld
 logger = get_logger()
 
 
