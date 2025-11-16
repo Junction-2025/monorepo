@@ -106,7 +106,7 @@ def main():
     # Hardcoded roi fan_const_rpm (bounding box)
     # roi = (550, 700, 250, 440)
     # Hardcoded roi drone_moving (bounding box)
-    #roi = (720, 920, 200, 330)
+    roi = (720, 920, 200, 330)
     blade_count = 2
 
     print("Loading data...")
