@@ -30,6 +30,40 @@ The project is based on a simple event loop (`src/main.py`):
 - FFT analysis (`np.fft.rfft()`) identifies the dominant frequency peak (blade passage rate)
 - RPM = `(frequency_hz * 60) / blade_count` (converts blade passages/min to rotations/min)
 
+
+
+## YOLO model finetuning for event-camera usecase
+
+
+YOLO models are the best standards known for object detection models. However, using them out of the box for event cameras, doesn't make sense, as we want to process it fast.
+
+Hence, what we did was, fine-tune the models for event data for drones, and as we shown below, achieved fast inference speeds to be able to use them for the usecase.
+
+Also, we have shown (in the yt video) use of BoT-SORT for tracking that can be done as well.
+
+
+
+This table summarises the performance of the trained models using three key metrics:
+- **mAP50** (at final epoch)
+- **Inference speed** (on both GPU and Apple M4 Max)
+
+
+## Model Comparison
+
+these are ran on validation sets, and inference time taken on those
+
+
+| Model File                     | mAP50 (Final Epoch) | Inference Speed (GPU) | Inference Speed (M4 Max) | Notes |
+|-------------------------------|----------------------|-------------------------|----------------------------|--------|
+| **best-final.pt**             | **0.95138**          | **6.1 ms**             | **—**                      | Best fine-tuned model. Combines different datasets |
+| **best-custom.pt**            | **0.99500**          | **7.3 ms**             | **—**                      | Trained on custom dataset extracted from .dat file from FRED dataset |
+| **best-m.pt**                 | **0.92544**          | **7.6 ms**             | **—**                      | Same model but finetuned on yolo11(m).pt |
+| **best-custom-added-drone.pt**| **0.99500**          | **7.4 ms**             | **—**                      | Added extra drone examples; similar accuracy to best-custom.pt |
+
+
+
+
+
 ## Technical achievements
 - We accurately detect RPM on moving drones
     - On `drone_moving.dat` we capture average RPM in the scale of `5680.43`, `6192.86`, though we also detected `5425.53`, which is slightly outside of the range
