@@ -15,6 +15,11 @@ from src.utils import overlay_mask
 import cv2
 
 
+import numpy as np
+
+logger = get_logger()
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Stream a .dat file with real-time pacing."
@@ -53,6 +58,45 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def extract_roi_intensity(window, roi):
+    x, y, pol = window
+    x1, x2, y1, y2 = roi
+
+    mask = (x >= x1) & (x < x2) & (y >= y1) & (y < y2)
+
+    on_count = np.sum(pol[mask])
+    return on_count
+
+
+def estimate_rpm_from_signals(signals, fps, blade_count):
+    """
+    signals: list of np.ndarray (gray scale intensity frames generated from event windows)
+    fps: effective signal rate (1 / window_size)
+
+    blade_count: number of blades on the propeller
+    """
+    if len(signals) < 20:
+        logger.info("Not enough signals for FFT.")
+        return None
+
+    # Remove DC bias
+    signals = np.array(signals, dtype=float)
+    signal = signals - np.mean(signals)
+
+    # FFT
+    fft_vals = np.abs(np.fft.rfft(signal))
+    freqs = np.fft.rfftfreq(len(signal), 1.0 / fps)
+
+    # Ignore the zero-frequency peak
+    peak_idx = np.argmax(fft_vals[1:]) + 1
+    rot_freq_hz = freqs[peak_idx]
+
+    # Set your blade count
+    rpm = (rot_freq_hz * 60) / blade_count
+
+    return rpm, freqs, fft_vals
+
+
 def main():
     args = parse_args()
 
@@ -80,76 +124,103 @@ def main():
         "per_iter": [],
     }
 
+    roi = (500, 700, 230, 300)
+    roi_signals = []
+    fps = 1000000 / args.window
+    max_signals = 100
+    blade_count = 2 # Assume 2
+    
+    frame_counter = 0
+
     logger.info("\n--- Data Import Complete ---")
     for batch_range in pacer.pace(src.ranges()):
-        t0 = time.perf_counter()
+        frame_counter += 1
+        
         window = get_window(
-            src.event_words,
-            src.order,
-            batch_range.start,
-            batch_range.stop,
+            src.event_words, src.order, batch_range.start, batch_range.stop
         )
-        frame = get_frame(window)
-        t1 = time.perf_counter()
-        timings["get_data"].append(t1 - t0)
-        t2 = time.perf_counter()
-        yolo_bounding_box = detect_drone_crop(frame)
-        t3 = time.perf_counter()
-        timings["yolo"].append(t3-t2)
+        event_intensity = extract_roi_intensity(window, roi)
+        roi_signals.append(event_intensity)
 
-        t4 = time.perf_counter()
-        if yolo_bounding_box:
-            tl = (int(yolo_bounding_box.x1), int(yolo_bounding_box.y1))
-            br = (int(yolo_bounding_box.x2), int(yolo_bounding_box.y2))
-            cv2.rectangle(frame, tl, br, (0, 255, 0), 2)
-
-            cropped_frame = frame[
-                yolo_bounding_box.y1 : yolo_bounding_box.y2,
-                yolo_bounding_box.x1 : yolo_bounding_box.x2,
-            ]
-            mask = get_propeller_masks(cropped_frame)
-            cropped_overlay = overlay_mask(cropped_frame, mask)
-            frame[
-                yolo_bounding_box.y1 : yolo_bounding_box.y2,
-                yolo_bounding_box.x1 : yolo_bounding_box.x2,
-            ] = cropped_overlay
-
-            blade_count = get_blade_count(cropped_frame, mask)
-            text_pos = (tl[0], max(0, tl[1] - 8))
-            cv2.putText(
-                frame,
-                "".join(
-                    [
-                        f"Blades (AVG): {int(sum([b[0] for b in blade_count]) / (len(blade_count) or 1))}"
-                    ]
-                ),
-                text_pos,
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.6,
-                2,
+        # Run FFT every N frames
+        if len(roi_signals) >= max_signals:
+            output = estimate_rpm_from_signals(
+                roi_signals, fps, blade_count
             )
-        t5 = time.perf_counter()
-        timings["post_processing"].append(t5-t4)
-        cv2.imshow(window_name, frame)
-        cv2.waitKey(1)
-    cv2.destroyAllWindows()
+            assert output is not None
+            rpm, _, _ = output
+            logger.info(f"RPM: {rpm:.2f}")
+            roi_signals.clear()        
+        
+        if frame_counter % 30 == 0:
+            t0 = time.perf_counter()
+            window = get_window(
+                src.event_words,
+                src.order,
+                batch_range.start,
+                batch_range.stop,
+            )
+            frame = get_frame(window)
+            t1 = time.perf_counter()
+            timings["get_data"].append(t1 - t0)
+            t2 = time.perf_counter()
+            yolo_bounding_box = detect_drone_crop(frame)
+            t3 = time.perf_counter()
+            timings["yolo"].append(t3 - t2)
 
-    def profiling(name):
+            t4 = time.perf_counter()
+            if yolo_bounding_box:
+                tl = (int(yolo_bounding_box.x1), int(yolo_bounding_box.y1))
+                br = (int(yolo_bounding_box.x2), int(yolo_bounding_box.y2))
+                cv2.rectangle(frame, tl, br, (0, 255, 0), 2)
+
+                cropped_frame = frame[
+                    yolo_bounding_box.y1 : yolo_bounding_box.y2,
+                    yolo_bounding_box.x1 : yolo_bounding_box.x2,
+                ]
+                mask = get_propeller_masks(cropped_frame)
+                cropped_overlay = overlay_mask(cropped_frame, mask)
+                frame[
+                    yolo_bounding_box.y1 : yolo_bounding_box.y2,
+                    yolo_bounding_box.x1 : yolo_bounding_box.x2,
+                ] = cropped_overlay
+
+                blade_count_array = get_blade_count(cropped_frame, mask)
+                text_pos = (tl[0], max(0, tl[1] - 8))
+                cv2.putText(
+                    frame,
+                    "".join(
+                        [
+                            f"Blades (AVG): {int(sum([b[0] for b in blade_count_array]) / (len(blade_count_array) or 1))}"
+                        ]
+                    ),
+                    text_pos,
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.6,
+                    2,
+                )
+            t5 = time.perf_counter()
+            timings["post_processing"].append(t5 - t4)
+            cv2.imshow(window_name, frame)
+            cv2.waitKey(1)
+        cv2.destroyAllWindows()
+
+    def _profiling(name):
         times = timings[name]
         if not times:
             return
         avg = sum(times) / len(times)
-        print(
+        logger.info(
             f"{name:>10}: "
-            f"avg={avg*1000:.2f} ms, "
-            f"min={min(times)*1000:.2f} ms, "
-            f"max={max(times)*1000:.2f} ms, "
+            f"avg={avg * 1000:.2f} ms, "
+            f"min={min(times) * 1000:.2f} ms, "
+            f"max={max(times) * 1000:.2f} ms, "
             f"n={len(times)}"
         )
-        
-    print("\n=== Timing stats ===")
+
+    logger.info("\n=== Timing stats ===")
     for key in timings:
-        profiling(key)
+        _profiling(key)
 
 
 if __name__ == "__main__":
