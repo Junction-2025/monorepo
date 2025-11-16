@@ -1,11 +1,11 @@
 from pathlib import Path
 
-BATCH_WINDOW_US = 5000
+BATCH_WINDOW_US = 1000
 BASE_DIR = Path(__file__).parent.parent
 LOG_DIR = BASE_DIR / "logs"
 LOG_DIR.mkdir(exist_ok=True)
 
-MODEL_NAME = "best-m.pt"
+MODEL_NAME = "best-custom.pt"
 
 BASE_WIDTH = 1280
 BASE_HEIGHT = 720
