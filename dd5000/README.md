@@ -27,7 +27,7 @@ The project is based on a simple event loop (`src/main.py`):
     - On `drone_idle.dat` we capture average RPM in the scale of `5631.25`, `5608.16`, `5632.65`. The scale is a lot tighter than the moving case. 
 - In our experiments, the fine-tuned YOLO model could detect drones frame-by-frame, running on a normal Macbook, in only 8ms. This is a significant finding, as even the Sensofusion challenge providers did not believe this could be achieved.
     - With a YOLO-based drone detection system, it's possible to label enemy drones accurately in real time. It is possible to teach YOLO models to detect different drone types.
-- We completely implemented the KNN propeller detection concept from [this publication](https://arxiv.org/pdf/2209.02205) and almost integrated it with RPM estimation via a stateful blade count tracker (`src/blade_tracker.py`).
+- We completely implemented the KNN propeller detection concept from [this publication](https://arxiv.org/pdf/2209.02205) and integrated it with RPM estimation via a stateful blade count tracker (`src/blade_tracker.py`).
 
 ## Development philosophy
 - We utilized a mild functional development philosophy. The aim was to create composable modules that could be called on their lonesome using `uv -m`. (`src/main.py`, `src/kmeans.py`, `src/yolo.py`)
