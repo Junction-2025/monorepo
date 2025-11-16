@@ -18,9 +18,14 @@ Drone Detector 5000 is based on a simple event loop (`src/main.py`).
 
 ## Standalone RPM Calculation
 
-For testing and validation purposes, `src/pure_rpm_calculations.py` provides a standalone implementation that calculates RPM directly from event data using a hardcoded ROI (Region of Interest). 
+For testing and validation purposes, `src/pure_rpm_calculations.py` provides a standalone implementation that calculates RPM directly from event data using a hardcoded ROI (Region of Interest).
 
-**How it works**: Events are grouped into time windows (1ms default), and for each window, the number of "on" events (positive polarity) within the ROI are counted using boolean masking (`extract_roi_intensity()`). This creates a time-series signal of event activity. After collecting 100 samples, FFT analysis (`np.fft.rfft()`) converts the signal to frequency domain, identifying the dominant frequency peak which represents blade passage rate. RPM is calculated as `(frequency_hz * 60) / blade_count`, converting blade passages per minute to full rotations per minute.
+**How it works:**
+- Events are grouped into 1ms time windows
+- "On" events (positive polarity) within the ROI are counted per window using boolean masking
+- Creates a time-series signal of event activity (100 samples collected)
+- FFT analysis (`np.fft.rfft()`) identifies the dominant frequency peak (blade passage rate)
+- RPM = `(frequency_hz * 60) / blade_count` (converts blade passages/min to rotations/min)
 
 
 ## Technical achievements
