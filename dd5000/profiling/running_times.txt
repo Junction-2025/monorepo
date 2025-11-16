@@ -1,0 +1,12 @@
+=== Timing stats ===
+  get_data: avg=6.14 ms, min=4.93 ms, max=7.29 ms, n=41
+      yolo: avg=167.30 ms, min=157.35 ms, max=325.33 ms, n=41
+post_processing: avg=79.00 ms, min=0.00 ms, max=153.81 ms, n=41
+=== Timing stats ===
+  get_data: avg=6.30 ms, min=4.78 ms, max=8.07 ms, n=37
+      yolo: avg=182.98 ms, min=164.56 ms, max=349.18 ms, n=37
+post_processing: avg=89.04 ms, min=0.00 ms, max=340.93 ms, n=37
+=== Timing stats ===
+  get_data: avg=6.64 ms, min=4.83 ms, max=17.70 ms, n=40
+      yolo: avg=174.04 ms, min=160.60 ms, max=461.77 ms, n=40
+post_processing: avg=81.38 ms, min=0.00 ms, max=143.90 ms, n=40

@@ -1,0 +1,413 @@
+         186621 function calls (186545 primitive calls) in 0.258 seconds
+
+   Ordered by: cumulative time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.010    0.010    0.258    0.258 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/src/kmeans.py:141(get_propeller_masks)
+        1    0.001    0.001    0.245    0.245 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/src/kmeans.py:96(kmeans)
+        1    0.089    0.089    0.185    0.185 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/src/kmeans.py:77(remove_outliers)
+    19114    0.050    0.000    0.090    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/linalg/_linalg.py:2575(norm)
+        4    0.000    0.000    0.042    0.011 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/base.py:1348(wrapper)
+        4    0.008    0.002    0.040    0.010 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/cluster/_kmeans.py:1426(fit)
+        4    0.000    0.000    0.022    0.006 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/parallel.py:169(wrapper)
+        4    0.018    0.005    0.022    0.005 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/cluster/_kmeans.py:623(_kmeans_single_lloyd)
+    19114    0.018    0.000    0.018    0.000 {method 'dot' of 'numpy.ndarray' objects}
+     27/3    0.000    0.000    0.014    0.005 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:187(wrapper)
+        3    0.000    0.000    0.014    0.005 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/metrics/cluster/_unsupervised.py:389(davies_bouldin_score)
+      205    0.008    0.000    0.008    0.000 {method 'reduce' of 'numpy.ufunc' objects}
+    19114    0.005    0.000    0.008    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/linalg/_linalg.py:128(isComplexType)
+    19116    0.008    0.000    0.008    0.000 {method 'ravel' of 'numpy.ndarray' objects}
+       12    0.000    0.000    0.007    0.001 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/metrics/pairwise.py:2254(pairwise_distances)
+       12    0.000    0.000    0.007    0.001 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/metrics/pairwise.py:1951(_parallel_pairwise)
+       12    0.000    0.000    0.006    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/metrics/pairwise.py:273(euclidean_distances)
+    38330    0.006    0.000    0.006    0.000 {built-in method builtins.issubclass}
+       38    0.001    0.000    0.005    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:734(check_array)
+        5    0.001    0.000    0.005    0.001 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/_methods.py:151(_var)
+       44    0.000    0.000    0.004    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/_methods.py:118(_mean)
+       36    0.000    0.000    0.004    0.000 {method 'mean' of 'numpy.ndarray' objects}
+        4    0.000    0.000    0.004    0.001 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/cluster/_kmeans.py:1403(_check_params_vs_input)
+        4    0.000    0.000    0.004    0.001 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/cluster/_kmeans.py:868(_check_params_vs_input)
+        4    0.000    0.000    0.004    0.001 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/cluster/_kmeans.py:279(_tolerance)
+        4    0.000    0.000    0.004    0.001 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:4073(var)
+       12    0.000    0.000    0.003    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/metrics/pairwise.py:75(check_pairwise_arrays)
+       75    0.001    0.000    0.003    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/extmath.py:47(row_norms)
+    19356    0.003    0.000    0.003    0.000 {built-in method numpy.asarray}
+       12    0.000    0.000    0.003    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/metrics/pairwise.py:391(_euclidean_distances)
+    19162    0.002    0.000    0.002    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/multiarray.py:383(where)
+    19114    0.002    0.000    0.002    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/linalg/_linalg.py:2571(_norm_dispatcher)
+      198    0.002    0.000    0.002    0.000 {built-in method numpy.array}
+       35    0.001    0.000    0.002    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:90(_assert_all_finite)
+        9    0.000    0.000    0.002    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_indexing.py:242(_safe_indexing)
+        4    0.000    0.000    0.002    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/base.py:463(_validate_params)
+        9    0.002    0.000    0.002    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_indexing.py:31(_array_indexing)
+        3    0.000    0.000    0.002    0.001 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/preprocessing/_label.py:97(fit_transform)
+       16    0.000    0.000    0.002    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/externals/array_api_compat/_internal.py:32(wrapped_f)
+        1    0.001    0.001    0.002    0.002 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/src/kmeans.py:39(get_heatmap_centroids)
+     1578    0.001    0.000    0.001    0.000 {built-in method builtins.isinstance}
+        4    0.001    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:1488(check_random_state)
+        3    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_encode.py:20(_unique)
+        3    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_encode.py:61(_unique_np)
+        3    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/externals/array_api_compat/common/_aliases.py:238(unique_inverse)
+       75    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/einsumfunc.py:1057(einsum)
+        9    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/lib/_arraysetops_impl.py:145(unique)
+       62    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:51(_wrapfunc)
+       75    0.001    0.000    0.001    0.000 {built-in method numpy._core._multiarray_umath.c_einsum}
+       10    0.000    0.000    0.001    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:3338(signature)
+        9    0.001    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/lib/_arraysetops_impl.py:339(_unique1d)
+       10    0.000    0.000    0.001    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:3062(from_callable)
+       10    0.000    0.000    0.001    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:2473(_signature_from_callable)
+      177    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/externals/array_api_compat/numpy/_aliases.py:89(asarray)
+        4    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2845(validate_data)
+        1    0.000    0.000    0.001    0.001 {method 'std' of 'numpy.ndarray' objects}
+        1    0.000    0.000    0.001    0.001 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/_methods.py:221(_std)
+        7    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:28(validate_parameter_constraints)
+        3    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:1201(check_X_y)
+      279    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_array_api.py:387(get_namespace)
+       47    0.001    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/numeric.py:2475(array_equal)
+       10    0.000    0.000    0.001    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:2369(_signature_from_function)
+      352    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/_config.py:35(get_config)
+        4    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/base.py:233(get_params)
+       52    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_array_api.py:736(_asarray_with_order)
+        4    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/base.py:202(_get_param_names)
+      303    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/scipy/_lib/_sparse.py:10(issparse)
+        4    0.001    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/_ufunc_config.py:464(inner)
+      499    0.000    0.000    0.001    0.000 <frozen abc>:117(__instancecheck__)
+        2    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:1685(_array_str_implementation)
+       32    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:2338(sum)
+       42    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:381(_num_samples)
+        2    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:605(array2string)
+       47    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:1251(argmax)
+        4    0.000    0.000    0.001    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:1509(info)
+       39    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:69(_wrapreduction)
+        4    0.000    0.000    0.001    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:1640(_log)
+        2    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:550(wrapper)
+       60    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/numerictypes.py:381(isdtype)
+        2    0.000    0.000    0.001    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:567(_array2string)
+        9    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/src/kmeans.py:25(find_furthest_centroid)
+       57    0.000    0.000    0.000    0.000 {method 'sum' of 'numpy.ndarray' objects}
+      499    0.000    0.000    0.000    0.000 {built-in method _abc._abc_instancecheck}
+        6    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:1415(column_or_1d)
+       54    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:104(make_constraint)
+       12    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_array_api.py:473(get_namespace_and_device)
+      974    0.000    0.000    0.000    0.000 {built-in method builtins.hasattr}
+       57    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/_methods.py:50(_sum)
+      366    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/_config.py:27(_get_threadlocal_config)
+       48    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:41(_wrapit)
+        6    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/numeric.py:2243(allclose)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/threadpoolctl.py:870(limit)
+        3    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/externals/array_api_compat/common/_aliases.py:199(_unique_kwargs)
+        2    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:828(_formatArray)
+     48/2    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:837(recurser)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/threadpoolctl.py:581(__init__)
+        3    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:1392(_check_y)
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:2018(nonzero)
+       47    0.000    0.000    0.000    0.000 {method 'all' of 'numpy.ndarray' objects}
+       64    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:2722(__init__)
+       12    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/joblib/parallel.py:927(effective_n_jobs)
+        1    0.000    0.000    0.000    0.000 {method 'nonzero' of 'numpy.ndarray' objects}
+       49    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/_methods.py:76(_count_reduce_items)
+        9    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/lib/_function_base_impl.py:415(average)
+        3    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:2879(cumsum)
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/lib/_function_base_impl.py:3916(median)
+       12    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/joblib/parallel.py:130(get_active_backend)
+       12    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/extmath.py:153(safe_sparse_dot)
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/lib/_function_base_impl.py:3834(_ureduce)
+       47    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/_methods.py:67(_all)
+        4    0.000    0.000    0.000    0.000 {method 'argsort' of 'numpy.ndarray' objects}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:1666(handle)
+       38    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/warnings.py:170(simplefilter)
+        3    0.000    0.000    0.000    0.000 {method 'cumsum' of 'numpy.ndarray' objects}
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/lib/_function_base_impl.py:4005(_median)
+       24    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:502(is_satisfied_by)
+        6    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/numeric.py:2337(isclose)
+       12    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/joblib/parallel.py:141(_get_active_backend)
+       24    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_array_api.py:977(_modify_in_place_if_numpy)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:1720(callHandlers)
+       27    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_array_api.py:351(_remove_non_arrays)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/threadpoolctl.py:827(info)
+      181    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/externals/array_api_compat/common/_helpers.py:660(_check_device)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:1010(handle)
+       60    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/numerictypes.py:368(_preprocess_dtype)
+       33    0.000    0.000    0.000    0.000 {built-in method builtins.next}
+       20    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/threadpoolctl.py:119(info)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2128(_check_sample_weight)
+       24    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/metrics/pairwise.py:51(_return_float_dtype)
+      319    0.000    0.000    0.000    0.000 {built-in method builtins.getattr}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:1625(makeRecord)
+       22    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:313(_is_arraylike_not_scalar)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:1250(emit)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:1138(emit)
+        8    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:3735(mean)
+        8    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/contextlib.py:145(__exit__)
+       15    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_array_api.py:171(device)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:298(__init__)
+       38    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/warnings.py:188(_add_filter)
+      354    0.000    0.000    0.000    0.000 {method 'copy' of 'dict' objects}
+       14    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/_config.py:233(config_context)
+      177    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/enum.py:198(__get__)
+       38    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/_ufunc_config.py:440(__enter__)
+        5    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/lib/_shape_base_impl.py:621(column_stack)
+       10    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:3010(__init__)
+       24    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:486(__contains__)
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/src/kmeans.py:11(construct_heatmap)
+        9    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_indexing.py:158(_determine_key_type)
+      308    0.000    0.000    0.000    0.000 {method 'get' of 'dict' objects}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/threadpoolctl.py:592(__exit__)
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:758(partition)
+       51    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:318(_use_interchange_protocol)
+        2    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:496(_get_format_function)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/threadpoolctl.py:602(restore_original_limits)
+      102    0.000    0.000    0.000    0.000 <frozen abc>:121(__subclasscheck__)
+       14    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/_config.py:63(set_config)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:1130(flush)
+       40    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:801(_extendLine_pretty)
+       24    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/threadpoolctl.py:196(set_num_threads)
+       20    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/threadpoolctl.py:132(num_threads)
+       10    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:530(is_satisfied_by)
+        1    0.000    0.000    0.000    0.000 {method 'partition' of 'numpy.ndarray' objects}
+        6    0.000    0.000    0.000    0.000 {method 'sort' of 'numpy.ndarray' objects}
+       24    0.000    0.000    0.000    0.000 {built-in method builtins.any}
+      375    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/einsumfunc.py:1049(_einsum_dispatcher)
+        3    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_array_api.py:530(_fill_or_add_to_diagonal)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/externals/array_api_compat/common/_aliases.py:122(ones)
+       56    0.000    0.000    0.000    0.000 {method 'argmax' of 'numpy.ndarray' objects}
+       22    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:305(_is_arraylike)
+        4    0.000    0.000    0.000    0.000 {method 'flush' of '_io.TextIOWrapper' objects}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:564(__init__)
+       95    0.000    0.000    0.000    0.000 {method 'update' of 'set' objects}
+        3    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:454(check_consistent_length)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_tags.py:298(get_tags)
+       38    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/_ufunc_config.py:456(__exit__)
+        2    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:454(<lambda>)
+       10    0.000    0.000    0.000    0.000 {method 'flatten' of 'numpy.ndarray' objects}
+        9    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/externals/array_api_compat/common/_aliases.py:447(reshape)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/numeric.py:137(ones)
+       22    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/numeric.py:1927(isscalar)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/cluster/_kmeans.py:1180(__sklearn_tags__)
+      102    0.000    0.000    0.000    0.000 {built-in method _abc._abc_subclasscheck}
+       38    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/warnings.py:488(__enter__)
+       64    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/enum.py:691(__call__)
+        2    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:1282(__init__)
+       41    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:671(_ensure_no_complex_data)
+        3    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:3255(bind)
+      415    0.000    0.000    0.000    0.000 {built-in method builtins.len}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:1591(findCaller)
+       12    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/joblib/_parallel_backends.py:382(__init__)
+       40    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:1297(__call__)
+       10    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:764(unwrap)
+       36    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/threadpoolctl.py:156(_get_symbol)
+        3    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:3116(_bind)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/base.py:834(__sklearn_tags__)
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:1130(argsort)
+        8    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:438(__init__)
+      156    0.000    0.000    0.000    0.000 {built-in method numpy.asanyarray}
+       12    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/threadpoolctl.py:190(get_num_threads)
+      196    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_array_api.py:231(_is_numpy_namespace)
+        5    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:3052(max)
+      157    0.000    0.000    0.000    0.000 {method 'append' of 'list' objects}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:987(format)
+       38    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/warnings.py:509(__exit__)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/random.py:893(getrandbits)
+       55    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2344(_is_pandas_df)
+       46    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:787(_extendLine)
+        6    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:2589(all)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/threadpoolctl.py:699(_set_threadpool_limits)
+       38    0.000    0.000    0.000    0.000 {method 'remove' of 'list' objects}
+        7    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/contextlib.py:136(__enter__)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:698(format)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/cluster/_kmeans.py:955(_init_centroids)
+       10    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:176(get_annotations)
+       38    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:729(_is_extension_array_dtype)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:613(__init__)
+       42    0.000    0.000    0.000    0.000 {method 'reset' of '_contextvars.ContextVar' objects}
+        8    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:447(_check_params)
+       40    0.000    0.000    0.000    0.000 {method 'format' of 'str' objects}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:572(is_satisfied_by)
+        4    0.000    0.000    0.000    0.000 <frozen os>:810(getenv)
+        9    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:211(reshape)
+       74    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:3057(<genexpr>)
+        6    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:89(_wrapreduction_any_all)
+       42    0.000    0.000    0.000    0.000 {method 'set' of '_contextvars.ContextVar' objects}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/base.py:664(__sklearn_tags__)
+        2    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:50(_make_options_dict)
+        4    0.000    0.000    0.000    0.000 <frozen _collections_abc>:808(get)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:621(is_satisfied_by)
+       25    0.000    0.000    0.000    0.000 {method 'reshape' of 'numpy.ndarray' objects}
+       77    0.000    0.000    0.000    0.000 {method 'items' of 'dict' objects}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/numeric.py:290(full)
+        7    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/contextlib.py:303(helper)
+       42    0.000    0.000    0.000    0.000 {built-in method numpy._core._multiarray_umath._make_extobj}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:573(<genexpr>)
+        4    0.000    0.000    0.000    0.000 {built-in method posix.urandom}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/cluster/_kmeans.py:910(_check_mkl_vcomp)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/numeric.py:64(zeros_like)
+        4    0.000    0.000    0.000    0.000 <frozen os>:711(__getitem__)
+       48    0.000    0.000    0.000    0.000 {method 'as_arrays' of 'numpy._core._multiarray_umath._array_converter' objects}
+      7/1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:408(_leading_trailing)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/base.py:454(__sklearn_tags__)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:589(__init__)
+       48    0.000    0.000    0.000    0.000 {method 'wrap' of 'numpy._core._multiarray_umath._array_converter' objects}
+      177    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/enum.py:1322(value)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:622(<genexpr>)
+       30    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/numeric.py:2429(<genexpr>)
+       20    0.000    0.000    0.000    0.000 {built-in method numpy.empty}
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/lib/_utils_impl.py:643(_median_nancheck)
+       12    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:197(_is_internal_frame)
+      114    0.000    0.000    0.000    0.000 {built-in method _warnings._filters_mutated}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2790(_check_n_features)
+       64    0.000    0.000    0.000    0.000 {method 'isidentifier' of 'str' objects}
+       27    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_array_api.py:154(_single_array_device)
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/reprlib.py:15(wrapper)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:682(formatMessage)
+       41    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:681(_check_estimator_name)
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/src/main.py:33(profile_block)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:328(_num_features)
+        7    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/contextlib.py:108(__init__)
+        2    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:446(_get_formatdict)
+       12    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/joblib/_parallel_backends.py:51(__init__)
+       58    0.000    0.000    0.000    0.000 {built-in method numpy.lib.array_utils.normalize_axis_index}
+        3    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:2930(apply_defaults)
+       20    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:296(__init__)
+       64    0.000    0.000    0.000    0.000 {method '__contains__' of 'frozenset' objects}
+        8    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/threadpoolctl.py:497(set_num_threads)
+        4    0.000    0.000    0.000    0.000 <frozen posixpath>:165(basename)
+        4    0.000    0.000    0.000    0.000 <frozen posixpath>:116(splitext)
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
+      152    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:2775(name)
+        8    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/threadpoolctl.py:493(get_num_threads)
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:1349(argmin)
+       19    0.000    0.000    0.000    0.000 {built-in method numpy.zeros}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:470(format)
+       60    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/joblib/parallel.py:111(_get_config_param)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2697(_check_feature_names)
+       65    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/deprecation.py:129(_deprecate_force_all_finite)
+       58    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:264(__init__)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:596(is_satisfied_by)
+       38    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/warnings.py:462(__init__)
+        7    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:645(parent)
+       60    0.000    0.000    0.000    0.000 {method 'values' of 'dict' objects}
+       64    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/enum.py:1145(__new__)
+        4    0.000    0.000    0.000    0.000 {method 'copy' of 'numpy.ndarray' objects}
+        1    0.000    0.000    0.000    0.000 <string>:5(__repr__)
+        5    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/lib/_shape_base_impl.py:617(_column_stack_dispatcher)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/cluster/_kmeans.py:1377(__init__)
+       38    0.000    0.000    0.000    0.000 {method 'insert' of 'list' objects}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:463(_format)
+       12    0.000    0.000    0.000    0.000 {built-in method builtins.abs}
+       20    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:386(isfunction)
+        4    0.000    0.000    0.000    0.000 <frozen os>:793(encode)
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/numerictypes.py:471(issubdtype)
+       20    0.000    0.000    0.000    0.000 {built-in method builtins.vars}
+       10    0.000    0.000    0.000    0.000 {method 'values' of 'mappingproxy' objects}
+        9    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2362(_is_polars_df_or_series)
+        2    0.000    0.000    0.000    0.000 {built-in method builtins.locals}
+        3    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_missing.py:9(is_scalar_nan)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:676(usesTime)
+       38    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/_ufunc_config.py:430(__init__)
+       90    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:2787(kind)
+        1    0.000    0.000    0.000    0.000 {method 'max' of 'numpy.ndarray' objects}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2380(_get_feature_names)
+       12    0.000    0.000    0.000    0.000 <frozen posixpath>:52(normcase)
+       12    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:368(is_satisfied_by)
+       47    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:1247(_argmax_dispatcher)
+        2    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:3190(min)
+        5    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/shape_base.py:208(_arrays_for_stack_dispatcher)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/threadpoolctl.py:648(_check_params)
+       40    0.000    0.000    0.000    0.000 {method 'splitlines' of 'str' objects}
+        1    0.000    0.000    0.000    0.000 {method 'any' of 'numpy.generic' objects}
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/_methods.py:42(_amax)
+        3    0.000    0.000    0.000    0.000 <string>:1(<lambda>)
+        4    0.000    0.000    0.000    0.000 {built-in method builtins.sorted}
+       47    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/numeric.py:2456(_array_equal_dispatcher)
+        4    0.000    0.000    0.000    0.000 <frozen genericpath>:157(_splitext)
+        9    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/lib/_arraysetops_impl.py:132(_unpack_tuple)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:167(<lambda>)
+        4    0.000    0.000    0.000    0.000 <frozen os>:797(decode)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:129(getLevelName)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:455(usesTime)
+        2    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/numerictypes.py:289(issubclass_)
+       24    0.000    0.000    0.000    0.000 {built-in method _operator.lt}
+        9    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2353(_is_pyarrow_data)
+        7    0.000    0.000    0.000    0.000 {method 'rpartition' of 'str' objects}
+       13    0.000    0.000    0.000    0.000 {method 'keys' of 'dict' objects}
+       12    0.000    0.000    0.000    0.000 {method 'rfind' of 'str' objects}
+       32    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:2333(_sum_dispatcher)
+       24    0.000    0.000    0.000    0.000 {built-in method builtins.callable}
+       16    0.000    0.000    0.000    0.000 {built-in method builtins.id}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:597(<genexpr>)
+        4    0.000    0.000    0.000    0.000 {method 'get' of '_contextvars.ContextVar' objects}
+       20    0.000    0.000    0.000    0.000 {built-in method _operator.ge}
+        3    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:2510(<lambda>)
+       20    0.000    0.000    0.000    0.000 {built-in method posix.fspath}
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/_methods.py:58(_any)
+        4    0.000    0.000    0.000    0.000 {built-in method posix.getpid}
+        6    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/lib/_index_tricks_impl.py:794(__getitem__)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/threading.py:1427(current_thread)
+       12    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/joblib/_parallel_backends.py:649(effective_n_jobs)
+        4    0.000    0.000    0.000    0.000 {built-in method _asyncio.current_task}
+        4    0.000    0.000    0.000    0.000 {method 'encode' of 'str' objects}
+        9    0.000    0.000    0.000    0.000 {built-in method builtins.max}
+        8    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:839(filter)
+        4    0.000    0.000    0.000    0.000 <frozen posixpath>:41(_get_sep)
+        4    0.000    0.000    0.000    0.000 {built-in method time.time_ns}
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/src/kmeans.py:70(scale_centroids)
+        4    0.000    0.000    0.000    0.000 {built-in method sys._getframe}
+        4    0.000    0.000    0.000    0.000 {method 'decode' of 'bytes' objects}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/cluster/_kmeans.py:930(_validate_center_shape)
+        4    0.000    0.000    0.000    0.000 {built-in method from_bytes}
+       11    0.000    0.000    0.000    0.000 {built-in method _thread.get_ident}
+       10    0.000    0.000    0.000    0.000 {built-in method sys.getrecursionlimit}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/threading.py:1094(name)
+        3    0.000    0.000    0.000    0.000 {built-in method __new__ of type object at 0x7f8fc22d2ed0}
+        9    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/lib/_function_base_impl.py:410(_average_dispatcher)
+        8    0.000    0.000    0.000    0.000 {method 'rstrip' of 'str' objects}
+        4    0.000    0.000    0.000    0.000 {method 'find' of 'str' objects}
+        4    0.000    0.000    0.000    0.000 {method 'write' of '_io.TextIOWrapper' objects}
+        6    0.000    0.000    0.000    0.000 {built-in method builtins.iter}
+       16    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:3070(parameters)
+        8    0.000    0.000    0.000    0.000 {method '__exit__' of '_thread.RLock' objects}
+        3    0.000    0.000    0.000    0.000 {method 'items' of 'mappingproxy' objects}
+        1    0.000    0.000    0.000    0.000 {method 'take' of 'numpy.ndarray' objects}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:1764(isEnabledFor)
+        1    0.000    0.000    0.000    0.000 {method 'argmin' of 'numpy.ndarray' objects}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/multiprocessing/process.py:37(current_process)
+       12    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/multiarray.py:1098(copyto)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:300(is_satisfied_by)
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/ma/core.py:6732(isMaskedArray)
+       12    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/multiarray.py:180(concatenate)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/logging/__init__.py:391(getMessage)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:550(is_satisfied_by)
+        3    0.000    0.000    0.000    0.000 {method 'discard' of 'set' objects}
+        9    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/lib/_arraysetops_impl.py:140(_unique_dispatcher)
+        7    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_array_api.py:127(_check_array_api_dispatch)
+        9    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:206(_reshape_dispatcher)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/parallel.py:150(_get_threadpool_controller)
+        8    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/multiarray.py:1410(may_share_memory)
+        3    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/metrics/cluster/_unsupervised.py:23(check_number_of_labels)
+        8    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:3730(_mean_dispatcher)
+        6    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/numeric.py:2239(_allclose_dispatcher)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/utils/_tags.py:133(<lambda>)
+        6    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:2584(_all_dispatcher)
+        3    0.000    0.000    0.000    0.000 {method 'add' of 'set' objects}
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/sklearn/cluster/_kmeans.py:849(__init__)
+        4    0.000    0.000    0.000    0.000 <string>:2(__init__)
+        6    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/numeric.py:2333(_isclose_dispatcher)
+        2    0.000    0.000    0.000    0.000 {method 'update' of 'dict' objects}
+        5    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:3047(_max_dispatcher)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/arrayprint.py:471(indirect)
+        4    0.000    0.000    0.000    0.000 {built-in method _operator.gt}
+        3    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/inspect.py:2869(__init__)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/threadpoolctl.py:589(__enter__)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:4068(_var_dispatcher)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/.local/share/uv/python/cpython-3.13.0-linux-x86_64-gnu/lib/python3.13/multiprocessing/process.py:189(name)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/numeric.py:58(_zeros_like_dispatcher)
+        3    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:2875(_cumsum_dispatcher)
+        4    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/multiarray.py:107(empty_like)
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:2014(_nonzero_dispatcher)
+        2    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:3185(_min_dispatcher)
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:1345(_argmin_dispatcher)
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:1126(_argsort_dispatcher)
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/lib/_function_base_impl.py:3911(_median_dispatcher)
+        1    0.000    0.000    0.000    0.000 /home/mlesdani/junction2025_sensofusion/monorepo/monorepo/dd5000/.venv/lib/python3.13/site-packages/numpy/_core/fromnumeric.py:754(_partition_dispatcher)
+
+

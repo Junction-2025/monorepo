@@ -1,6 +1,6 @@
 import argparse
 from pathlib import Path
-
+import time
 
 from src.config import BATCH_WINDOW_US, BASE_WIDTH, BASE_HEIGHT
 
@@ -73,8 +73,16 @@ def main():
     window_name = "Drone Detection"
     cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
 
+    timings = {
+        "get_data": [],
+        "yolo": [],
+        "post_processing": [],
+        "per_iter": [],
+    }
+
     logger.info("\n--- Data Import Complete ---")
     for batch_range in pacer.pace(src.ranges()):
+        t0 = time.perf_counter()
         window = get_window(
             src.event_words,
             src.order,
@@ -82,9 +90,14 @@ def main():
             batch_range.stop,
         )
         frame = get_frame(window)
-
+        t1 = time.perf_counter()
+        timings["get_data"].append(t1 - t0)
+        t2 = time.perf_counter()
         yolo_bounding_box = detect_drone_crop(frame)
+        t3 = time.perf_counter()
+        timings["yolo"].append(t3-t2)
 
+        t4 = time.perf_counter()
         if yolo_bounding_box:
             tl = (int(yolo_bounding_box.x1), int(yolo_bounding_box.y1))
             br = (int(yolo_bounding_box.x2), int(yolo_bounding_box.y2))
@@ -115,10 +128,28 @@ def main():
                 0.6,
                 2,
             )
-
+        t5 = time.perf_counter()
+        timings["post_processing"].append(t5-t4)
         cv2.imshow(window_name, frame)
         cv2.waitKey(1)
     cv2.destroyAllWindows()
+
+    def profiling(name):
+        times = timings[name]
+        if not times:
+            return
+        avg = sum(times) / len(times)
+        print(
+            f"{name:>10}: "
+            f"avg={avg*1000:.2f} ms, "
+            f"min={min(times)*1000:.2f} ms, "
+            f"max={max(times)*1000:.2f} ms, "
+            f"n={len(times)}"
+        )
+        
+    print("\n=== Timing stats ===")
+    for key in timings:
+        profiling(key)
 
 
 if __name__ == "__main__":
