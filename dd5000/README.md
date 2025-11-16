@@ -22,11 +22,6 @@ For testing and validation purposes, `src/pure_rpm_calculations.py` provides a s
 
 **How it works**: Events are grouped into time windows (1ms default), and for each window, the number of "on" events (positive polarity) within the ROI are counted using boolean masking (`extract_roi_intensity()`). This creates a time-series signal of event activity. After collecting 100 samples, FFT analysis (`np.fft.rfft()`) converts the signal to frequency domain, identifying the dominant frequency peak which represents blade passage rate. RPM is calculated as `(frequency_hz * 60) / blade_count`, converting blade passages per minute to full rotations per minute.
 
-This utility is useful for:
-- Validating RPM calculation accuracy
-- Testing different ROI configurations
-- Benchmarking FFT-based frequency detection
-- Understanding the core RPM estimation logic in isolation
 
 ## Technical achievements
 - In our experiments, the fine-tuned YOLO model could detect drones frame-by-frame, running on a normal Macbook, in only 8ms. This is a significant finding, as even the Sensofusion challenge providers did not believe this could be achieved.
