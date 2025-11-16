@@ -21,6 +21,15 @@ The project is based on a simple event loop (`src/main.py`):
     - The tracker uses statistical methods (mode/median) to provide a robust estimate
     - RPM calculations dynamically use the tracked blade count instead of hardcoded values
 
+
+## RPM Calculation
+
+- Events are grouped into 1ms time windows
+- "On" events (positive polarity) within the ROI are counted per window using boolean masking
+- Creates a time-series signal of event activity (100 samples collected)
+- FFT analysis (`np.fft.rfft()`) identifies the dominant frequency peak (blade passage rate)
+- RPM = `(frequency_hz * 60) / blade_count` (converts blade passages/min to rotations/min)
+
 ## Technical achievements
 - We accurately detect RPM on moving drones
     - On `drone_moving.dat` we capture average RPM in the scale of `5680.43`, `6192.86`, though we also detected `5425.53`, which is slightly outside of the range

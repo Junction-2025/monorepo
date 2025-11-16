@@ -28,19 +28,18 @@ app.post('/agent', async (req, res) => {
 
 app.post('/trigger_event', async (req, res) => {
     const droneData = req.body;
-    /*
-    {
+
+    const data = {
         type: "drone-detected",
-        model: "DJI M600",
-        rpm: "5000",
-        rotors: 4,
-        description: "Target detected via event camera system. Classification: Commercial hexacopter. Status: Active monitoring. Last detected: 0.5 seconds ago. Confidence: 94.7%",
+        model: droneData.model,
+        rpm: droneData.rpm,
+        rotors: droneData.rotors,
+        description: droneData.description,
         timestamp: new Date().toISOString()
     }
-    */
 
     // Send to all connected SSE clients
-    await sendSSE(droneData);
+    await sendSSE(data);
     //await sendSSE(droneData);
 
     res.json({ success: true, message: "Drone data sent to clients" });

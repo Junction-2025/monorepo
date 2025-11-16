@@ -38,7 +38,7 @@ export default function Dashboard() {
             <h1 className="text-4xl font-semibold m-6 mb-10">Drone Destroyer 5000</h1>
             <div className="flex h-full w-full items-center justify-center">
                 {droneData &&
-                    <Card className="max-w-80">
+                    <Card className="w-90">
                         <CardHeader>
                             <CardTitle className="flex flex-row gap-2 items-center text-xl">
                                 <Drone className="w-6 h-6 shrink-0" />
@@ -50,9 +50,9 @@ export default function Dashboard() {
                         </CardHeader>
                         <CardContent className="text-sm border px-4 py-4 rounded-xl mx-4">
                             <ul className="flex flex-col list-disc list-inside gap-2">
+                                <li>RPM: {droneData.rpm}</li>
                                 <li>Model: {droneData.model}</li>
                                 <li>Rotors: {droneData.rotors}</li>
-                                <li>RPM: {droneData.rpm}</li>
                             </ul>
                         </CardContent>
                         <CardFooter className="flex text-sm text-muted-foreground items-start gap-2">
