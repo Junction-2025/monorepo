@@ -15,10 +15,15 @@ MODEL_LOGGING_VERBOSE = True
 YOLO_CONFIDENCE_THRESHOLD = 0.01
 HEATMAP_PIXEL_SIZE = 4
 
-CENTROID_EPSILON = 0.8
+# Balanced threshold for propeller center detection
+CENTROID_EPSILON = 0.65
+
+# Maximum number of centroids (propeller centers) to detect
+MAX_CENTROIDS = 6
 
 K_CANDIDATES = [1, 2, 3, 4]
 
-OUTLIER_DISTANCE_MULTIPLIER = 3.0
+# More lenient outlier filtering
+OUTLIER_DISTANCE_MULTIPLIER = 5.0
 
-LOWER_RPM_BOUND = 1000
+LOWER_RPM_BOUND = 1001

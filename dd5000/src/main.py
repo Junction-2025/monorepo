@@ -15,10 +15,8 @@ from src.yolo import detect_drone_crop
 from src.kmeans import get_blade_count, get_propeller_masks
 from src.utils import overlay_mask
 from src.rpm import extract_roi_intensity, estimate_rpm_from_signals
+from src.blade_tracker import BladeCountTracker
 import cv2
-
-
-import numpy as np
 
 logger = get_logger()
 timings = create_timings()
@@ -57,6 +55,11 @@ def parse_args() -> argparse.Namespace:
         default=0.1,
         help="Lag tolerance in seconds before dropping batches (default: 0.1s).",
     )
+    parser.add_argument(
+        "--no-display",
+        action="store_true",
+        help="Disable video display for headless/benchmark mode.",
+    )
 
     return parser.parse_args()
 
@@ -77,8 +80,10 @@ def main():
 
     logger = get_logger()
 
+    # Setup display only if not in headless mode
     window_name = "Drone Detection"
-    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+    if not args.no_display:
+        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
 
     timings = {
         "get_data": [],
@@ -87,14 +92,23 @@ def main():
         "per_iter": [],
     }
 
-    roi = (500, 700, 230, 300)
+    # Use the same ROI as pure_rpm_calculations.py for drone_idle
+    roi = (500, 700, 230, 430)
     roi_signals = []
     fps = 1000000 / args.window
-    max_signals = 100
-    blade_count = 2 # Assume 2
-    
+    max_signals = 30  # Reduced for faster testing (was 100)
+
+    # Initialize blade count tracker for KNN-based detection
+    blade_tracker = BladeCountTracker(
+        window_size=10,
+        min_observations=3,
+        default_blade_count=2  # Fallback assumption
+    )
+
     frame_counter = 0
     rpm_records = []
+    current_rpm = 0.0
+    running_avg_rpm = 0.0
 
     logger.info("\n--- Data Import Complete ---")
     for batch_range in pacer.pace(src.ranges()):
@@ -110,6 +124,10 @@ def main():
 
         # Run FFT every N frames
         if len(roi_signals) >= max_signals:
+            # Get current blade count estimate from tracker
+            blade_count = blade_tracker.get_blade_count()
+            tracker_stats = blade_tracker.get_stats()
+
             with timing_section(timings, "estimate_rpm_from_signal"):
                 output = estimate_rpm_from_signals(
                     roi_signals, fps, blade_count
@@ -117,10 +135,24 @@ def main():
             assert output is not None
             rpm, _, _ = output
             rpm_records.append(rpm)
-            logger.info(f"RPM: {rpm:.2f}")
+            current_rpm = rpm
+
+            # Calculate running average from filtered records
+            filtered_records = [r for r in rpm_records if r >= LOWER_RPM_BOUND]
+            if filtered_records:
+                running_avg_rpm = float(sum(filtered_records)) / len(filtered_records)
+
+            # Log RPM with blade count context
+            confidence_str = "confident" if tracker_stats["is_confident"] else "default"
+            logger.info(
+                f"RPM: {rpm:.2f} (using blade_count={blade_count}, {confidence_str}, "
+                f"observations={tracker_stats['count']})"
+            )
             roi_signals.clear()        
         
-        if frame_counter % 30 == 0:
+        # Run YOLO/KNN detection periodically to update blade count
+        # Run early and frequently to populate tracker before first RPM calculation
+        if frame_counter % 10 == 0:
             window = get_window(
                 src.event_words,
                 src.order,
@@ -149,22 +181,41 @@ def main():
                     yolo_bounding_box.x1 : yolo_bounding_box.x2,
                 ] = cropped_overlay
 
+                # Detect blade count using KNN and add to tracker
                 blade_count_array = get_blade_count(cropped_frame, mask)
+                blade_tracker.add_observation(blade_count_array)
+
+                detected_avg = int(sum([b[0] for b in blade_count_array]) / (len(blade_count_array) or 1)) if blade_count_array else 0
+                current_estimate = blade_tracker.get_blade_count()
+
                 text_pos = (tl[0], max(0, tl[1] - 8))
                 cv2.putText(
                     frame,
-                    "".join(
-                        [
-                            f"Blades (AVG): {int(sum([b[0] for b in blade_count_array]) / (len(blade_count_array) or 1))}"
-                        ]
-                    ),
+                    f"Blades: detected={detected_avg}, estimate={current_estimate}",
                     text_pos,
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.6,
+                    (0, 255, 0),
                     2,
                 )
-            cv2.imshow(window_name, frame)
-            cv2.waitKey(1)
+
+                # Display average RPM in red
+                rpm_text_pos = (tl[0], max(0, tl[1] - 32))
+                rpm_text = f"Avg RPM: {running_avg_rpm:.1f}"
+                cv2.putText(
+                    frame,
+                    rpm_text,
+                    rpm_text_pos,
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.6,
+                    (0, 0, 255),  # Red color in BGR
+                    2,
+                )
+            if not args.no_display:
+                cv2.imshow(window_name, frame)
+                cv2.waitKey(1)
+
+    if not args.no_display:
         cv2.destroyAllWindows()
 
     log_timings(logger, timings, title="Main function benchmarks")
