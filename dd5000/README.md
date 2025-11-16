@@ -7,10 +7,10 @@ Drone Detector 5000 is based on a simple event loop (`src/main.py`).
 - The frame is fed to a fine-tuned YOLO model (`src/yolo.py`)
     - YOLO detects if the event contains a drone (`src/yolo.py`)
         - If not, discard frame
-        - If yet, continue
+        - If yeS, continue
 - YOLO gives us a bounding box containing the drone (`src/yolo.py`)
 - We use KMeans to detect clusters of high frequency events inside of the bounding box. These will be the drone's propellers. (`src/kmeans.py`)
-    - KMeans is customized to be intialized via customized centroids (`src/kmeans.py`)
+    - KMeans is customized to be intialized via specific centroids (`src/kmeans.py`)
     - KMeans auto-adjusts its' chosen `k` (`src/kmeans.py`)
 - Once we have `k` clusters of high event frequency, we process each of these clusters separately (`src/main.py`)
 - We once again run KMeans to detect blades of the rotor, with similar principles. (`src/kmeans.py`)

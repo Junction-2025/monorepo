@@ -93,6 +93,8 @@ def estimate_rpm_from_signals(signals, fps, blade_count):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("dat", help="Path to .dat file")
+    parser.add_argument("--no-blades", type=int, default=2, help="Number of blades of a `propeller`")
+    parser.add_argument("--roi", type=tuple, default=(720, 920, 200, 330), help="Pixel area of type (x1, x2, y1, y2) to look for the frequency")
     #parser.add_argument("--window", type=float, default=0.25, help="Window duration in ms")
     parser.add_argument("--window", type=float, default=1, help="Window duration in ms")
     parser.add_argument("--speed", type=float, default=1, help="Playback speed (1 is real time)")
@@ -104,7 +106,7 @@ def main():
     # Hardcoded roi fan_const_rpm (bounding box)
     # roi = (550, 700, 250, 440)
     # Hardcoded roi drone_moving (bounding box)
-    roi = (720, 920, 200, 330)
+    #roi = (720, 920, 200, 330)
     blade_count = 2
 
     print("Loading data...")
